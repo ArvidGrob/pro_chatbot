@@ -54,37 +54,27 @@ class _SignUpPageState extends State<SignUpPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 32.0),
                   child: Column(
                     children: [
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 15),
 
                       // Robot avatar
                       _buildRobotAvatar(),
 
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 15),
 
-                      // App title
-                      const Text(
-                        'Luminara AI',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-
-                      const SizedBox(height: 8),
+                      // Title removed - logo speaks for itself
 
                       // Sign up title
                       const Text(
                         'SIGN UP',
                         style: TextStyle(
                           fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF4F46E5),
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
                           letterSpacing: 1.0,
                         ),
                       ),
 
-                      const SizedBox(height: 40),
+                      const SizedBox(height: 30),
 
                       // Form fields
                       Expanded(
@@ -130,23 +120,34 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  // Build robot avatar similar to welcome page
+  // Build Luminara AI logo
   Widget _buildRobotAvatar() {
-    return Container(
-      width: 80,
-      height: 80,
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: Colors.white.withOpacity(0.3),
-          width: 2,
-        ),
-      ),
-      child: const Icon(
-        Icons.smart_toy_outlined,
-        size: 40,
-        color: Colors.white,
+    return SizedBox(
+      width: 160,
+      height: 160,
+      child: Image.asset(
+        'assets/images/luminara_logo.png',
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) {
+          // Fallback to old design if image not found
+          return Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: Colors.white.withOpacity(0.3),
+                width: 2,
+              ),
+            ),
+            child: const Icon(
+              Icons.smart_toy_outlined,
+              size: 40,
+              color: Colors.white,
+            ),
+          );
+        },
       ),
     );
   }

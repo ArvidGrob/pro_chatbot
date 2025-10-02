@@ -54,40 +54,54 @@ class WelcomePage extends StatelessWidget {
                   'WELKOM',
                   style: TextStyle(
                     fontSize: 32,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                     color: Colors.white,
                     letterSpacing: 2.0,
                   ),
                 ),
                 const SizedBox(height: 8),
 
-                // Robot logo/avatar
+                // Luminara AI logo
                 Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.3),
-                      width: 2,
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.smart_toy_outlined,
-                    size: 60,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Application name
-                const Text(
-                  'Luminara AI',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                  width: 360,
+                  height: 360,
+                  child: Image.asset(
+                    'assets/images/luminara_logo.png',
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      // Fallback to old design if image not found
+                      return Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.3),
+                            width: 2,
+                          ),
+                        ),
+                        child: const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.smart_toy_outlined,
+                              size: 40,
+                              color: Colors.white,
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              'Luminara AI',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 ),
 
@@ -117,7 +131,7 @@ class WelcomePage extends StatelessWidget {
                     child: const Text(
                       'Inloggen',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 22,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -148,7 +162,7 @@ class WelcomePage extends StatelessWidget {
                     child: const Text(
                       'Registreren',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 22,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
