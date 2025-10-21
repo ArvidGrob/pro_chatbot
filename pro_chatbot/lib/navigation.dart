@@ -31,7 +31,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   String _buttonText = "Chat";
 
-  void _ChangeButtonText() {
+  void changeButtonText() {
     setState(() {
       _buttonText = "Button was clicked";
     });
@@ -50,7 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Center(
         child: ElevatedButton(
-          onPressed: _ChangeButtonText,
+          onPressed: changeButtonText,
           style: ElevatedButton.styleFrom(
             minimumSize: Size(300, 100),
             backgroundColor: const Color(0xFF6464FF),
