@@ -1,219 +1,204 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: const AdminDashboard(),
+  ));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class AdminDashboard extends StatefulWidget {
+  const AdminDashboard({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Admin Dashboard',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const AdminDashboard(),
-    );
-  }
+  State<AdminDashboard> createState() => _AdminDashboardState();
 }
 
-class AdminDashboard extends StatelessWidget {
-  const AdminDashboard({super.key});
+class _AdminDashboardState extends State<AdminDashboard> {
+  String _pressedButton = '';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text(
-          "Administrator",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 30,
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/background.png'),
+            fit: BoxFit.cover,
           ),
         ),
-        centerTitle: true,
-        backgroundColor: const Color(0xFF6464FF),
-        elevation: 0,
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  DashboardButton(
-                    count: '880',
-                    label: 'Student',
-                    backgroundColor: const Color(0xFF6464FF),
-                    iconBackgroundColor: const Color(0xFF8989FF),
-                    icon: Icons.school,
-                    onPressed: () {
-                      print('Student button pressed');
-                      // Navigate to Student page
-                    },
-                  ),
-                  const SizedBox(height: 50),
-                  DashboardButton(
-                    count: '25',
-                    label: 'Admin',
-                    backgroundColor: const Color(0xFFFF6464),
-                    iconBackgroundColor: const Color(0xFFFF898B),
-                    icon: Icons.headset_mic,
-                    onPressed: () {
-                      print('Admins button pressed');
-                      // Navigate to Admins page
-                    },
-                  ),
-                  const SizedBox(height: 50),
-                  DashboardButton(
-                    count: '32',
-                    label: 'Beheer',
-                    backgroundColor: const Color(0xFF64FFC1),
-                    iconBackgroundColor: const Color(0xFF89FFDF),
-                    icon: Icons.description,
-                    onPressed: () {
-                      print('Beheer button pressed');
-                      // Navigate to Beheer page
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            decoration: const BoxDecoration(
-              color: Color(0xFF6464FF),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
               children: [
-                IconButton(
-                  onPressed: () {
-                    print('Back button pressed');
-                  },
-                  icon: const Icon(
-                    Icons.arrow_back,
-                    size: 32,
-                    color: Colors.white,
-                  ),
-                  style: IconButton.styleFrom(
-                    backgroundColor: Colors.white.withOpacity(0.2),
-                    padding: const EdgeInsets.all(12),
+                // Title
+                const Text(
+                  'Admin dashboard',
+                  maxLines: 1,
+                  style: TextStyle(
+                    color: Color(0xFF4242BD),
+                    fontSize: 36,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                IconButton(
-                  onPressed: () {
-                    print('Profile button pressed');
+
+                const SizedBox(height: 40),
+
+                // Student button
+                _buildDashboardButton(
+                  buttonId: 'student',
+                  label: 'Student',
+                  iconPath: 'assets/images/student.png',
+                  onTap: () {
+                    print('Student tapped');
                   },
-                  icon: const Icon(
-                    Icons.person,
-                    size: 32,
-                    color: Colors.white,
-                  ),
-                  style: IconButton.styleFrom(
-                    backgroundColor: Colors.white.withOpacity(0.2),
-                    padding: const EdgeInsets.all(12),
+                ),
+
+                const SizedBox(height: 25),
+
+                // Docent button
+                _buildDashboardButton(
+                  buttonId: 'docent',
+                  label: 'Docent',
+                  iconPath: 'assets/images/docent.png',
+                  onTap: () {
+                    print('Docent tapped');
+                  },
+                ),
+
+                const SizedBox(height: 25),
+
+                // Beheer button
+                _buildDashboardButton(
+                  buttonId: 'beheer',
+                  label: 'Beheer',
+                  iconPath: 'assets/images/beheer.png',
+                  onTap: () {
+                    print('Beheer tapped');
+                  },
+                ),
+
+                const Spacer(),
+
+                // Return button
+                Center(
+                  child: _buildReturnButton(
+                    buttonId: 'return',
+                    iconPath: 'assets/images/return.png',
+                    onTap: () {
+                      print('Return tapped');
+                    },
                   ),
                 ),
+
+                const SizedBox(height: 20),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
-}
 
-class DashboardButton extends StatelessWidget {
-  final String count;
-  final String label;
-  final Color backgroundColor;
-  final Color iconBackgroundColor;
-  final IconData icon;
-  final VoidCallback onPressed;
+  Widget _buildDashboardButton({
+    required String buttonId,
+    required String label,
+    required String iconPath,
+    required VoidCallback onTap,
+  }) {
+    bool isPressed = _pressedButton == buttonId;
+    Color primaryColor =
+        isPressed ? const Color(0xFF4545BD) : const Color(0xFF6464FF);
+    Color secondaryColor =
+        isPressed ? const Color(0xFF6D6DCA) : const Color(0xFF8989FF);
 
-  const DashboardButton({
-    super.key,
-    required this.count,
-    required this.label,
-    required this.backgroundColor,
-    required this.iconBackgroundColor,
-    required this.icon,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onPressed,
-      borderRadius: BorderRadius.circular(16),
+    return GestureDetector(
+      onTapDown: (_) {
+        setState(() {
+          _pressedButton = buttonId;
+        });
+      },
+      onTapUp: (_) {
+        setState(() {
+          _pressedButton = '';
+        });
+        onTap();
+      },
+      onTapCancel: () {
+        setState(() {
+          _pressedButton = '';
+        });
+      },
       child: Container(
+        height: 140,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-          ],
+          color: primaryColor,
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
           children: [
+            // Left side with label
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      count,
-                      style: const TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                padding: const EdgeInsets.only(
+                  left: 20.0,
+                  right: 10.0,
+                  bottom: 20.0,
+                ),
+                child: Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Text(
+                    label,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 38,
+                      fontWeight: FontWeight.bold,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      label,
-                      style: const TextStyle(
-                        fontSize: 53,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
+
+            // Right side with icon
             Container(
-              padding: const EdgeInsets.all(24),
+              width: 140,
+              height: 140,
               decoration: BoxDecoration(
-                color: iconBackgroundColor,
+                color: secondaryColor,
                 borderRadius: const BorderRadius.only(
-                  topRight: Radius.circular(16),
-                  bottomRight: Radius.circular(16),
+                  topRight: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
                 ),
               ),
-              child: Icon(
-                icon,
-                size: 115,
-                color: Colors.white,
+              child: Center(
+                child: Image.asset(
+                  iconPath,
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildReturnButton({
+    required String buttonId,
+    required String iconPath,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Image.asset(
+        iconPath,
+        width: 70,
+        height: 70,
+        fit: BoxFit.contain,
       ),
     );
   }
