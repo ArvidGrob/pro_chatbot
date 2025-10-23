@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'settings_page_account.dart';
 import 'settings_page_spraak.dart';
+import 'settings_page_hulp.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -98,7 +99,12 @@ class _SettingsPageState extends State<SettingsPage> {
                   title: 'Hulp',
                   iconPath: 'assets/images/hulp.png',
                   onTap: () {
-                    print('Hulp tapped');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SettingsPageHulp(),
+                      ),
+                    );
                   },
                 ),
 
