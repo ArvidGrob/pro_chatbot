@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'settings_page_account.dart';
+import 'settings_page_spraak.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -68,7 +69,12 @@ class _SettingsPageState extends State<SettingsPage> {
                   title: 'Spraak',
                   iconPath: 'assets/images/spraak.png',
                   onTap: () {
-                    print('Spraak tapped');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SettingsPageSpraak(),
+                      ),
+                    );
                   },
                 ),
 
