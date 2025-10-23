@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'settings_page_account.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -50,7 +51,12 @@ class _SettingsPageState extends State<SettingsPage> {
                   title: 'Account',
                   iconPath: 'assets/images/account.png',
                   onTap: () {
-                    print('Account tapped');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SettingsPageAccount(),
+                      ),
+                    );
                   },
                 ),
 
