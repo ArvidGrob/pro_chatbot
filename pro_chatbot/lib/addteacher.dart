@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'login_page.dart';
+// import 'login/login_page.dart';
 
-class TeacherPage extends StatefulWidget {
-  const TeacherPage({super.key});
+class AddTeacherPage extends StatefulWidget {
+  const AddTeacherPage({super.key});
 
   @override
-  State<TeacherPage> createState() => _TeacherPageState();
+  State<AddTeacherPage> createState() => _TeacherPageState();
 }
 
-class _TeacherPageState extends State<TeacherPage> {
+class _TeacherPageState extends State<AddTeacherPage> {
   static const primary = Color(0xFF6464FF);
 
   final _formKey = GlobalKey<FormState>();
@@ -44,21 +44,22 @@ class _TeacherPageState extends State<TeacherPage> {
       body: SafeArea(
         child: Stack(
           children: [
-            // Backgroundwaves
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: CustomPaint(
-                size: Size(MediaQuery.of(context).size.width, 520),
-                painter: WaveBackgroundPainter(),
-              ),
-            ),
+            // Backgroundwaves - COMMENTED OUT
+            // Positioned(
+            //   bottom: 0,
+            //   left: 0,
+            //   right: 0,
+            //   child: CustomPaint(
+            //     size: Size(MediaQuery.of(context).size.width, 520),
+            //     painter: WaveBackgroundPainter(),
+            //   ),
+            // ),
 
             // Content
             LayoutBuilder(
               builder: (context, c) => SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 child: ConstrainedBox(
                   constraints: BoxConstraints(minHeight: c.maxHeight - 32),
                   child: Column(
@@ -88,7 +89,9 @@ class _TeacherPageState extends State<TeacherPage> {
                                 controller: _nameCtrl,
                                 textInputAction: TextInputAction.next,
                                 validator: (v) =>
-                                (v == null || v.trim().isEmpty) ? 'Voer een naam in' : null,
+                                    (v == null || v.trim().isEmpty)
+                                        ? 'Voer een naam in'
+                                        : null,
                                 decoration: const InputDecoration(
                                   hintText: 'Voornaam en Achternaam',
                                 ),
@@ -106,7 +109,8 @@ class _TeacherPageState extends State<TeacherPage> {
                                   if (v == null || v.trim().isEmpty) {
                                     return 'Voer een email in';
                                   }
-                                  final ok = RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(v.trim());
+                                  final ok = RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                                      .hasMatch(v.trim());
                                   return ok ? null : 'Ongeldig emailadres';
                                 },
                                 decoration: const InputDecoration(
@@ -134,7 +138,9 @@ class _TeacherPageState extends State<TeacherPage> {
                                     onPressed: () =>
                                         setState(() => _obscure1 = !_obscure1),
                                     icon: Icon(
-                                      _obscure1 ? Icons.visibility_off : Icons.visibility,
+                                      _obscure1
+                                          ? Icons.visibility_off
+                                          : Icons.visibility,
                                     ),
                                   ),
                                 ),
@@ -149,15 +155,18 @@ class _TeacherPageState extends State<TeacherPage> {
                                 obscureText: _obscure2,
                                 obscuringCharacter: '•',
                                 textInputAction: TextInputAction.done,
-                                validator: (v) =>
-                                (v == _pwCtrl.text) ? null : 'Wachtwoorden komen niet overeen',
+                                validator: (v) => (v == _pwCtrl.text)
+                                    ? null
+                                    : 'Wachtwoorden komen niet overeen',
                                 decoration: InputDecoration(
                                   hintText: 'Herhaal Wachtwoord',
                                   suffixIcon: IconButton(
                                     onPressed: () =>
                                         setState(() => _obscure2 = !_obscure2),
                                     icon: Icon(
-                                      _obscure2 ? Icons.visibility_off : Icons.visibility,
+                                      _obscure2
+                                          ? Icons.visibility_off
+                                          : Icons.visibility,
                                     ),
                                   ),
                                 ),
@@ -212,7 +221,8 @@ class _TeacherPageState extends State<TeacherPage> {
                                 borderRadius: BorderRadius.circular(16),
                               ),
                             ),
-                            child: const Icon(Icons.arrow_back_rounded, size: 28),
+                            child:
+                                const Icon(Icons.arrow_back_rounded, size: 28),
                           ),
                         ),
                       ),
@@ -249,7 +259,6 @@ class _FieldLabel extends StatelessWidget {
   }
 }
 
-
 class _InputCard extends StatelessWidget {
   const _InputCard({required this.child});
   final Widget child;
@@ -272,7 +281,8 @@ class _InputCard extends StatelessWidget {
       child: Theme(
         data: Theme.of(context).copyWith(
           inputDecorationTheme: const InputDecorationTheme(
-            hintStyle: TextStyle(color: Colors.black38, fontWeight: FontWeight.w600),
+            hintStyle:
+                TextStyle(color: Colors.black38, fontWeight: FontWeight.w600),
             border: InputBorder.none,
           ),
         ),
@@ -281,7 +291,6 @@ class _InputCard extends StatelessWidget {
     );
   }
 }
-
 
 class _SectionSpacer extends StatelessWidget {
   const _SectionSpacer();
