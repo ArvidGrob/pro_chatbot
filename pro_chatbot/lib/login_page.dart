@@ -1,4 +1,26 @@
 import 'package:flutter/material.dart';
+import 'navigation.dart';
+
+void main() {
+  runApp(const _DebugLoginApp());
+}
+
+class _DebugLoginApp extends StatelessWidget {
+  const _DebugLoginApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Luminara (Debug Login)',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF6464FF)),
+        useMaterial3: true,
+      ),
+      home: const LoginPage(),
+    );
+  }
+}
+
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -8,538 +30,283 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  // Form controllers for input fields
   final _formKey = GlobalKey<FormState>();
-  final _studentIdController = TextEditingController();
-  final _passwordController = TextEditingController();
-
-  // State variables for UI control
-  bool _isPasswordVisible = false;
+  final _idCtrl = TextEditingController();
+  final _pwCtrl = TextEditingController();
+  bool _obscure = true;
   bool _isLoading = false;
-  bool _hasError = false;
 
   @override
   void dispose() {
-    _studentIdController.dispose();
-    _passwordController.dispose();
+    _idCtrl.dispose();
+    _pwCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleLogin() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    // TODO: add the real authentification later
+    await Future.delayed(const Duration(milliseconds: 600));
+
+    if (!mounted) return;
+    // successfull -> Navigation Page
+    //Navigator.of(context).pushReplacement(
+      //MaterialPageRoute(
+        //builder: (_) => const navigation(title: 'Dashboard'),
+      //),
+    //);
   }
 
   @override
   Widget build(BuildContext context) {
+    const primary = Color(0xFF6464FF);
+
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF9C7BE8), // Light purple
-              Color(0xFF6B5CE7), // Darker purple
-              Color(0xFF4F46E5), // Blue purple
-            ],
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            // Hintergrund mit drei Bögen
+            Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: CustomPaint(
+              size: Size(MediaQuery.of(context).size.width, 500),
+              painter: WaveBackgroundPainter(),
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Header with back button (only visible on certain states)
-              _buildHeader(),
 
-              // Main content area
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 30),
+        LayoutBuilder(
+          builder: (context, c) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: c.maxHeight - 32),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Inloggen',
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.w800,
+                        color: primary,
+                        letterSpacing: .5,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
 
-                      // Robot avatar (visible in design E)
-                      if (_shouldShowAvatar()) _buildRobotAvatar(),
+                    // Logo
+                    SizedBox(
+                      height: 240,
+                      child: Image.asset(
+                        'assets/images/luminara_logo.png',
+                        fit: BoxFit.contain,
+                      ),
+                    ),
 
-                      if (_shouldShowAvatar()) const SizedBox(height: 15),
+                    const SizedBox(height: 12),
 
-                      // Title removed - logo speaks for itself
+                    Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            // Student naam
+                            _RoundedField(
+                              label: 'Studentnaam',
+                              controller: _idCtrl,
+                              textInputAction: TextInputAction.next,
+                              validator: (v) => (v == null || v.isEmpty)
+                                  ? 'Voer uw studentnaam in'
+                                  : null,
+                            ),
+                            const SizedBox(height: 16),
 
-                      // Login title
-                      const Text(
-                        'LOGIN',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                          letterSpacing: 1.0,
+                            // Password
+                            _RoundedField(
+                              label: 'Wachtwoord',
+                              controller: _pwCtrl,
+                              obscureText: _obscure,
+                              validator: (v) => (v == null || v.isEmpty)
+                                  ? 'Voer uw wachtwoord in'
+                                  : null,
+                              suffix: IconButton(
+                                onPressed: () =>
+                                    setState(() => _obscure = !_obscure),
+                                icon: Icon(
+                                  _obscure
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+
+                            // Login Button
+                            SizedBox(
+                              width: double.infinity,
+                              height: 70,
+                              child: ElevatedButton(
+                                onPressed: _isLoading ? null : _handleLogin,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF8F8FFF),
+                                  foregroundColor: Colors.white,
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  textStyle: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                child: _isLoading
+                                    ? const SizedBox(
+                                  height: 22,
+                                  width: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.6,
+                                    color: Colors.white,
+                                  ),
+                                )
+                                    : const Text('Inloggen'),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-
-                      const SizedBox(height: 30),
-
-                      // Form fields
-                      Expanded(
-                        child: _buildForm(),
-                      ),
-                    ],
-                  ),
+                    const SizedBox(height: 60),
+                  ],
                 ),
               ),
-            ],
-          ),
+            );
+          },
         ),
-      ),
-    );
-  }
-
-  // Build header with back button (visible in design E)
-  Widget _buildHeader() {
-    if (!_shouldShowAvatar()) return const SizedBox.shrink();
-
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            icon: const Icon(
-              Icons.arrow_back_ios,
-              color: Colors.white,
-              size: 24,
-            ),
-          ),
-          const Text(
-            'Back',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Build Luminara AI logo
-  Widget _buildRobotAvatar() {
-    return SizedBox(
-      width: 160,
-      height: 160,
-      child: Image.asset(
-        'assets/images/luminara_logo.png',
-        fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) {
-          // Fallback to old design if image not found
-          return Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.white.withOpacity(0.3),
-                width: 2,
-              ),
-            ),
-            child: const Icon(
-              Icons.smart_toy_outlined,
-              size: 40,
-              color: Colors.white,
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  // Build main form with all input fields
-  Widget _buildForm() {
-    return Form(
-      key: _formKey,
-      child: Column(
-        children: [
-          // Student ID field
-          _buildInputField(
-            controller: _studentIdController,
-            hintText: 'Student ID',
-            fieldType: InputFieldType.studentId,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Student ID is verplicht';
-              }
-              return null;
-            },
-          ),
-
-          const SizedBox(height: 20),
-
-          // Password field
-          _buildInputField(
-            controller: _passwordController,
-            hintText: 'Wachtwoord',
-            fieldType: InputFieldType.password,
-            isPassword: true,
-            isPasswordVisible: _isPasswordVisible,
-            onTogglePassword: () {
-              setState(() {
-                _isPasswordVisible = !_isPasswordVisible;
-              });
-            },
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Wachtwoord is verplicht';
-              }
-              return null;
-            },
-          ),
-
-          // Error message (if login fails)
-          if (_hasError)
-            Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: Text(
-                'Het juiste account help u hier aan!',
-                style: TextStyle(
-                  color: Colors.red.shade300,
-                  fontSize: 12,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ),
-
-          const SizedBox(height: 30),
-
-          // Login button
-          _buildLoginButton(),
-
-          const SizedBox(height: 20),
-
-          // Forgot password button
-          _buildForgotPasswordButton(),
-
-          const SizedBox(height: 20),
-
-          // Sign up link
-          _buildSignUpLink(),
-
-          const Spacer(),
-        ],
-      ),
-    );
-  }
-
-  // Build input field with different styles based on design states
-  Widget _buildInputField({
-    required TextEditingController controller,
-    required String hintText,
-    required InputFieldType fieldType,
-    bool isPassword = false,
-    bool isPasswordVisible = false,
-    VoidCallback? onTogglePassword,
-    String? Function(String?)? validator,
-  }) {
-    // Determine field style based on current state
-    Color fieldColor = _getFieldColor(fieldType);
-    Color textColor = _getTextColor(fieldType);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: fieldColor,
-        borderRadius: BorderRadius.circular(25),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: TextFormField(
-        controller: controller,
-        obscureText: isPassword && !isPasswordVisible,
-        validator: validator,
-        style: TextStyle(
-          fontSize: 16,
-          color: textColor,
-          fontWeight: FontWeight.w500,
-        ),
-        decoration: InputDecoration(
-          hintText: hintText,
-          hintStyle: TextStyle(
-            color: textColor.withOpacity(0.7),
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(25),
-            borderSide: BorderSide.none,
-          ),
-          filled: true,
-          fillColor: Colors.transparent,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 16,
-          ),
-          suffixIcon: isPassword
-              ? IconButton(
-                  onPressed: onTogglePassword,
-                  icon: Icon(
-                    isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                    color: textColor.withOpacity(0.7),
-                  ),
-                )
-              : null,
-        ),
-      ),
-    );
-  }
-
-  // Build login button with different styles based on state
-  Widget _buildLoginButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: _isLoading ? null : _handleLogin,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF4F46E5),
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(25),
-          ),
-          elevation: 0,
-        ),
-        child: _isLoading
-            ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2,
-                ),
-              )
-            : const Text(
-                'Login',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-      ),
-    );
-  }
-
-  // Build forgot password button
-  Widget _buildForgotPasswordButton() {
-    return Container(
-      width: double.infinity,
-      child: TextButton(
-        onPressed: () {
-          _showForgotPasswordDialog();
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 12,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(25),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.3),
-              width: 1,
-            ),
-          ),
-          child: const Text(
-            'Wachtwoord vergeten?',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Build sign up link
-  Widget _buildSignUpLink() {
-    return Container(
-      width: double.infinity,
-      child: TextButton(
-        onPressed: () {
-          _navigateToSignUp();
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 12,
-          ),
-          decoration: BoxDecoration(
-            color: const Color(0xFF4F46E5),
-            borderRadius: BorderRadius.circular(25),
-          ),
-          child: const Text(
-            'Nog geen account? Meld je hier aan!',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Determine if avatar should be shown (design E style)
-  bool _shouldShowAvatar() {
-    return true; // Can be modified based on specific design state
-  }
-
-  // Get field color based on design progression and state
-  Color _getFieldColor(InputFieldType fieldType) {
-    if (_hasError && fieldType == InputFieldType.password) {
-      return Colors.red.shade100.withOpacity(0.8);
-    }
-    return Colors.white.withOpacity(0.9);
-  }
-
-  // Get text color based on field state
-  Color _getTextColor(InputFieldType fieldType) {
-    if (_hasError && fieldType == InputFieldType.password) {
-      return Colors.red.shade700;
-    }
-    return const Color(0xFF4F46E5);
-  }
-
-  // Handle login process
-  void _handleLogin() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-        _hasError = false;
-      });
-
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
-
-      setState(() {
-        _isLoading = false;
-      });
-
-      // Simulate login validation (for demo purposes)
-      if (_studentIdController.text.toLowerCase() == 'demo' &&
-          _passwordController.text == 'password') {
-        if (mounted) {
-          _showSuccessDialog();
-        }
-      } else {
-        setState(() {
-          _hasError = true;
-        });
-      }
-    }
-  }
-
-  // Navigate to sign up page
-  void _navigateToSignUp() {
-    Navigator.pushNamed(context, '/signup');
-  }
-
-  // Show forgot password dialog
-  void _showForgotPasswordDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: const Row(
-            children: [
-              Icon(
-                Icons.help_outline,
-                color: Color(0xFF4F46E5),
-                size: 28,
-              ),
-              SizedBox(width: 8),
-              Text('Wachtwoord vergeten?'),
-            ],
-          ),
-          content: const Text(
-            'Neem contact op met uw docent om uw wachtwoord te resetten.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text(
-                'OK',
-                style: TextStyle(
-                  color: Color(0xFF4F46E5),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Show success dialog after successful login
-  void _showSuccessDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: const Row(
-            children: [
-              Icon(
-                Icons.check_circle,
-                color: Colors.green,
-                size: 28,
-              ),
-              SizedBox(width: 8),
-              Text('Login succesvol!'),
-            ],
-          ),
-          content: const Text(
-            'Welkom bij Luminara AI! U bent succesvol ingelogd.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close dialog
-                Navigator.of(context).pop(); // Go back to welcome page
-                // Here you would typically navigate to the main app
-              },
-              child: const Text(
-                'OK',
-                style: TextStyle(
-                  color: Color(0xFF4F46E5),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+      ],
+    )
+    )
     );
   }
 }
 
-// Enum to define different input field types for styling
-enum InputFieldType {
-  studentId,
-  password,
+/// text field
+class _RoundedField extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final bool obscureText;
+  final String? Function(String?)? validator;
+  final Widget? suffix;
+  final TextInputAction? textInputAction;
+
+  const _RoundedField({
+    required this.label,
+    required this.controller,
+    this.obscureText = false,
+    this.validator,
+    this.suffix,
+    this.textInputAction,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: controller,
+      obscureText: obscureText,
+      obscuringCharacter: '*',
+      enableSuggestions: false,
+      autocorrect: false,
+      validator: validator,
+      textInputAction: textInputAction,
+      style: const TextStyle(
+        fontSize: 17,
+        fontWeight: FontWeight.w600,
+        color: Color(0xFF2D2D2D),
+      ),
+      decoration: InputDecoration(
+        hintText: label,
+        hintStyle: TextStyle(color:
+          Color(0xFF2D2D2D),
+          fontSize: 17,
+          fontWeight: FontWeight.w600,
+        ),
+        filled: true,
+        fillColor: const Color(0xFFF5F5F5),
+        suffixIcon: suffix,
+        contentPadding:
+        const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
+  }
+}
+
+class WaveBackgroundPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint1 = Paint()
+      ..color = const Color(0xFF2323AD)
+      ..style = PaintingStyle.fill;
+
+    final paint2 = Paint()
+      ..color = const Color(0xFF4242BD)
+      ..style = PaintingStyle.fill;
+
+    final paint3 = Paint()
+      ..color = const Color(0xFF5454FF)
+      ..style = PaintingStyle.fill;
+
+    // first wave, background, darkest
+    final path1 = Path();
+    path1.moveTo(0, size.height);
+    path1.lineTo(0, size.height * 0.25);
+    path1.quadraticBezierTo(
+      size.width * 0.5,
+      size.height * 0.05,
+      size.width,
+      size.height * 0.25,
+    );
+    path1.lineTo(size.width, size.height);
+    path1.close();
+    canvas.drawPath(path1, paint1);
+
+    // second wave
+    final path2 = Path();
+    path2.moveTo(0, size.height);
+    path2.lineTo(0, size.height * 0.35);
+    path2.quadraticBezierTo(
+      size.width * 0.5,
+      size.height * 0.15,
+      size.width,
+      size.height * 0.35,
+    );
+    path2.lineTo(size.width, size.height);
+    path2.close();
+    canvas.drawPath(path2, paint2);
+
+    // third wave
+    final path3 = Path();
+    path3.moveTo(0, size.height);
+    path3.lineTo(0, size.height * 0.45);
+    path3.quadraticBezierTo(
+      size.width * 0.5,
+      size.height * 0.25,
+      size.width,
+      size.height * 0.45,
+    );
+    path3.lineTo(size.width, size.height);
+    path3.close();
+    canvas.drawPath(path3, paint3);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
