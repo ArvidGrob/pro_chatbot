@@ -1,6 +1,23 @@
 import 'package:flutter/material.dart';
 import 'student_store.dart';
 
+void main() {
+  runApp(const MyApp());
+}
+
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Students',
+      home: const StudentOverviewPage(),
+    );
+  }
+}
 class StudentOverviewPage extends StatefulWidget {
   const StudentOverviewPage({super.key});
 
@@ -25,10 +42,6 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.5,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black87),
-          onPressed: () => Navigator.of(context).maybePop(),
-        ),
         title: const Text(
           'Studentenoverzicht',
           style: TextStyle(
@@ -118,8 +131,35 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
               },
             ),
           ),
+          // Return button
+          Center(
+            child: _buildReturnButton(
+              buttonId: 'return',
+              iconPath: 'assets/images/return.png',
+              onTap: () {
+                print('Return tapped');
+              },
+            ),
+          ),
         ],
       ),
     );
   }
+
+  Widget _buildReturnButton({
+    required String buttonId,
+    required String iconPath,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Image.asset(
+        iconPath,
+        width: 70,
+        height: 70,
+        fit: BoxFit.contain,
+      ),
+    );
+  }
+
 }

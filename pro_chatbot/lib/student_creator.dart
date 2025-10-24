@@ -1,6 +1,22 @@
 import 'package:flutter/material.dart';
 import 'student_store.dart';
 
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Student creator',
+      home: const StudentCreatorPage(),
+    );
+  }
+}
 class StudentCreatorPage extends StatefulWidget {
   const StudentCreatorPage({super.key});
 

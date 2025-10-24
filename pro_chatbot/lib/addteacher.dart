@@ -1,6 +1,22 @@
 import 'package:flutter/material.dart';
 import 'login_page.dart';
 
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Add Teacher',
+      home: const TeacherPage(),
+    );
+  }
+}
 class TeacherPage extends StatefulWidget {
   const TeacherPage({super.key});
 

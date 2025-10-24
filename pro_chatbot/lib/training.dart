@@ -11,7 +11,7 @@ void main() {
   runApp(const MyApp());
 }
 
-// <- NEU
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Training',
-      home: const TrainingPage(), // deine Seite hier rein
+      home: const TrainingPage(),
     );
   }
 }

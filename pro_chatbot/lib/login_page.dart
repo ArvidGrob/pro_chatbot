@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'navigation.dart';
+import 'navigation_page.dart';
 
 void main() {
   runApp(const _DebugLoginApp());
