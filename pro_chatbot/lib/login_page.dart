@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'navigation.dart';
+import 'navigation_page.dart';
 
 void main() {
   runApp(const _DebugLoginApp());
@@ -20,7 +20,6 @@ class _DebugLoginApp extends StatelessWidget {
     );
   }
 }
-
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -54,9 +53,9 @@ class _LoginPageState extends State<LoginPage> {
     if (!mounted) return;
     // successfull -> Navigation Page
     //Navigator.of(context).pushReplacement(
-      //MaterialPageRoute(
-        //builder: (_) => const navigation(title: 'Dashboard'),
-      //),
+    //MaterialPageRoute(
+    //builder: (_) => const navigation(title: 'Dashboard'),
+    //),
     //);
   }
 
@@ -65,133 +64,132 @@ class _LoginPageState extends State<LoginPage> {
     const primary = Color(0xFF6464FF);
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Stack(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+            child: Stack(
           children: [
             // Hintergrund mit drei Bögen
             Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: CustomPaint(
-              size: Size(MediaQuery.of(context).size.width, 500),
-              painter: WaveBackgroundPainter(),
-            ),
-          ),
-
-        LayoutBuilder(
-          builder: (context, c) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: c.maxHeight - 32),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Inloggen',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w800,
-                        color: primary,
-                        letterSpacing: .5,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Logo
-                    SizedBox(
-                      height: 240,
-                      child: Image.asset(
-                        'assets/images/luminara_logo.png',
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    Form(
-                        key: _formKey,
-                        child: Column(
-                          children: [
-                            // Student naam
-                            _RoundedField(
-                              label: 'Studentnaam',
-                              controller: _idCtrl,
-                              textInputAction: TextInputAction.next,
-                              validator: (v) => (v == null || v.isEmpty)
-                                  ? 'Voer uw studentnaam in'
-                                  : null,
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Password
-                            _RoundedField(
-                              label: 'Wachtwoord',
-                              controller: _pwCtrl,
-                              obscureText: _obscure,
-                              validator: (v) => (v == null || v.isEmpty)
-                                  ? 'Voer uw wachtwoord in'
-                                  : null,
-                              suffix: IconButton(
-                                onPressed: () =>
-                                    setState(() => _obscure = !_obscure),
-                                icon: Icon(
-                                  _obscure
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-
-                            // Login Button
-                            SizedBox(
-                              width: double.infinity,
-                              height: 70,
-                              child: ElevatedButton(
-                                onPressed: _isLoading ? null : _handleLogin,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF8F8FFF),
-                                  foregroundColor: Colors.white,
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  textStyle: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                child: _isLoading
-                                    ? const SizedBox(
-                                  height: 22,
-                                  width: 22,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2.6,
-                                    color: Colors.white,
-                                  ),
-                                )
-                                    : const Text('Inloggen'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    const SizedBox(height: 60),
-                  ],
-                ),
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: CustomPaint(
+                size: Size(MediaQuery.of(context).size.width, 500),
+                painter: WaveBackgroundPainter(),
               ),
-            );
-          },
-        ),
-      ],
-    )
-    )
-    );
+            ),
+
+            LayoutBuilder(
+              builder: (context, c) {
+                return SingleChildScrollView(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: c.maxHeight - 32),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Inloggen',
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w800,
+                            color: primary,
+                            letterSpacing: .5,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 24),
+
+                        // Logo
+                        SizedBox(
+                          height: 240,
+                          child: Image.asset(
+                            'assets/images/luminara_logo.png',
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        Form(
+                          key: _formKey,
+                          child: Column(
+                            children: [
+                              // Student naam
+                              _RoundedField(
+                                label: 'Studentnaam',
+                                controller: _idCtrl,
+                                textInputAction: TextInputAction.next,
+                                validator: (v) => (v == null || v.isEmpty)
+                                    ? 'Voer uw studentnaam in'
+                                    : null,
+                              ),
+                              const SizedBox(height: 16),
+
+                              // Password
+                              _RoundedField(
+                                label: 'Wachtwoord',
+                                controller: _pwCtrl,
+                                obscureText: _obscure,
+                                validator: (v) => (v == null || v.isEmpty)
+                                    ? 'Voer uw wachtwoord in'
+                                    : null,
+                                suffix: IconButton(
+                                  onPressed: () =>
+                                      setState(() => _obscure = !_obscure),
+                                  icon: Icon(
+                                    _obscure
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+
+                              // Login Button
+                              SizedBox(
+                                width: double.infinity,
+                                height: 70,
+                                child: ElevatedButton(
+                                  onPressed: _isLoading ? null : _handleLogin,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF8F8FFF),
+                                    foregroundColor: Colors.white,
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    textStyle: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  child: _isLoading
+                                      ? const SizedBox(
+                                          height: 22,
+                                          width: 22,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2.6,
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                      : const Text('Inloggen'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 60),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        )));
   }
 }
 
@@ -230,8 +228,8 @@ class _RoundedField extends StatelessWidget {
       ),
       decoration: InputDecoration(
         hintText: label,
-        hintStyle: TextStyle(color:
-          Color(0xFF2D2D2D),
+        hintStyle: TextStyle(
+          color: Color(0xFF2D2D2D),
           fontSize: 17,
           fontWeight: FontWeight.w600,
         ),
@@ -239,7 +237,7 @@ class _RoundedField extends StatelessWidget {
         fillColor: const Color(0xFFF5F5F5),
         suffixIcon: suffix,
         contentPadding:
-        const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
           borderSide: BorderSide.none,

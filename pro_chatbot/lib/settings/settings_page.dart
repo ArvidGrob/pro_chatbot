@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
+import 'settings_page_account.dart';
+import 'settings_page_spraak.dart';
+import 'settings_page_hulp.dart';
 
 void main() {
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
-    home: const AdminDashboard(),
+    home: const SettingsPage(),
   ));
 }
 
-class AdminDashboard extends StatefulWidget {
-  const AdminDashboard({super.key});
+class SettingsPage extends StatefulWidget {
+  const SettingsPage({super.key});
 
   @override
-  State<AdminDashboard> createState() => _AdminDashboardState();
+  State<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _AdminDashboardState extends State<AdminDashboard> {
+class _SettingsPageState extends State<SettingsPage> {
   String _pressedButton = '';
 
   @override
@@ -34,48 +37,74 @@ class _AdminDashboardState extends State<AdminDashboard> {
               children: [
                 // Title
                 const Text(
-                  'Admin dashboard',
-                  maxLines: 1,
+                  'Instellingen',
                   style: TextStyle(
                     color: Color(0xFF4242BD),
-                    fontSize: 36,
+                    fontSize: 40,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
 
                 const SizedBox(height: 40),
 
-                // Student button
-                _buildDashboardButton(
-                  buttonId: 'student',
-                  label: 'Student',
-                  iconPath: 'assets/images/student.png',
+                // Account button
+                _buildSettingsButton(
+                  buttonId: 'account',
+                  title: 'Account',
+                  iconPath: 'assets/images/account.png',
                   onTap: () {
-                    print('Student tapped');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SettingsPageAccount(),
+                      ),
+                    );
                   },
                 ),
 
-                const SizedBox(height: 25),
+                const SizedBox(height: 30),
 
-                // Docent button
-                _buildDashboardButton(
-                  buttonId: 'docent',
-                  label: 'Docent',
-                  iconPath: 'assets/images/docent.png',
+                // Spraak button
+                _buildSettingsButton(
+                  buttonId: 'spraak',
+                  title: 'Spraak',
+                  iconPath: 'assets/images/spraak.png',
                   onTap: () {
-                    print('Docent tapped');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SettingsPageSpraak(),
+                      ),
+                    );
                   },
                 ),
 
-                const SizedBox(height: 25),
+                const SizedBox(height: 30),
 
-                // Beheer button
-                _buildDashboardButton(
-                  buttonId: 'beheer',
-                  label: 'Beheer',
-                  iconPath: 'assets/images/beheer.png',
+                // Thema button
+                _buildSettingsButton(
+                  buttonId: 'thema',
+                  title: 'Thema',
+                  iconPath: 'assets/images/thema.png',
                   onTap: () {
-                    print('Beheer tapped');
+                    print('Thema tapped');
+                  },
+                ),
+
+                const SizedBox(height: 30),
+
+                // Hulp button
+                _buildSettingsButton(
+                  buttonId: 'hulp',
+                  title: 'Hulp',
+                  iconPath: 'assets/images/hulp.png',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SettingsPageHulp(),
+                      ),
+                    );
                   },
                 ),
 
@@ -84,10 +113,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 // Return button
                 Center(
                   child: _buildReturnButton(
-                    buttonId: 'return',
                     iconPath: 'assets/images/return.png',
                     onTap: () {
-                      print('Return tapped');
+                      Navigator.pop(context);
                     },
                   ),
                 ),
@@ -101,9 +129,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
-  Widget _buildDashboardButton({
+  Widget _buildSettingsButton({
     required String buttonId,
-    required String label,
+    required String title,
     required String iconPath,
     required VoidCallback onTap,
   }) {
@@ -131,40 +159,40 @@ class _AdminDashboardState extends State<AdminDashboard> {
         });
       },
       child: Container(
-        height: 140,
+        height: 90,
         width: double.infinity,
         decoration: BoxDecoration(
           color: primaryColor,
           borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
         child: Row(
           children: [
-            // Left side with label
+            // Text zone (left side)
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.only(
-                  left: 20.0,
-                  right: 10.0,
-                  bottom: 20.0,
-                ),
-                child: Align(
-                  alignment: Alignment.bottomLeft,
-                  child: Text(
-                    label,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 38,
-                      fontWeight: FontWeight.bold,
-                    ),
+                padding: const EdgeInsets.only(left: 30.0),
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ),
 
-            // Right side with icon
+            // Icon zone (right side with lighter color)
             Container(
-              width: 140,
-              height: 140,
+              width: 90,
+              height: 90,
               decoration: BoxDecoration(
                 color: secondaryColor,
                 borderRadius: const BorderRadius.only(
@@ -172,11 +200,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   bottomRight: Radius.circular(20),
                 ),
               ),
-              child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
                 child: Image.asset(
                   iconPath,
-                  width: 80,
-                  height: 80,
                   fit: BoxFit.contain,
                 ),
               ),
@@ -188,7 +215,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   Widget _buildReturnButton({
-    required String buttonId,
     required String iconPath,
     required VoidCallback onTap,
   }) {

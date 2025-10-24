@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../settings/settings_page.dart';
+import '../admindashboard/admin_dashboard.dart';
+import '../training/training_page.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -66,8 +69,12 @@ class _NavigationPageState extends State<NavigationPage> {
                   title: 'Training',
                   iconPath: 'assets/images/training.png',
                   onTap: () {
-                    // TODO: Navigate to training page
-                    print('Training pressed');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const TrainingPage(),
+                      ),
+                    );
                   },
                 ),
 
@@ -83,8 +90,12 @@ class _NavigationPageState extends State<NavigationPage> {
                         title: 'Instellingen',
                         iconPath: 'assets/images/settings.png',
                         onTap: () {
-                          // TODO: Navigate to settings page
-                          print('Instellingen pressed');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SettingsPage(),
+                            ),
+                          );
                         },
                       ),
                     ),
@@ -98,8 +109,12 @@ class _NavigationPageState extends State<NavigationPage> {
                         title: 'Admin',
                         iconPath: 'assets/images/admin.png',
                         onTap: () {
-                          // TODO: Navigate to admin page
-                          print('Admin pressed');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AdminDashboard(),
+                            ),
+                          );
                         },
                       ),
                     ),
