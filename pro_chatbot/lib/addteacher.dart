@@ -44,7 +44,7 @@ class _TeacherPageState extends State<AddTeacherPage> {
       body: SafeArea(
         child: Stack(
           children: [
-            // Backgroundwaves - COMMENTED OUT
+            // Backgroundwaves
             // Positioned(
             //   bottom: 0,
             //   left: 0,

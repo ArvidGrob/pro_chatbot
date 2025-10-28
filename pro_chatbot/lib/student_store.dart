@@ -1,9 +1,10 @@
 import 'package:flutter/foundation.dart';
 
 class Student {
-  Student(this.name, {this.online = false});
-  final String name;
+  Student(this.name, {this.online = false, this.password});
+  String name;
   bool online;
+  String? password;
 }
 
 class StudentStore {
@@ -12,10 +13,10 @@ class StudentStore {
 
   /// Current students in the class/app
   final ValueNotifier<List<Student>> students = ValueNotifier<List<Student>>([
-    Student('San Janssen', online: true),
-    Student('Emily Jansen', online: true),
-    Student('Luuk de Vries', online: false),
-    Student('Sophie Bakker', online: false),
+    Student('San Janssen', online: true, password: 'san123'),
+    Student('Emily Jansen', online: true, password: 'emily123'),
+    Student('Luuk de Vries', online: false, password: 'luuk123'),
+    Student('Sophie Bakker', online: false, password: 'sophie123'),
   ]);
 
   /// “Directory” of all known people you can add from (mocked).
@@ -37,10 +38,15 @@ class StudentStore {
   bool containsName(String name) =>
       students.value.any((s) => s.name.toLowerCase() == name.toLowerCase());
 
-  void addByName(String name) {
+  // Neuer Weg zum Hinzufügen, damit Passwort gesetzt werden kann
+  void addStudent(String name, {bool online = false, String? password}) {
     if (containsName(name)) return;
-    final list = [...students.value, Student(name, online: false)];
+    final list = [...students.value, Student(name, online: online, password: password)];
     students.value = list;
+  }
+
+  void addByName(String name) {
+    addStudent(name, online: false);
   }
 
   void removeByName(String name) {
@@ -54,5 +60,25 @@ class StudentStore {
     if (i == -1) return;
     list[i].online = online;
     students.value = List<Student>.from(list); // trigger listeners
+  }
+  void renameStudent(String oldName, String newName) {
+    final list = students.value;
+    final i = list.indexWhere((s) => s.name == oldName);
+    if (i == -1) return;
+    list[i].name = newName;
+    students.value = List<Student>.from(list);
+  }
+  void setPassword(String name, String newPassword) {
+    final list = students.value;
+    final i = list.indexWhere((s) => s.name == name);
+    if (i == -1) return;
+    list[i].password = newPassword;
+    students.value = List<Student>.from(list);
+  }
+  String? getPassword(String name) {
+    final list = students.value;
+    final i = list.indexWhere((s) => s.name == name);
+    if (i == -1) return null;
+    return list[i].password;
   }
 }

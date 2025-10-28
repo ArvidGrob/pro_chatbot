@@ -13,18 +13,18 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Student creator',
-      home: const StudentCreatorPage(),
+      home: const StudentDeletePage(),
     );
   }
 }
-class StudentCreatorPage extends StatefulWidget {
-  const StudentCreatorPage({super.key});
+class StudentDeletePage extends StatefulWidget {
+  const StudentDeletePage({super.key});
 
   @override
-  State<StudentCreatorPage> createState() => _StudentCreatorPageState();
+  State<StudentDeletePage> createState() => _StudentDeletePageState();
 }
 
-class _StudentCreatorPageState extends State<StudentCreatorPage> {
+class _StudentDeletePageState extends State<StudentDeletePage> {
   static const primary = Color(0xFF6464FF);
 
   final TextEditingController _searchCtrl = TextEditingController();
