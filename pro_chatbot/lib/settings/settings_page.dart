@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'settings_page_account.dart';
 import 'settings_page_spraak.dart';
 import 'settings_page_hulp.dart';
+import 'settings_page_thema.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -87,7 +88,12 @@ class _SettingsPageState extends State<SettingsPage> {
                   title: 'Thema',
                   iconPath: 'assets/images/thema.png',
                   onTap: () {
-                    print('Thema tapped');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SettingsPageThema(),
+                      ),
+                    );
                   },
                 ),
 
