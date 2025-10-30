@@ -20,6 +20,7 @@ class _ChatPageState extends State<ChatPage> {
   final List<ChatMessage> _messages = [];
   bool _isTyping = false;
   bool _viewHistoryPressed = false;
+  bool _showPlusMenu = false;
 
   @override
   void initState() {
@@ -293,86 +294,185 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Widget _buildInputArea() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
-      ),
-      child: Row(
-        children: [
-          // Text input
-          Expanded(
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        // Plus menu bubble
+        if (_showPlusMenu)
+          Positioned(
+            bottom: 70,
+            right: 12,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(25),
+                color: const Color(0xFF6464FF),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _messageController,
-                      decoration: const InputDecoration(
-                        hintText: 'Vraag het aan Luminara',
-                        hintStyle: TextStyle(
-                          color: Colors.black38,
-                          fontSize: 15,
+                  _buildMenuOption(
+                    icon: 'assets/images/file.png',
+                    onTap: () {
+                      setState(() => _showPlusMenu = false);
+                      // TODO: Implement file picker
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Choisir un fichier - À implémenter'),
+                          duration: Duration(seconds: 1),
                         ),
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      maxLines: null,
-                      textInputAction: TextInputAction.send,
-                      onSubmitted: (_) => _sendMessage(),
-                    ),
+                      );
+                    },
                   ),
-                  // Send button inside the text field
-                  GestureDetector(
-                    onTap: _sendMessage,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: Image.asset(
-                        'assets/images/arrow.png',
-                        width: 40,
-                        height: 40,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
+                  const SizedBox(width: 12),
+                  _buildMenuOption(
+                    icon: 'assets/images/gallery.png',
+                    onTap: () {
+                      setState(() => _showPlusMenu = false);
+                      // TODO: Implement gallery picker
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Choisir une photo - À implémenter'),
+                          duration: Duration(seconds: 1),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 12),
+                  _buildMenuOption(
+                    icon: 'assets/images/photo.png',
+                    onTap: () {
+                      setState(() => _showPlusMenu = false);
+                      // TODO: Implement camera
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Prendre une photo - À implémenter'),
+                          duration: Duration(seconds: 1),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 12),
+                  _buildMenuOption(
+                    icon: 'assets/images/microphone.png',
+                    onTap: () {
+                      setState(() => _showPlusMenu = false);
+                      // TODO: Implement voice recording
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Commande vocale - À implémenter'),
+                          duration: Duration(seconds: 1),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
             ),
           ),
 
-          const SizedBox(width: 10),
-
-          // Plus button on the right
-          GestureDetector(
-            onTap: () {
-              // TODO: Implement plus functionality
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Plus button - To be implemented'),
-                  duration: Duration(seconds: 1),
-                ),
-              );
-            },
-            child: Container(
-              width: 45,
-              height: 45,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.add,
-                color: Colors.black54,
-                size: 28,
-              ),
-            ),
+        // Input area
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.9),
           ),
-        ],
+          child: Row(
+            children: [
+              // Text input
+              Expanded(
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _messageController,
+                          decoration: const InputDecoration(
+                            hintText: 'Vraag het aan Luminara',
+                            hintStyle: TextStyle(
+                              color: Colors.black38,
+                              fontSize: 15,
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          maxLines: null,
+                          textInputAction: TextInputAction.send,
+                          onSubmitted: (_) => _sendMessage(),
+                        ),
+                      ),
+                      // Send button inside the text field
+                      GestureDetector(
+                        onTap: _sendMessage,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Image.asset(
+                            'assets/images/arrow.png',
+                            width: 40,
+                            height: 40,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 10),
+
+              // Plus button on the right
+              GestureDetector(
+                onTap: () {
+                  setState(() => _showPlusMenu = !_showPlusMenu);
+                },
+                child: Container(
+                  width: 45,
+                  height: 45,
+                  decoration: BoxDecoration(
+                    color: _showPlusMenu
+                        ? const Color(0xFF6464FF)
+                        : Colors.grey[300],
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.add,
+                    color: _showPlusMenu ? Colors.white : Colors.black54,
+                    size: 28,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMenuOption({
+    required String icon,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Image.asset(
+        icon,
+        width: 32,
+        height: 32,
+        fit: BoxFit.contain,
       ),
     );
   }
