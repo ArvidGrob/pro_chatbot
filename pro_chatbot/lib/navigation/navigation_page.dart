@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../settings/settings_page.dart';
 import '../admindashboard/admin_dashboard.dart';
 import '../training/training_page.dart';
+import '../chat/chat_page.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -56,8 +57,12 @@ class _NavigationPageState extends State<NavigationPage> {
                   title: 'Chat',
                   iconPath: 'assets/images/chat.png',
                   onTap: () {
-                    // TODO: Navigate to chat page
-                    print('Chat pressed');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ChatPage(),
+                      ),
+                    );
                   },
                 ),
 
