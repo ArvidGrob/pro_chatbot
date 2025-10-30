@@ -300,7 +300,7 @@ class _ChatPageState extends State<ChatPage> {
         // Plus menu bubble
         if (_showPlusMenu)
           Positioned(
-            bottom: 70,
+            bottom: 80,
             right: 12,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -318,60 +318,32 @@ class _ChatPageState extends State<ChatPage> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildMenuOption(
-                    icon: 'assets/images/file.png',
-                    onTap: () {
-                      setState(() => _showPlusMenu = false);
-                      // TODO: Implement file picker
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Choisir un fichier - À implémenter'),
-                          duration: Duration(seconds: 1),
-                        ),
-                      );
-                    },
+                  Image.asset(
+                    'assets/images/file.png',
+                    width: 32,
+                    height: 32,
+                    fit: BoxFit.contain,
                   ),
                   const SizedBox(width: 12),
-                  _buildMenuOption(
-                    icon: 'assets/images/gallery.png',
-                    onTap: () {
-                      setState(() => _showPlusMenu = false);
-                      // TODO: Implement gallery picker
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Choisir une photo - À implémenter'),
-                          duration: Duration(seconds: 1),
-                        ),
-                      );
-                    },
+                  Image.asset(
+                    'assets/images/gallery.png',
+                    width: 32,
+                    height: 32,
+                    fit: BoxFit.contain,
                   ),
                   const SizedBox(width: 12),
-                  _buildMenuOption(
-                    icon: 'assets/images/photo.png',
-                    onTap: () {
-                      setState(() => _showPlusMenu = false);
-                      // TODO: Implement camera
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Prendre une photo - À implémenter'),
-                          duration: Duration(seconds: 1),
-                        ),
-                      );
-                    },
+                  Image.asset(
+                    'assets/images/photo.png',
+                    width: 32,
+                    height: 32,
+                    fit: BoxFit.contain,
                   ),
                   const SizedBox(width: 12),
-                  _buildMenuOption(
-                    icon: 'assets/images/microphone.png',
-                    onTap: () {
-                      setState(() => _showPlusMenu = false);
-                      // TODO: Implement voice recording
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Commande vocale - À implémenter'),
-                          duration: Duration(seconds: 1),
-                        ),
-                      );
-                    },
+                  Image.asset(
+                    'assets/images/microphone.png',
+                    width: 32,
+                    height: 32,
+                    fit: BoxFit.contain,
                   ),
                 ],
               ),
@@ -459,21 +431,6 @@ class _ChatPageState extends State<ChatPage> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildMenuOption({
-    required String icon,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Image.asset(
-        icon,
-        width: 32,
-        height: 32,
-        fit: BoxFit.contain,
-      ),
     );
   }
 }
