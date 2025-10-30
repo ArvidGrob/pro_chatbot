@@ -125,6 +125,122 @@ class _ChatPageState extends State<ChatPage> {
                       return _buildMessageBubble(_messages[index]);
                     },
                   ),
+
+                  // Plus menu bubble positioned here instead of in input area
+                  if (_showPlusMenu)
+                    Positioned(
+                      bottom: 80,
+                      right: 12,
+                      child: Material(
+                        color: Colors.transparent,
+                        elevation: 10,
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF6464FF),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              InkWell(
+                                onTap: () {
+                                  print('File picker clicked!!!');
+                                  setState(() => _showPlusMenu = false);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                          'File picker - To be implemented'),
+                                      duration: Duration(seconds: 2),
+                                    ),
+                                  );
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Image.asset(
+                                    'assets/images/file.png',
+                                    width: 32,
+                                    height: 32,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              InkWell(
+                                onTap: () {
+                                  print('Gallery picker clicked!!!');
+                                  setState(() => _showPlusMenu = false);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                          'Gallery picker - To be implemented'),
+                                      duration: Duration(seconds: 2),
+                                    ),
+                                  );
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Image.asset(
+                                    'assets/images/gallery.png',
+                                    width: 32,
+                                    height: 32,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              InkWell(
+                                onTap: () {
+                                  print('Photo clicked!!!');
+                                  setState(() => _showPlusMenu = false);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content:
+                                          Text('Photo - To be implemented'),
+                                      duration: Duration(seconds: 2),
+                                    ),
+                                  );
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Image.asset(
+                                    'assets/images/photo.png',
+                                    width: 32,
+                                    height: 32,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              InkWell(
+                                onTap: () {
+                                  print('Microphone clicked!!!');
+                                  setState(() => _showPlusMenu = false);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                          'Microphone - To be implemented'),
+                                      duration: Duration(seconds: 2),
+                                    ),
+                                  );
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Image.asset(
+                                    'assets/images/microphone.png',
+                                    width: 32,
+                                    height: 32,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -294,143 +410,83 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Widget _buildInputArea() {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        // Plus menu bubble
-        if (_showPlusMenu)
-          Positioned(
-            bottom: 80,
-            right: 12,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.9),
+      ),
+      child: Row(
+        children: [
+          // Text input
+          Expanded(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
               decoration: BoxDecoration(
-                color: const Color(0xFF6464FF),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(25),
               ),
               child: Row(
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Image.asset(
-                    'assets/images/file.png',
-                    width: 32,
-                    height: 32,
-                    fit: BoxFit.contain,
+                  Expanded(
+                    child: TextField(
+                      controller: _messageController,
+                      decoration: const InputDecoration(
+                        hintText: 'Vraag het aan Luminara',
+                        hintStyle: TextStyle(
+                          color: Colors.black38,
+                          fontSize: 15,
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      maxLines: null,
+                      textInputAction: TextInputAction.send,
+                      onSubmitted: (_) => _sendMessage(),
+                    ),
                   ),
-                  const SizedBox(width: 12),
-                  Image.asset(
-                    'assets/images/gallery.png',
-                    width: 32,
-                    height: 32,
-                    fit: BoxFit.contain,
-                  ),
-                  const SizedBox(width: 12),
-                  Image.asset(
-                    'assets/images/photo.png',
-                    width: 32,
-                    height: 32,
-                    fit: BoxFit.contain,
-                  ),
-                  const SizedBox(width: 12),
-                  Image.asset(
-                    'assets/images/microphone.png',
-                    width: 32,
-                    height: 32,
-                    fit: BoxFit.contain,
+                  // Send button inside the text field
+                  GestureDetector(
+                    onTap: _sendMessage,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: Image.asset(
+                        'assets/images/arrow.png',
+                        width: 40,
+                        height: 40,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
           ),
 
-        // Input area
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.9),
-          ),
-          child: Row(
-            children: [
-              // Text input
-              Expanded(
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _messageController,
-                          decoration: const InputDecoration(
-                            hintText: 'Vraag het aan Luminara',
-                            hintStyle: TextStyle(
-                              color: Colors.black38,
-                              fontSize: 15,
-                            ),
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(vertical: 12),
-                          ),
-                          maxLines: null,
-                          textInputAction: TextInputAction.send,
-                          onSubmitted: (_) => _sendMessage(),
-                        ),
-                      ),
-                      // Send button inside the text field
-                      GestureDetector(
-                        onTap: _sendMessage,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          child: Image.asset(
-                            'assets/images/arrow.png',
-                            width: 40,
-                            height: 40,
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+          const SizedBox(width: 10),
 
-              const SizedBox(width: 10),
-
-              // Plus button on the right
-              GestureDetector(
-                onTap: () {
-                  setState(() => _showPlusMenu = !_showPlusMenu);
-                },
-                child: Container(
-                  width: 45,
-                  height: 45,
-                  decoration: BoxDecoration(
-                    color: _showPlusMenu
-                        ? const Color(0xFF6464FF)
-                        : Colors.grey[300],
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.add,
-                    color: _showPlusMenu ? Colors.white : Colors.black54,
-                    size: 28,
-                  ),
-                ),
+          // Plus button on the right
+          GestureDetector(
+            onTap: () {
+              setState(() => _showPlusMenu = !_showPlusMenu);
+              print('Plus button clicked, menu is now: $_showPlusMenu');
+            },
+            child: Container(
+              width: 45,
+              height: 45,
+              decoration: BoxDecoration(
+                color:
+                    _showPlusMenu ? const Color(0xFF6464FF) : Colors.grey[300],
+                shape: BoxShape.circle,
               ),
-            ],
+              child: Icon(
+                Icons.add,
+                color: _showPlusMenu ? Colors.white : Colors.black54,
+                size: 28,
+              ),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
