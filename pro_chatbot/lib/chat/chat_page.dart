@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
-import 'chat_page_file.dart';
-import 'chat_page_gallery.dart';
-import 'chat_page_photo.dart';
-import 'chat_page_micro.dart';
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
+import 'chat_message_model.dart';
+import 'attachment_service.dart';
+import 'attachment_widget.dart';
+import 'speech_to_text_dialog.dart';
+import 'attachment_prompt_dialog.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -31,6 +35,7 @@ class _ChatPageState extends State<ChatPage> {
     super.initState();
     // Add initial message
     _messages.add(ChatMessage(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
       text: 'Hallo! Hoe kan ik u helpen?',
       isUser: false,
       timestamp: DateTime.now(),
@@ -50,6 +55,7 @@ class _ChatPageState extends State<ChatPage> {
     final userMessage = _messageController.text.trim();
     setState(() {
       _messages.add(ChatMessage(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
         text: userMessage,
         isUser: true,
         timestamp: DateTime.now(),
@@ -66,6 +72,7 @@ class _ChatPageState extends State<ChatPage> {
       setState(() {
         _isTyping = false;
         _messages.add(ChatMessage(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
           text: 'AI not yet implemented. Please try again later.',
           isUser: false,
           timestamp: DateTime.now(),
@@ -85,6 +92,238 @@ class _ChatPageState extends State<ChatPage> {
         );
       }
     });
+  }
+
+  // Handle file picker
+  Future<void> _handleFilePicker() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.any,
+        allowMultiple: false,
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        final file = result.files.first;
+
+        // Check file size
+        if (!AttachmentService.validateFileSize(file.size)) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('File size exceeds 10 MB limit'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          return;
+        }
+
+        await _addMessageWithAttachment(
+          file.path!,
+          AttachmentType.file,
+        );
+      }
+    } catch (e) {
+      print('Error picking file: $e');
+    }
+  }
+
+  // Handle image picker from gallery
+  Future<void> _handleGalleryPicker() async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        final size = await AttachmentService.getFileSize(image.path);
+        if (!AttachmentService.validateFileSize(size)) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Image size exceeds 10 MB limit'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          return;
+        }
+
+        await _addMessageWithAttachment(
+          image.path,
+          AttachmentType.image,
+        );
+      }
+    } catch (e) {
+      print('Error picking image: $e');
+    }
+  }
+
+  // Handle camera photo
+  Future<void> _handleCamera() async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? photo = await picker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 85,
+      );
+
+      if (photo != null) {
+        final size = await AttachmentService.getFileSize(photo.path);
+        if (!AttachmentService.validateFileSize(size)) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Photo size exceeds 10 MB limit'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          return;
+        }
+
+        await _addMessageWithAttachment(
+          photo.path,
+          AttachmentType.photo,
+        );
+      }
+    } catch (e) {
+      print('Error taking photo: $e');
+    }
+  }
+
+  // Handle microphone - speech to text
+  Future<void> _handleMicrophone() async {
+    try {
+      print('Starting speech to text...');
+      final transcribedText = await speechToText(context);
+
+      print('Transcribed text: $transcribedText');
+
+      if (transcribedText != null && transcribedText.isNotEmpty) {
+        // Add transcribed text to message input
+        print('Adding text to controller: $transcribedText');
+        setState(() {
+          _messageController.text = transcribedText;
+        });
+        print('Controller text is now: ${_messageController.text}');
+      } else {
+        print('No text transcribed or text is empty');
+      }
+    } catch (e) {
+      print('Error with speech to text: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Fout: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  // Add message with attachment
+  Future<void> _addMessageWithAttachment(
+    String filePath,
+    AttachmentType type,
+  ) async {
+    try {
+      // Create attachment
+      final attachment = await AttachmentService.createAttachment(
+        filePath: filePath,
+        type: type,
+      );
+
+      // Show dialog to add prompt/message with attachment
+      if (!mounted) return;
+      final String? promptText = await showDialog<String>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AttachmentPromptDialog(
+          attachment: attachment,
+        ),
+      );
+
+      // If user cancelled, don't send
+      if (promptText == null) {
+        return;
+      }
+
+      // Create message with attachment and uploading state
+      final messageId = DateTime.now().millisecondsSinceEpoch.toString();
+      final message = ChatMessage(
+        id: messageId,
+        text: promptText, // Use the prompt from dialog
+        isUser: true,
+        timestamp: DateTime.now(),
+        attachment: attachment,
+        isUploading: true,
+        uploadProgress: 0.0,
+      );
+
+      setState(() {
+        _messages.add(message);
+        _showPlusMenu = false; // Close the menu
+      });
+      _scrollToBottom();
+
+      // Simulate upload progress
+      await for (final progress in AttachmentService.simulateUpload()) {
+        final index = _messages.indexWhere((m) => m.id == messageId);
+        if (index != -1) {
+          setState(() {
+            _messages[index] = _messages[index].copyWith(
+              uploadProgress: progress,
+            );
+          });
+        }
+      }
+
+      // Mark as uploaded
+      final index = _messages.indexWhere((m) => m.id == messageId);
+      if (index != -1) {
+        setState(() {
+          _messages[index] = _messages[index].copyWith(
+            isUploading: false,
+            uploadProgress: 1.0,
+          );
+        });
+      }
+
+      _scrollToBottom();
+
+      // Simulate AI response after attachment is uploaded
+      setState(() {
+        _isTyping = true;
+      });
+
+      Future.delayed(const Duration(seconds: 2), () {
+        if (!mounted) return;
+        setState(() {
+          _isTyping = false;
+          _messages.add(ChatMessage(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            text: 'AI not yet implemented. Please try again later.',
+            isUser: false,
+            timestamp: DateTime.now(),
+          ));
+        });
+        _scrollToBottom();
+      });
+    } catch (e) {
+      print('Error adding attachment: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -151,7 +390,7 @@ class _ChatPageState extends State<ChatPage> {
                             children: [
                               InkWell(
                                 onTap: () async {
-                                  await pickFile(context);
+                                  await _handleFilePicker();
                                 },
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
@@ -167,7 +406,7 @@ class _ChatPageState extends State<ChatPage> {
                               InkWell(
                                 onTap: () async {
                                   print('Gallery picker clicked!!!');
-                                  await pickImageFromGallery(context);
+                                  await _handleGalleryPicker();
                                 },
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
@@ -183,7 +422,7 @@ class _ChatPageState extends State<ChatPage> {
                               InkWell(
                                 onTap: () async {
                                   print('Photo clicked!!!');
-                                  await takePhoto(context);
+                                  await _handleCamera();
                                 },
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
@@ -199,7 +438,7 @@ class _ChatPageState extends State<ChatPage> {
                               InkWell(
                                 onTap: () async {
                                   print('Microphone clicked!!!');
-                                  await recordAudio(context);
+                                  await _handleMicrophone();
                                 },
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
@@ -321,13 +560,29 @@ class _ChatPageState extends State<ChatPage> {
               : const Color(0xFF6464FF),
           borderRadius: BorderRadius.circular(20),
         ),
-        child: Text(
-          message.text,
-          style: TextStyle(
-            color: message.isUser ? Colors.black87 : Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Show attachment if present
+            if (message.attachment != null) ...[
+              AttachmentWidget(
+                attachment: message.attachment!,
+                isUploading: message.isUploading,
+                uploadProgress: message.uploadProgress,
+              ),
+              if (message.text.isNotEmpty) const SizedBox(height: 8),
+            ],
+            // Show text if present
+            if (message.text.isNotEmpty)
+              Text(
+                message.text,
+                style: TextStyle(
+                  color: message.isUser ? Colors.black87 : Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+          ],
         ),
       ),
     );
@@ -464,16 +719,4 @@ class _ChatPageState extends State<ChatPage> {
       ),
     );
   }
-}
-
-class ChatMessage {
-  final String text;
-  final bool isUser;
-  final DateTime timestamp;
-
-  ChatMessage({
-    required this.text,
-    required this.isUser,
-    required this.timestamp,
-  });
 }
