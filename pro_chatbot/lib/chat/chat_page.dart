@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'chat_page_file.dart';
+import 'chat_page_gallery.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -162,15 +163,9 @@ class _ChatPageState extends State<ChatPage> {
                               ),
                               const SizedBox(width: 8),
                               InkWell(
-                                onTap: () {
+                                onTap: () async {
                                   print('Gallery picker clicked!!!');
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                          'Gallery picker - To be implemented'),
-                                      duration: Duration(milliseconds: 500),
-                                    ),
-                                  );
+                                  await pickImageFromGallery(context);
                                 },
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
