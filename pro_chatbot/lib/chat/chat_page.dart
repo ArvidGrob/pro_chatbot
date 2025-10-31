@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'chat_page_file.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -146,15 +147,8 @@ class _ChatPageState extends State<ChatPage> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               InkWell(
-                                onTap: () {
-                                  print('File picker clicked!!!');
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                          'File picker - To be implemented'),
-                                      duration: Duration(milliseconds: 500),
-                                    ),
-                                  );
+                                onTap: () async {
+                                  await pickFile(context);
                                 },
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
