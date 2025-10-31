@@ -129,7 +129,7 @@ class _ChatPageState extends State<ChatPage> {
                   // Plus menu bubble positioned here instead of in input area
                   if (_showPlusMenu)
                     Positioned(
-                      bottom: 80,
+                      bottom: 20,
                       right: 12,
                       child: Material(
                         color: Colors.transparent,
@@ -148,12 +148,11 @@ class _ChatPageState extends State<ChatPage> {
                               InkWell(
                                 onTap: () {
                                   print('File picker clicked!!!');
-                                  setState(() => _showPlusMenu = false);
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content: Text(
                                           'File picker - To be implemented'),
-                                      duration: Duration(seconds: 2),
+                                      duration: Duration(milliseconds: 500),
                                     ),
                                   );
                                 },
@@ -171,12 +170,11 @@ class _ChatPageState extends State<ChatPage> {
                               InkWell(
                                 onTap: () {
                                   print('Gallery picker clicked!!!');
-                                  setState(() => _showPlusMenu = false);
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content: Text(
                                           'Gallery picker - To be implemented'),
-                                      duration: Duration(seconds: 2),
+                                      duration: Duration(milliseconds: 500),
                                     ),
                                   );
                                 },
@@ -194,12 +192,11 @@ class _ChatPageState extends State<ChatPage> {
                               InkWell(
                                 onTap: () {
                                   print('Photo clicked!!!');
-                                  setState(() => _showPlusMenu = false);
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content:
                                           Text('Photo - To be implemented'),
-                                      duration: Duration(seconds: 2),
+                                      duration: Duration(milliseconds: 500),
                                     ),
                                   );
                                 },
@@ -217,12 +214,11 @@ class _ChatPageState extends State<ChatPage> {
                               InkWell(
                                 onTap: () {
                                   print('Microphone clicked!!!');
-                                  setState(() => _showPlusMenu = false);
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content: Text(
                                           'Microphone - To be implemented'),
-                                      duration: Duration(seconds: 2),
+                                      duration: Duration(milliseconds: 500),
                                     ),
                                   );
                                 },
