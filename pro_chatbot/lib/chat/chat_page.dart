@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'chat_page_file.dart';
 import 'chat_page_gallery.dart';
+import 'chat_page_photo.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -179,15 +180,9 @@ class _ChatPageState extends State<ChatPage> {
                               ),
                               const SizedBox(width: 8),
                               InkWell(
-                                onTap: () {
+                                onTap: () async {
                                   print('Photo clicked!!!');
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content:
-                                          Text('Photo - To be implemented'),
-                                      duration: Duration(milliseconds: 500),
-                                    ),
-                                  );
+                                  await takePhoto(context);
                                 },
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
