@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'chat_page_file.dart';
 import 'chat_page_gallery.dart';
 import 'chat_page_photo.dart';
+import 'chat_page_micro.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -196,15 +197,9 @@ class _ChatPageState extends State<ChatPage> {
                               ),
                               const SizedBox(width: 8),
                               InkWell(
-                                onTap: () {
+                                onTap: () async {
                                   print('Microphone clicked!!!');
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                          'Microphone - To be implemented'),
-                                      duration: Duration(milliseconds: 500),
-                                    ),
-                                  );
+                                  await recordAudio(context);
                                 },
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
