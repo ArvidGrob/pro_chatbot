@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:pro_chatbot/admindashboard/addstudent.dart';
+import 'package:pro_chatbot/admindashboard/teacher_overview.dart';
+import 'student_overview.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -51,7 +54,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   label: 'Student',
                   iconPath: 'assets/images/student.png',
                   onTap: () {
-                    print('Student tapped');
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const StudentOverviewPage(),
+                      ),
+                    );
                   },
                 ),
 
@@ -63,7 +70,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   label: 'Docent',
                   iconPath: 'assets/images/docent.png',
                   onTap: () {
-                    print('Docent tapped');
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const TeacherOverviewPage(),
+                      ),
+                    );
                   },
                 ),
 

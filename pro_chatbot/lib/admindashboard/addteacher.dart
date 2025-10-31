@@ -120,7 +120,7 @@ class _TeacherPageState extends State<AddTeacherPage> {
                             ),
                             const SizedBox(height: 16),
 
-                            const _SectionSpacer(),
+
 
                             const _FieldLabel('Wachtwoord'),
                             _InputCard(
@@ -172,8 +172,9 @@ class _TeacherPageState extends State<AddTeacherPage> {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 20),
 
+                            const SizedBox(height: 20),
+                            
                             // Register-Button
                             Align(
                               alignment: Alignment.center,
@@ -287,36 +288,6 @@ class _InputCard extends StatelessWidget {
           ),
         ),
         child: child,
-      ),
-    );
-  }
-}
-
-class _SectionSpacer extends StatelessWidget {
-  const _SectionSpacer();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 28,
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(32),
-        gradient: const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFF6D6DFF),
-            Color(0xFF5454FF),
-          ],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(.12),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
     );
   }
