@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'chat_message_model.dart';
@@ -7,6 +6,8 @@ import 'attachment_service.dart';
 import 'attachment_widget.dart';
 import 'speech_to_text_dialog.dart';
 import 'attachment_prompt_dialog.dart';
+import 'platform_helper.dart';
+import '../history/chat_history_page.dart';
 
 void main() {
   runApp(const MaterialApp(
@@ -163,6 +164,21 @@ class _ChatPageState extends State<ChatPage> {
 
   // Handle camera photo
   Future<void> _handleCamera() async {
+    // Check platform support
+    if (!PlatformHelper.isCameraAvailable) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Camera not available on ${PlatformHelper.platformName}',
+            ),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+      return;
+    }
+
     try {
       final ImagePicker picker = ImagePicker();
       final XFile? photo = await picker.pickImage(
@@ -191,11 +207,34 @@ class _ChatPageState extends State<ChatPage> {
       }
     } catch (e) {
       print('Error taking photo: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error taking photo: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
   // Handle microphone - speech to text
   Future<void> _handleMicrophone() async {
+    // Check platform support
+    if (!PlatformHelper.isSpeechToTextAvailable) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Speech recognition not available on ${PlatformHelper.platformName}',
+            ),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+      return;
+    }
+
     try {
       print('Starting speech to text...');
       final transcribedText = await speechToText(context);
@@ -420,33 +459,48 @@ class _ChatPageState extends State<ChatPage> {
                               ),
                               const SizedBox(width: 8),
                               InkWell(
-                                onTap: () async {
-                                  print('Photo clicked!!!');
-                                  await _handleCamera();
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Image.asset(
-                                    'assets/images/photo.png',
-                                    width: 32,
-                                    height: 32,
-                                    fit: BoxFit.contain,
+                                onTap: PlatformHelper.isCameraAvailable
+                                    ? () async {
+                                        print('Photo clicked!!!');
+                                        await _handleCamera();
+                                      }
+                                    : null,
+                                child: Opacity(
+                                  opacity: PlatformHelper.isCameraAvailable
+                                      ? 1.0
+                                      : 0.3,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Image.asset(
+                                      'assets/images/photo.png',
+                                      width: 32,
+                                      height: 32,
+                                      fit: BoxFit.contain,
+                                    ),
                                   ),
                                 ),
                               ),
                               const SizedBox(width: 8),
                               InkWell(
-                                onTap: () async {
-                                  print('Microphone clicked!!!');
-                                  await _handleMicrophone();
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Image.asset(
-                                    'assets/images/microphone.png',
-                                    width: 32,
-                                    height: 32,
-                                    fit: BoxFit.contain,
+                                onTap: PlatformHelper.isSpeechToTextAvailable
+                                    ? () async {
+                                        print('Microphone clicked!!!');
+                                        await _handleMicrophone();
+                                      }
+                                    : null,
+                                child: Opacity(
+                                  opacity:
+                                      PlatformHelper.isSpeechToTextAvailable
+                                          ? 1.0
+                                          : 0.3,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Image.asset(
+                                      'assets/images/microphone.png',
+                                      width: 32,
+                                      height: 32,
+                                      fit: BoxFit.contain,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -507,13 +561,13 @@ class _ChatPageState extends State<ChatPage> {
             onTapDown: (_) {
               setState(() => _viewHistoryPressed = true);
             },
-            onTapUp: (_) {
+            onTapUp: (_) async {
               setState(() => _viewHistoryPressed = false);
-              // TODO: Implement view history
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('View History - To be implemented'),
-                  duration: Duration(seconds: 1),
+              // Navigate to chat history page
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ChatHistoryPage(),
                 ),
               );
             },
