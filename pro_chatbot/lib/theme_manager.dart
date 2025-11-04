@@ -12,10 +12,11 @@ class ThemeManager extends ChangeNotifier {
   static const Color defaultBackgroundDark = Colors.black87;
 
   static const List<Color> ibmColorBlindPalette = [
-    Color(0xFF785ef0), // 'Soft blue'
-    Color(0xFFdc267f), // 'Bright pink'
-    Color(0xFFfe6100), // 'Blaze Orange'
-    Color(0xFFffb000), // 'Yellow Sea'
+    Color(0xFF785ef0), // Soft Blue
+    Color(0xFFdc267f), // Bright Pink
+    Color(0xFFfe6100), // Blaze Orange
+    Color(0xFFffb000), // Yellow Sea
+    Color(0xFF648fff), // Light Blue
   ];
 
   Color get backgroundColor =>
@@ -24,16 +25,14 @@ class ThemeManager extends ChangeNotifier {
   Color get primaryColor =>
       _isColorBlindMode ? ibmColorBlindPalette[0] : defaultPrimary;
 
-  /// 🔹 New getter for dynamic subtitle text color
   Color get subtitleTextColor =>
       _isWhiteSelected ? Colors.black87 : Colors.white;
 
-  // 🔹 NEW: Get different container colors for white and black options
-  Color getOptionSoftblue() {
+  Color getOptionSoftBlue() {
     return _isColorBlindMode ? ibmColorBlindPalette[0] : defaultPrimary;
   }
 
-  Color getOptionBrightpink() {
+  Color getOptionBrightPink() {
     return _isColorBlindMode ? ibmColorBlindPalette[1] : defaultPrimary;
   }
 
@@ -45,12 +44,25 @@ class ThemeManager extends ChangeNotifier {
     return _isColorBlindMode ? ibmColorBlindPalette[3] : defaultPrimary;
   }
 
+  Color getOptionLightBlue() {
+    return _isColorBlindMode ? ibmColorBlindPalette[4] : defaultPrimary;
+  }
+
   List<Color> getProgressiveColors(int boxIndex) {
     if (!_isColorBlindMode) {
       return [defaultPrimary];
     }
     int count = boxIndex.clamp(1, ibmColorBlindPalette.length);
     return ibmColorBlindPalette.sublist(0, count);
+  }
+
+  /// Darken a color by a given [amount] (0.0 - 1.0)
+  Color darkenColor(Color color, [double amount = 0.1]) {
+    assert(amount >= 0 && amount <= 1);
+    final hsl = HSLColor.fromColor(color);
+    final darkerHsl =
+        hsl.withLightness((hsl.lightness - amount).clamp(0.0, 1.0));
+    return darkerHsl.toColor();
   }
 
   void toggleColorBlindMode(bool value) {

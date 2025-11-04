@@ -54,7 +54,8 @@ class _SettingsPageState extends State<SettingsPage> {
               id: 'account',
               title: 'Account',
               iconPath: 'assets/images/account.png',
-              color: themeManager.getOptionSoftblue(),
+              color: themeManager.getOptionSoftBlue(),
+              themeManager: themeManager,
               onTap: () => _navigateTo(context, const SettingsPageAccount()),
             ),
             const SizedBox(height: 30),
@@ -64,7 +65,8 @@ class _SettingsPageState extends State<SettingsPage> {
               id: 'spraak',
               title: 'Spraak',
               iconPath: 'assets/images/spraak.png',
-              color: themeManager.getOptionBrightpink(),
+              color: themeManager.getOptionBrightPink(),
+              themeManager: themeManager,
               onTap: () => _navigateTo(context, const SettingsPageSpraak()),
             ),
             const SizedBox(height: 30),
@@ -75,6 +77,7 @@ class _SettingsPageState extends State<SettingsPage> {
               title: 'Thema',
               iconPath: 'assets/images/thema.png',
               color: themeManager.getOptionBlazeOrange(),
+              themeManager: themeManager,
               onTap: () => _navigateTo(context, const SettingsPageThema()),
             ),
             const SizedBox(height: 30),
@@ -85,6 +88,7 @@ class _SettingsPageState extends State<SettingsPage> {
               title: 'Hulp',
               iconPath: 'assets/images/hulp.png',
               color: themeManager.getOptionYellowSea(),
+              themeManager: themeManager,
               onTap: () => _navigateTo(context, const SettingsPageHulp()),
             ),
 
@@ -115,13 +119,14 @@ class _SettingsPageState extends State<SettingsPage> {
     required String title,
     required String iconPath,
     required Color color,
+    required ThemeManager themeManager,
     required VoidCallback onTap,
   }) {
     final isPressed = _pressedButton == id;
 
-    // Slightly darken color when pressed
-    final Color primaryColor =
-        isPressed ? Color.alphaBlend(Colors.black26, color) : color;
+    // Use ThemeManager's darkenColor when pressed
+    final Color displayColor =
+        isPressed ? themeManager.darkenColor(color, 0.25) : color;
 
     return GestureDetector(
       onTapDown: (_) => setState(() => _pressedButton = id),
@@ -137,7 +142,7 @@ class _SettingsPageState extends State<SettingsPage> {
         height: 90,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: primaryColor,
+          color: displayColor,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
