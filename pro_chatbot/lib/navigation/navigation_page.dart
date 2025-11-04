@@ -262,7 +262,7 @@ class _NavigationPageState extends State<NavigationPage> {
         child: Column(
           children: [
             // Text zone (upper part)
-            Container(
+            SizedBox(
               width: double.infinity,
               height: 70,
               child: Center(
