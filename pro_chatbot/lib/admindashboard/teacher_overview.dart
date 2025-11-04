@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pro_chatbot/admindashboard/class_overview.dart';
 import 'addteacher.dart';
 import 'school_overview.dart';
 
@@ -70,7 +71,6 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header mit Back + Titel
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Row(
@@ -85,7 +85,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                       ),
                       const SizedBox(width: 12),
                       const Text(
-                        'Admin View',
+                        'Principal Overview',
                         style: TextStyle(
                           color: Color(0xFF1A2B8F),
                           fontSize: 30,
@@ -105,18 +105,10 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
 
                 const SizedBox(height: 10),
 
-                // Zwei große Kacheln: Leerkracht / School
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Column(
                     children: [
-                      _bigTile(
-                        label: 'Leerkracht',
-                        icon: Icons.school_rounded,
-                        onTap: () {
-                          // optional: hier könntest du später andere Funktionen öffnen
-                        },
-                      ),
                       const SizedBox(height: 14),
                       _bigTile(
                         label: 'School',

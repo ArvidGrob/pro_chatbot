@@ -204,30 +204,6 @@ class _TeacherPageState extends State<AddTeacherPage> {
                       ),
 
                       const SizedBox(height: 28),
-
-                      // Back-Button
-                      Align(
-                        alignment: Alignment.bottomCenter,
-                        child: SizedBox(
-                          height: 56,
-                          width: 56,
-                          child: ElevatedButton(
-                            onPressed: () => Navigator.of(context).maybePop(),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: primary,
-                              elevation: 4,
-                              padding: EdgeInsets.zero,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                            ),
-                            child:
-                                const Icon(Icons.arrow_back_rounded, size: 28),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
                     ],
                   ),
                 ),
@@ -292,3 +268,4 @@ class _InputCard extends StatelessWidget {
     );
   }
 }
+

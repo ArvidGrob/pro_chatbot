@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:pro_chatbot/admindashboard/addstudent.dart';
 import 'package:pro_chatbot/admindashboard/teacher_overview.dart';
 import 'student_overview.dart';
+import 'class_overview.dart';
+
 
 void main() {
   runApp(MaterialApp(
@@ -80,13 +82,17 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
                 const SizedBox(height: 25),
 
-                // Beheer button
+                // Classes button
                 _buildDashboardButton(
-                  buttonId: 'beheer',
-                  label: 'Beheer',
+                  buttonId: 'Class',
+                  label: 'Class',
                   iconPath: 'assets/images/beheer.png',
                   onTap: () {
-                    print('Beheer tapped');
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const ClassOverviewPage(),
+                      ),
+                    );
                   },
                 ),
 

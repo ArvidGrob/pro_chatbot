@@ -17,6 +17,7 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
 class ClassOverviewPage extends StatefulWidget {
   const ClassOverviewPage({super.key});
 
@@ -29,7 +30,6 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
 
   final TextEditingController _searchCtrl = TextEditingController();
 
-  // Mock-Klassen – später durch echten Store ersetzen
   List<String> _classes = [
     'Klas 1A',
     'Klas 2B',
@@ -56,7 +56,6 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          // Hintergrund
           SizedBox.expand(
             child: Image.asset(
               'assets/images/background.png',
@@ -69,6 +68,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
+                  // Header
                   Row(
                     children: [
                       GestureDetector(
@@ -100,7 +100,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
 
                   const SizedBox(height: 18),
 
-                  // searchfield
+                  // search
                   TextField(
                     controller: _searchCtrl,
                     onChanged: (_) => setState(() {}),
@@ -128,12 +128,29 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                     height: 42,
                     child: ElevatedButton.icon(
                       onPressed: () async {
-                        // Navigiere zur Add-Class-Seite
-                        await Navigator.of(context).push(
+                        final newClassName = await Navigator.of(context).push<String>(
                           MaterialPageRoute(
                             builder: (_) => const AddClassPage(),
                           ),
                         );
+
+                        if (newClassName != null &&
+                            newClassName.trim().isNotEmpty) {
+                          setState(() {
+                            if (!_classes.any((c) =>
+                            c.toLowerCase() ==
+                                newClassName.trim().toLowerCase())) {
+                              _classes.add(newClassName.trim());
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                      'Klas "$newClassName" bestaat al'),
+                                ),
+                              );
+                            }
+                          });
+                        }
                       },
                       icon: const Icon(Icons.add),
                       label: const Text('Add class'),
@@ -150,7 +167,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
 
                   const SizedBox(height: 14),
 
-                  // Liste all classes
+                  // List
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
@@ -183,36 +200,38 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            trailing: TextButton(
-                              style: TextButton.styleFrom(
-                                backgroundColor: const Color(0xFFFF4D4D),
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
+                            // actions rechts
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.more_vert),
+                                  onPressed: () => _openClassActions(cls),
                                 ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
+                                TextButton(
+                                  style: TextButton.styleFrom(
+                                    backgroundColor:
+                                    const Color(0xFFFF4D4D),
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 4,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                      BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                  onPressed: () => _confirmDelete(cls),
+                                  child: const Text(
+                                    'remove',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _classes.remove(cls);
-                                });
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Removed: $cls')),
-                                );
-                              },
-                              child: const Text(
-                                'remove',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
+                              ],
                             ),
-                            onTap: () {
-                              //  "class detail"
-                            },
                           );
                         },
                       ),
@@ -224,6 +243,126 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
           ),
         ],
       ),
+    );
+  }
+
+  void _openClassActions(String cls) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: const Text('Rename class'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showRenameDialog(cls);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text(
+                  'Delete class',
+                  style: TextStyle(color: Colors.red),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _confirmDelete(cls);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showRenameDialog(String oldName) {
+    final ctrl = TextEditingController(text: oldName);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Rename class'),
+          content: TextField(
+            controller: ctrl,
+            decoration: const InputDecoration(hintText: 'Nieuwe naam'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                final newName = ctrl.text.trim();
+                if (newName.isEmpty) return;
+
+                // prüfen auf Duplikat
+                final exists = _classes.any((c) =>
+                c.toLowerCase() == newName.toLowerCase() &&
+                    c != oldName);
+                if (exists) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Naam bestaat al voor een andere klas')),
+                  );
+                  return;
+                }
+
+                setState(() {
+                  final idx = _classes.indexOf(oldName);
+                  if (idx != -1) {
+                    _classes[idx] = newName;
+                  }
+                });
+                Navigator.pop(context);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _confirmDelete(String cls) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Klas verwijderen?'),
+          content: Text('Weet je zeker dat je "$cls" wilt verwijderen?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Annuleer'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                setState(() {
+                  _classes.remove(cls);
+                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Removed: $cls')),
+                );
+              },
+              child: const Text(
+                'Verwijder',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

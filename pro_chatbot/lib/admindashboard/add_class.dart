@@ -35,14 +35,12 @@ class _AddClassPageState extends State<AddClassPage> {
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          // Hintergrundbild
           SizedBox.expand(
             child: Image.asset(
               'assets/images/background.png',
               fit: BoxFit.cover,
             ),
           ),
-
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(20),
@@ -50,7 +48,6 @@ class _AddClassPageState extends State<AddClassPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Titel
                     const Text(
                       'Klas toevoegen',
                       style: TextStyle(
@@ -66,10 +63,9 @@ class _AddClassPageState extends State<AddClassPage> {
                         ],
                       ),
                     ),
-
                     const SizedBox(height: 32),
 
-                    // Klassenname
+                    // Klasnaam
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -89,7 +85,7 @@ class _AddClassPageState extends State<AddClassPage> {
 
                     const SizedBox(height: 24),
 
-                    // Schüler hinzufügen
+                    // studenten
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -122,16 +118,17 @@ class _AddClassPageState extends State<AddClassPage> {
                         underline: const SizedBox(),
                         hint: const Text('Selecteer een student'),
                         items: _allStudents
-                            .where(
-                              (s) => !_selectedStudents.contains(s),
+                            .where((s) => !_selectedStudents.contains(s))
+                            .map(
+                              (student) => DropdownMenuItem(
+                            value: student,
+                            child: Text(student),
+                          ),
                         )
-                            .map((student) => DropdownMenuItem(
-                          value: student,
-                          child: Text(student),
-                        ))
                             .toList(),
                         onChanged: (value) {
-                          if (value != null && !_selectedStudents.contains(value)) {
+                          if (value != null &&
+                              !_selectedStudents.contains(value)) {
                             setState(() {
                               _selectedStudents.add(value);
                               _selectedStudent = null;
@@ -143,7 +140,6 @@ class _AddClassPageState extends State<AddClassPage> {
 
                     const SizedBox(height: 16),
 
-                    // Anzeige hinzugefügter Schüler
                     if (_selectedStudents.isNotEmpty)
                       Container(
                         width: double.infinity,
@@ -191,7 +187,6 @@ class _AddClassPageState extends State<AddClassPage> {
 
                     const SizedBox(height: 36),
 
-                    // Create button
                     SizedBox(
                       width: 180,
                       height: 48,
@@ -218,7 +213,6 @@ class _AddClassPageState extends State<AddClassPage> {
 
                     const SizedBox(height: 40),
 
-                    // Return button
                     GestureDetector(
                       onTap: () => Navigator.of(context).maybePop(),
                       child: Container(
@@ -299,13 +293,7 @@ class _AddClassPageState extends State<AddClassPage> {
       return;
     }
 
-    // TODO: hier später an ClassStore übergeben
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Klas "$name" aangemaakt met ${_selectedStudents.length} studenten'),
-      ),
-    );
-
-    Navigator.pop(context);
+    // hier geben wir den Namen an die aufrufende Seite zurück
+    Navigator.pop<String>(context, name);
   }
 }
