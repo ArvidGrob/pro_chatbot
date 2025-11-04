@@ -9,9 +9,9 @@ import 'speech_to_text_dialog.dart';
 import 'attachment_prompt_dialog.dart';
 
 void main() {
-  runApp(MaterialApp(
+  runApp(const MaterialApp(
     debugShowCheckedModeBanner: false,
-    home: const ChatPage(),
+    home: ChatPage(),
   ));
 }
 
