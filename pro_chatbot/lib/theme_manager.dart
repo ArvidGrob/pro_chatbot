@@ -48,6 +48,20 @@ class ThemeManager extends ChangeNotifier {
     return _isColorBlindMode ? ibmColorBlindPalette[4] : defaultPrimary;
   }
 
+  /// Lighten a color by a given [amount] (0.0 - 1.0)
+  Color lightenColor(Color color, [double amount = 0.25]) {
+    assert(amount >= 0 && amount <= 1);
+    final hsl = HSLColor.fromColor(color);
+    final lighterHsl =
+        hsl.withLightness((hsl.lightness + amount).clamp(0.0, 1.0));
+    return lighterHsl.toColor();
+  }
+
+  /// Secondary color is mostly primary but slightly lighter
+  Color getSecondaryColor(Color primaryColor, {double lightenAmount = 0.1}) {
+    return lightenColor(primaryColor, lightenAmount);
+  }
+
   List<Color> getProgressiveColors(int boxIndex) {
     if (!_isColorBlindMode) {
       return [defaultPrimary];

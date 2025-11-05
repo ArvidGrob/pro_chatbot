@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '/theme_manager.dart';
+import '/wave_background_layout.dart';
 
 void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: const AdminDashboard(),
-  ));
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeManager(),
+      child: const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: AdminDashboard(),
+      ),
+    ),
+  );
 }
 
 class AdminDashboard extends StatefulWidget {
@@ -19,82 +27,76 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/background.png'),
-            fit: BoxFit.cover,
-          ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              children: [
-                // Title
-                const Text(
-                  'Admin dashboard',
-                  maxLines: 1,
-                  style: TextStyle(
-                    color: Color(0xFF4242BD),
-                    fontSize: 36,
-                    fontWeight: FontWeight.bold,
-                  ),
+    final themeManager = Provider.of<ThemeManager>(context);
+
+    return WaveBackgroundLayout(
+      backgroundColor: themeManager.backgroundColor,
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            children: [
+              // Title
+              const Text(
+                'Admin dashboard',
+                maxLines: 1,
+                style: TextStyle(
+                  color: Color(0xFF4242BD),
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
                 ),
+              ),
+              const SizedBox(height: 40),
 
-                const SizedBox(height: 40),
+              // Student button
+              _buildDashboardButton(
+                buttonId: 'student',
+                label: 'Student',
+                iconPath: 'assets/images/student.png',
+                primaryColor: themeManager.getOptionSoftBlue(),
+                secondaryColor: themeManager.getSecondaryColor(
+                    themeManager.getOptionSoftBlue(),
+                    lightenAmount: 0.2),
+                onTap: () => print('Student tapped'),
+              ),
+              const SizedBox(height: 25),
 
-                // Student button
-                _buildDashboardButton(
-                  buttonId: 'student',
-                  label: 'Student',
-                  iconPath: 'assets/images/student.png',
-                  onTap: () {
-                    print('Student tapped');
-                  },
+              // Docent button
+              _buildDashboardButton(
+                buttonId: 'docent',
+                label: 'Docent',
+                iconPath: 'assets/images/docent.png',
+                primaryColor: themeManager.getOptionBrightPink(),
+                secondaryColor: themeManager.getSecondaryColor(
+                    themeManager.getOptionBrightPink(),
+                    lightenAmount: 0.2),
+                onTap: () => print('Docent tapped'),
+              ),
+              const SizedBox(height: 25),
+
+              // Beheer button
+              _buildDashboardButton(
+                buttonId: 'beheer',
+                label: 'Beheer',
+                iconPath: 'assets/images/beheer.png',
+                primaryColor: themeManager.getOptionBlazeOrange(),
+                secondaryColor: themeManager.getSecondaryColor(
+                    themeManager.getOptionBlazeOrange(),
+                    lightenAmount: 0.2),
+                onTap: () => print('Beheer tapped'),
+              ),
+              const Spacer(),
+
+              // Return button
+              Center(
+                child: _buildReturnButton(
+                  buttonId: 'return',
+                  iconPath: 'assets/images/return.png',
+                  onTap: () => Navigator.pop(context),
                 ),
-
-                const SizedBox(height: 25),
-
-                // Docent button
-                _buildDashboardButton(
-                  buttonId: 'docent',
-                  label: 'Docent',
-                  iconPath: 'assets/images/docent.png',
-                  onTap: () {
-                    print('Docent tapped');
-                  },
-                ),
-
-                const SizedBox(height: 25),
-
-                // Beheer button
-                _buildDashboardButton(
-                  buttonId: 'beheer',
-                  label: 'Beheer',
-                  iconPath: 'assets/images/beheer.png',
-                  onTap: () {
-                    print('Beheer tapped');
-                  },
-                ),
-
-                const Spacer(),
-
-                // Return button
-                Center(
-                  child: _buildReturnButton(
-                    buttonId: 'return',
-                    iconPath: 'assets/images/return.png',
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-              ],
-            ),
+              ),
+              const SizedBox(height: 20),
+            ],
           ),
         ),
       ),
@@ -105,50 +107,40 @@ class _AdminDashboardState extends State<AdminDashboard> {
     required String buttonId,
     required String label,
     required String iconPath,
+    required Color primaryColor,
+    required Color secondaryColor,
     required VoidCallback onTap,
   }) {
     bool isPressed = _pressedButton == buttonId;
-    Color primaryColor =
-        isPressed ? const Color(0xFF4545BD) : const Color(0xFF6464FF);
-    Color secondaryColor =
-        isPressed ? const Color(0xFF6D6DCA) : const Color(0xFF8989FF);
+    final Color displayPrimary = isPressed
+        ? ThemeManager().darkenColor(primaryColor, 0.25)
+        : primaryColor;
+    final Color displaySecondary = isPressed
+        ? ThemeManager().darkenColor(secondaryColor, 0.25)
+        : secondaryColor;
 
     return GestureDetector(
-      onTapDown: (_) {
-        setState(() {
-          _pressedButton = buttonId;
-        });
-      },
+      onTapDown: (_) => setState(() => _pressedButton = buttonId),
       onTapUp: (_) {
-        setState(() {
-          _pressedButton = '';
-        });
+        setState(() => _pressedButton = '');
         onTap();
       },
-      onTapCancel: () {
-        setState(() {
-          _pressedButton = '';
-        });
-      },
+      onTapCancel: () => setState(() => _pressedButton = ''),
       child: Container(
-        height: 140,
+        height: 120,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: primaryColor,
+          color: displayPrimary,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
           children: [
-            // Left side with label
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.only(
-                  left: 20.0,
-                  right: 10.0,
-                  bottom: 20.0,
-                ),
+                padding:
+                    const EdgeInsets.only(left: 20.0, right: 10.0, bottom: 0.0),
                 child: Align(
-                  alignment: Alignment.bottomLeft,
+                  alignment: Alignment.center,
                   child: Text(
                     label,
                     style: const TextStyle(
@@ -160,13 +152,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 ),
               ),
             ),
-
-            // Right side with icon
             Container(
-              width: 140,
-              height: 140,
+              width: 150,
+              height: 120,
               decoration: BoxDecoration(
-                color: secondaryColor,
+                color: displaySecondary,
                 borderRadius: const BorderRadius.only(
                   topRight: Radius.circular(20),
                   bottomRight: Radius.circular(20),
