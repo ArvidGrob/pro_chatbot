@@ -6,6 +6,7 @@ import 'settings_page_thema.dart';
 import '/wave_background_layout.dart';
 import '/theme_manager.dart';
 import 'package:provider/provider.dart';
+import '/navigation/navigation_page.dart';
 
 void main() {
   runApp(
@@ -93,12 +94,23 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
 
             const Spacer(),
-
-            // Return
+            // Return button (to SettingsPage - Custom made image)
             Center(
-              child: _buildReturnButton(
-                iconPath: 'assets/images/return.png',
-                onTap: () => Navigator.pop(context),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const NavigationPage(),
+                    ),
+                  );
+                },
+                child: Image.asset(
+                  'assets/images/return.png',
+                  width: 70,
+                  height: 70,
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
             const SizedBox(height: 20),
@@ -184,22 +196,6 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  /// Return button
-  Widget _buildReturnButton({
-    required String iconPath,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Image.asset(
-        iconPath,
-        width: 70,
-        height: 70,
-        fit: BoxFit.contain,
       ),
     );
   }

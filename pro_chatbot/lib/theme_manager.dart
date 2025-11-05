@@ -26,7 +26,7 @@ class ThemeManager extends ChangeNotifier {
       _isColorBlindMode ? ibmColorBlindPalette[0] : defaultPrimary;
 
   Color get subtitleTextColor =>
-      _isWhiteSelected ? Colors.black87 : Colors.white;
+      _isWhiteSelected ? Color(0xFF252324) : Colors.white;
 
   Color getOptionSoftBlue() {
     return _isColorBlindMode ? ibmColorBlindPalette[0] : defaultPrimary;
@@ -57,7 +57,7 @@ class ThemeManager extends ChangeNotifier {
   }
 
   /// Darken a color by a given [amount] (0.0 - 1.0)
-  Color darkenColor(Color color, [double amount = 0.1]) {
+  Color darkenColor(Color color, [double amount = 0.25]) {
     assert(amount >= 0 && amount <= 1);
     final hsl = HSLColor.fromColor(color);
     final darkerHsl =
@@ -73,5 +73,11 @@ class ThemeManager extends ChangeNotifier {
   void switchBackground(bool isWhite) {
     _isWhiteSelected = isWhite;
     notifyListeners();
+  }
+
+  /// Returns the active button color depending on pressed state
+  Color getButtonColor(Color baseColor,
+      {bool isPressed = false, double darkenAmount = 0.25}) {
+    return isPressed ? darkenColor(baseColor, darkenAmount) : baseColor;
   }
 }

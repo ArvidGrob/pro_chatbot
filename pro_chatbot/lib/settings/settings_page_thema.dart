@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '/theme_manager.dart';
 import 'package:provider/provider.dart';
 import '/wave_background_layout.dart'; // Import the new layout
+import 'settings_page.dart'; // Import the target settings page
 
 void main() {
   runApp(
@@ -16,7 +17,6 @@ void main() {
 }
 
 // StatefulWidget to manage theme settings
-
 class SettingsPageThema extends StatelessWidget {
   const SettingsPageThema({super.key});
 
@@ -122,9 +122,7 @@ class SettingsPageThema extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: themeManager.isWhiteSelected
-                        ? Colors.white
-                        : Colors.black87,
+                    color: themeManager.backgroundColor,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: const [
                       BoxShadow(
@@ -151,14 +149,25 @@ class SettingsPageThema extends StatelessWidget {
 
           const Spacer(),
 
-          // Return button (custom made image) bottom side
+          // Return button (to SettingsPage - Custom made image)
           Center(
-            child: _buildReturnButton(
-              iconPath: 'assets/images/return.png',
-              onTap: () => Navigator.pop(context),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SettingsPage(),
+                  ),
+                );
+              },
+              child: Image.asset(
+                'assets/images/return.png',
+                width: 70,
+                height: 70,
+                fit: BoxFit.contain,
+              ),
             ),
           ),
-
           const SizedBox(height: 20),
         ],
       ),
@@ -196,9 +205,9 @@ class SettingsPageThema extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Wit',
-              style: TextStyle(
+            Text(
+              title,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: Colors.white,
@@ -241,17 +250,6 @@ class SettingsPageThema extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-
-  /// Custom return button
-  Widget _buildReturnButton({
-    required String iconPath,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Image.asset(iconPath, width: 70, height: 70),
     );
   }
 }

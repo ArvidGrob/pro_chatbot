@@ -35,7 +35,7 @@ class WaveBackgroundPainter extends CustomPainter {
     // Dark blue - (Top layer)
     paint.color = const Color(0xFF1E1EBF);
     canvas.drawArc(
-      Rect.fromLTWH(-size.width * 0.5, centerY - size.height * 0.05,
+      Rect.fromLTWH(-size.width * 0.5, centerY - size.height * 0.08,
           size.width * 2, size.height),
       pi,
       pi,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '/theme_manager.dart';
 import '/wave_background_layout.dart';
+import 'settings_page.dart';
 import 'settings_page_hulp_2_1.dart';
 import 'settings_page_hulp_2_2.dart';
 import 'settings_page_hulp_2_3.dart';
@@ -60,7 +61,6 @@ class _SettingsPageHulpState extends State<SettingsPageHulp> {
                   ),
                 ],
               ),
-
               const SizedBox(height: 40),
 
               // Veelgestelde vragen -> Soft Blue
@@ -69,16 +69,13 @@ class _SettingsPageHulpState extends State<SettingsPageHulp> {
                 buttonId: 'veelgestelde',
                 label: 'Veelgestelde vragen',
                 baseColor: themeManager.getOptionSoftBlue(),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SettingsPageHulp21(),
-                    ),
-                  );
-                },
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SettingsPageHulp21(),
+                  ),
+                ),
               ),
-
               const SizedBox(height: 20),
 
               // Contact opnemen -> Bright Pink
@@ -87,107 +84,62 @@ class _SettingsPageHulpState extends State<SettingsPageHulp> {
                 buttonId: 'contact',
                 label: 'Contact opnemen',
                 baseColor: themeManager.getOptionBrightPink(),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SettingsPageHulp22(),
-                    ),
-                  );
-                },
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SettingsPageHulp22(),
+                  ),
+                ),
               ),
-
               const SizedBox(height: 20),
 
-              // Over section -> Blaze Orange
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: themeManager.getOptionBlazeOrange(),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      blurRadius: 10,
-                      offset: const Offset(0, 6),
+              // Appversie -> Blaze Orange
+              _buildButton(
+                themeManager,
+                buttonId: 'appversie',
+                label: 'Appversie',
+                baseColor: themeManager.getOptionBlazeOrange(),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SettingsPageHulp23(
+                      title: 'Appversie',
+                      content: '',
                     ),
-                  ],
+                  ),
                 ),
-                child: Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 20.0,
-                        horizontal: 25.0,
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'Over',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(height: 2.0, color: Colors.white),
+              ),
+              const SizedBox(height: 20),
 
-                    // Appversie -> Yellow Sea
-                    _buildSubButton(
-                      themeManager,
-                      buttonId: 'appversie',
-                      label: 'Appversie',
-                      baseColor: themeManager.getOptionYellowSea(),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SettingsPageHulp23(
-                              title: 'Over',
-                              content: '',
-                            ),
-                          ),
-                        );
-                      },
+              // Ontwikkelaar -> Yellow Sea
+              _buildButton(
+                themeManager,
+                buttonId: 'ontwikkelaar',
+                label: 'Ontwikkelaar',
+                baseColor: themeManager.getOptionYellowSea(),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SettingsPageHulp23(
+                      title: 'Ontwikkelaar',
+                      content: 'Bedankt voor het\ngebruiken van onze app!',
                     ),
-
-                    Container(height: 2.0, color: Colors.white),
-
-                    // Ontwikkelaar -> Light Blue
-                    _buildSubButton(
-                      themeManager,
-                      buttonId: 'ontwikkelaar',
-                      label: 'Ontwikkelaar',
-                      baseColor: themeManager.getOptionLightBlue(),
-                      borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(20),
-                        bottomRight: Radius.circular(20),
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SettingsPageHulp23(
-                              title: 'Over',
-                              content:
-                                  'Bedankt voor het\ngebruiken van onze app!',
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
+                  ),
                 ),
               ),
 
               const Spacer(),
 
-              // Return button
+              // Return button (consistent with SettingsPageThema)
               Center(
                 child: GestureDetector(
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SettingsPage(),
+                      ),
+                    );
                   },
                   child: Image.asset(
                     'assets/images/return.png',
@@ -197,7 +149,6 @@ class _SettingsPageHulpState extends State<SettingsPageHulp> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 20),
             ],
           ),
@@ -206,7 +157,7 @@ class _SettingsPageHulpState extends State<SettingsPageHulp> {
     );
   }
 
-  /// Main buttons
+  /// Unified button builder for main and sub-buttons
   Widget _buildButton(
     ThemeManager themeManager, {
     required String buttonId,
@@ -215,10 +166,8 @@ class _SettingsPageHulpState extends State<SettingsPageHulp> {
     required Color baseColor,
   }) {
     bool isPressed = _pressedButton == buttonId;
-
-    final Color activePressedColor = themeManager.darkenColor(baseColor, 0.15);
-
-    Color buttonColor = isPressed ? activePressedColor : baseColor;
+    Color buttonColor =
+        themeManager.getButtonColor(baseColor, isPressed: isPressed);
 
     return GestureDetector(
       onTapDown: (_) => setState(() => _pressedButton = buttonId),
@@ -243,51 +192,6 @@ class _SettingsPageHulpState extends State<SettingsPageHulp> {
               offset: Offset(0, isPressed ? 4 : 5),
             ),
           ],
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Sub-buttons
-  Widget _buildSubButton(
-    ThemeManager themeManager, {
-    required String buttonId,
-    required String label,
-    required VoidCallback onTap,
-    required Color baseColor,
-    BorderRadius? borderRadius,
-  }) {
-    bool isPressed = _pressedButton == buttonId;
-
-    final Color activePressedColor = themeManager.darkenColor(baseColor, 0.25);
-    Color buttonColor = isPressed ? activePressedColor : baseColor;
-
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressedButton = buttonId),
-      onTapUp: (_) {
-        Future.delayed(const Duration(milliseconds: 80), () {
-          setState(() => _pressedButton = '');
-          onTap();
-        });
-      },
-      onTapCancel: () => setState(() => _pressedButton = ''),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 25.0),
-        decoration: BoxDecoration(
-          color: buttonColor,
-          borderRadius: borderRadius,
         ),
         child: Center(
           child: Text(
