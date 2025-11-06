@@ -73,7 +73,7 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
                 children: [
                   // Titel
                   const Text(
-                    'Change school',
+                    'Wijziging school',
                     style: TextStyle(
                       color: Color(0xFF3D4ED8),
                       fontSize: 24,
@@ -110,7 +110,7 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
                           child: TextField(
                             controller: _schoolNameCtrl,
                             decoration: const InputDecoration(
-                              hintText: 'Enter school name…',
+                              hintText: 'Voer de naam van de school in…',
                               border: InputBorder.none,
                               contentPadding: EdgeInsets.symmetric(vertical: 14),
                             ),
@@ -118,7 +118,7 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
                         ),
                         const SizedBox(width: 6),
                         GestureDetector(
-                          onTap: _applyChange, // <-- ruft den Wechsel auf
+                          onTap: _applyChange,
                           child: Container(
                             margin: const EdgeInsets.only(right: 6),
                             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
@@ -134,7 +134,7 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
                               ],
                             ),
                             child: const Text(
-                              'Change',
+                              'Wijziging',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w800,

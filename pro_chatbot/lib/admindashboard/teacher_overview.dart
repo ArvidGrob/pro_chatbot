@@ -85,7 +85,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                       ),
                       const SizedBox(width: 12),
                       const Text(
-                        'Principal Overview',
+                        'Principal overzicht',
                         style: TextStyle(
                           color: Color(0xFF1A2B8F),
                           fontSize: 30,
@@ -127,7 +127,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
 
                 const SizedBox(height: 12),
 
-                // Add teacher button (dein Wunsch)
+                // Add teacher button
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: SizedBox(
@@ -150,7 +150,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                         elevation: 6,
                       ),
                       child: const Text(
-                        'Add teacher',
+                        'Leraar toevoegen',
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 16,
@@ -162,7 +162,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
 
                 const SizedBox(height: 14),
 
-                // Weißes Panel mit Suche + Liste
+
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -194,7 +194,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                             ),
                           ),
                           const SizedBox(height: 10),
-                          // Suchfeld
+                          // searchfield
                           Padding(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 12.0,

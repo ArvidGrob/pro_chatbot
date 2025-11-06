@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Students',
+      title: 'Studenten',
       home: const StudentOverviewPage(),
     );
   }
@@ -140,7 +140,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                                 size: 20,
                               ),
                               SizedBox(width: 6),
-                              Text('Add student'),
+                              Text('Student toevoegen'),
                             ],
                           ),
                         ),
@@ -183,7 +183,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                                 size: 20,
                               ),
                               SizedBox(width: 6),
-                              Text('Delete student'),
+                              Text('Student verwijderen'),
                             ],
                           ),
                         ),

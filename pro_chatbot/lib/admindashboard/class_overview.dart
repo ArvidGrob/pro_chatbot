@@ -89,7 +89,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                     children: [
                       const SizedBox(width: 12),
                       const Text(
-                        'Class overview',
+                        'Klas overzicht',
                         style: TextStyle(
                           color: Color(0xFF3D4ED8),
                           fontSize: 26,
@@ -113,7 +113,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                     controller: _searchCtrl,
                     onChanged: (_) => setState(() {}),
                     decoration: InputDecoration(
-                      hintText: 'Search class...',
+                      hintText: 'Zoek klasse...',
                       prefixIcon: const Icon(Icons.search),
                       filled: true,
                       fillColor: const Color(0xFFEFEFEF),
@@ -161,7 +161,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                         }
                       },
                       icon: const Icon(Icons.add),
-                      label: const Text('Add class'),
+                      label: const Text('Klasse toevoegen'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF6F73FF),
                         foregroundColor: Colors.white,
@@ -193,7 +193,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                         ),
                         child: filtered.isEmpty
                             ? const Center(
-                          child: Text('No classes found'),
+                          child: Text('Geen klassen gevonden'),
                         )
                             : ListView.separated(
                           itemCount: filtered.length,
@@ -229,7 +229,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                                     ),
                                     onPressed: () => _confirmDelete(cls),
                                     child: const Text(
-                                      'remove',
+                                      'verwijderen',
                                       style: TextStyle(fontWeight: FontWeight.w700),
                                     ),
                                   ),
@@ -263,7 +263,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
             children: [
               ListTile(
                 leading: const Icon(Icons.edit),
-                title: const Text('Rename class'),
+                title: const Text('Klasse hernoemen'),
                 onTap: () {
                   Navigator.pop(context);
                   _showRenameDialog(cls);
@@ -272,7 +272,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
                 title: const Text(
-                  'Delete class',
+                  'Klasse verwijderen',
                   style: TextStyle(color: Colors.red),
                 ),
                 onTap: () {
@@ -294,7 +294,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Rename class'),
+          title: const Text('klasse hernoemen'),
           content: TextField(
             controller: ctrl,
             decoration: const InputDecoration(hintText: 'Nieuwe naam'),
@@ -309,7 +309,6 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                 final newName = ctrl.text.trim();
                 if (newName.isEmpty) return;
 
-                // prüfen auf Duplikat
                 final exists = _classes.any((c) =>
                 c.toLowerCase() == newName.toLowerCase() &&
                     c != oldName);

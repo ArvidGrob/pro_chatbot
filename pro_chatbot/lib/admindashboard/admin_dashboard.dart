@@ -84,8 +84,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
                 // Classes button
                 _buildDashboardButton(
-                  buttonId: 'Class',
-                  label: 'Class',
+                  buttonId: 'Klas',
+                  label: 'Klas',
                   iconPath: 'assets/images/beheer.png',
                   onTap: () {
                     Navigator.of(context).push(
