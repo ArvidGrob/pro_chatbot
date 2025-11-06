@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '/theme_manager.dart';
 import '/wave_background_layout.dart';
+import 'package:pro_chatbot/admindashboard/addstudent.dart';
+import 'package:pro_chatbot/admindashboard/teacher_overview.dart';
+import 'student_overview.dart';
+import 'class_overview.dart';
 
 void main() {
   runApp(
@@ -57,7 +61,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 secondaryColor: themeManager.getSecondaryColor(
                     themeManager.getOptionSoftBlue(),
                     lightenAmount: 0.2),
-                onTap: () => print('Student tapped'),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const StudentOverviewPage(),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 25),
 
@@ -70,20 +80,32 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 secondaryColor: themeManager.getSecondaryColor(
                     themeManager.getOptionBrightPink(),
                     lightenAmount: 0.2),
-                onTap: () => print('Docent tapped'),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const TeacherOverviewPage(),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 25),
 
               // Beheer button
               _buildDashboardButton(
-                buttonId: 'beheer',
-                label: 'Beheer',
+                buttonId: 'klas',
+                label: 'klas',
                 iconPath: 'assets/images/beheer.png',
                 primaryColor: themeManager.getOptionBlazeOrange(),
                 secondaryColor: themeManager.getSecondaryColor(
                     themeManager.getOptionBlazeOrange(),
                     lightenAmount: 0.2),
-                onTap: () => print('Beheer tapped'),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const ClassOverviewPage(),
+                    ),
+                  );
+                },
               ),
               const Spacer(),
 

@@ -3,6 +3,16 @@ import 'package:provider/provider.dart';
 import '/theme_manager.dart';
 import '/wave_background_layout.dart';
 import 'settings_page_hulp.dart';
+import 'help_question_1.dart';
+import 'help_question_2.dart';
+import 'help_question_3.dart';
+import 'help_question_4.dart';
+import 'help_question_5.dart';
+import 'help_question_6.dart';
+import 'help_question_7.dart';
+import 'help_question_8.dart';
+import 'help_question_9.dart';
+import 'help_question_10.dart';
 
 void main() {
   runApp(
@@ -25,6 +35,13 @@ class SettingsPageHulp21 extends StatefulWidget {
 
 class _SettingsPageHulp21State extends State<SettingsPageHulp21> {
   String _pressedButton = '';
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,6 +103,14 @@ class _SettingsPageHulp21State extends State<SettingsPageHulp21> {
                       questionId: 'question1',
                       text: 'Hoe gebruik je de app?',
                       baseColor: themeManager.getOptionSoftBlue(),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HelpQuestion1(),
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 12),
                     _buildQuestion(
@@ -93,6 +118,14 @@ class _SettingsPageHulp21State extends State<SettingsPageHulp21> {
                       questionId: 'question2',
                       text: 'Hoe verander je je stem?',
                       baseColor: themeManager.getOptionBrightPink(),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HelpQuestion2(),
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 12),
                     _buildQuestion(
@@ -100,6 +133,14 @@ class _SettingsPageHulp21State extends State<SettingsPageHulp21> {
                       questionId: 'question3',
                       text: 'Hoe importeer ik een bestand in de chat?',
                       baseColor: themeManager.getOptionBlazeOrange(),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HelpQuestion3(),
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 12),
                     _buildQuestion(
@@ -107,6 +148,106 @@ class _SettingsPageHulp21State extends State<SettingsPageHulp21> {
                       questionId: 'question4',
                       text: 'Hoe wijzig ik mijn wachtwoord?',
                       baseColor: themeManager.getOptionYellowSea(),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HelpQuestion4(),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    _buildQuestion(
+                      themeManager,
+                      questionId: 'question5',
+                      text:
+                          'Hoe verwijder ik een\ngesprek uit de geschiedenis?',
+                      baseColor: themeManager.getOptionYellowSea(),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HelpQuestion5(),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    _buildQuestion(
+                      themeManager,
+                      questionId: 'question6',
+                      text: 'Hoe neem ik contact op\nmet ondersteuning?',
+                      baseColor: themeManager.getOptionYellowSea(),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HelpQuestion6(),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    _buildQuestion(
+                      themeManager,
+                      questionId: 'question7',
+                      text: 'Hoe werk ik met de\nspraak-naar-tekst functie?',
+                      baseColor: themeManager.getOptionYellowSea(),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HelpQuestion7(),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    _buildQuestion(
+                      themeManager,
+                      questionId: 'question8',
+                      text:
+                          'Wat is de Training-sectie en\nhoe gebruik ik deze?',
+                      baseColor: themeManager.getOptionYellowSea(),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HelpQuestion8(),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    _buildQuestion(
+                      themeManager,
+                      questionId: 'question9',
+                      text: 'Hoe wijzig ik mijn naam\nin mijn profiel?',
+                      baseColor: themeManager.getOptionYellowSea(),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HelpQuestion9(),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    _buildQuestion(
+                      themeManager,
+                      questionId: 'question10',
+                      text: 'Welke bestandsformaten\nkan ik uploaden?',
+                      baseColor: themeManager.getOptionYellowSea(),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HelpQuestion10(),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -147,6 +288,7 @@ class _SettingsPageHulp21State extends State<SettingsPageHulp21> {
     required String questionId,
     required String text,
     required Color baseColor,
+    required VoidCallback onTap,
   }) {
     bool isPressed = _pressedButton == questionId;
     Color buttonColor =
