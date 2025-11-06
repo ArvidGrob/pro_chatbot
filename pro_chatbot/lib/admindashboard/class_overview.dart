@@ -62,6 +62,22 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
               fit: BoxFit.cover,
             ),
           ),
+          Positioned(
+            bottom: 30,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: GestureDetector(
+                onTap: () => Navigator.of(context).maybePop(),
+                child: Image.asset(
+                  'assets/images/return.png',
+                  width: 70,
+                  height: 70,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+          ),
 
           SafeArea(
             child: Padding(
@@ -71,14 +87,6 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                   // Header
                   Row(
                     children: [
-                      GestureDetector(
-                        onTap: () => Navigator.of(context).maybePop(),
-                        child: Image.asset(
-                          'assets/images/return.png',
-                          width: 46,
-                          height: 46,
-                        ),
-                      ),
                       const SizedBox(width: 12),
                       const Text(
                         'Class overview',
@@ -169,71 +177,67 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
 
                   // List
                   Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(18),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(.08),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: filtered.isEmpty
-                          ? const Center(
-                        child: Text('No classes found'),
-                      )
-                          : ListView.separated(
-                        itemCount: filtered.length,
-                        separatorBuilder: (_, __) => const Divider(
-                          height: 0,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 100),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(.08),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
-                        itemBuilder: (context, i) {
-                          final cls = filtered[i];
-                          return ListTile(
-                            title: Text(
-                              cls,
-                              style: const TextStyle(
-                                color: Colors.blue,
-                                fontWeight: FontWeight.w600,
+                        child: filtered.isEmpty
+                            ? const Center(
+                          child: Text('No classes found'),
+                        )
+                            : ListView.separated(
+                          itemCount: filtered.length,
+                          separatorBuilder: (_, __) => const Divider(height: 0),
+                          itemBuilder: (context, i) {
+                            final cls = filtered[i];
+                            return ListTile(
+                              title: Text(
+                                cls,
+                                style: const TextStyle(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ),
-                            // actions rechts
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.more_vert),
-                                  onPressed: () => _openClassActions(cls),
-                                ),
-                                TextButton(
-                                  style: TextButton.styleFrom(
-                                    backgroundColor:
-                                    const Color(0xFFFF4D4D),
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 4,
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.more_vert),
+                                    onPressed: () => _openClassActions(cls),
+                                  ),
+                                  TextButton(
+                                    style: TextButton.styleFrom(
+                                      backgroundColor: const Color(0xFFFF4D4D),
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 4,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
                                     ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                      BorderRadius.circular(10),
+                                    onPressed: () => _confirmDelete(cls),
+                                    child: const Text(
+                                      'remove',
+                                      style: TextStyle(fontWeight: FontWeight.w700),
                                     ),
                                   ),
-                                  onPressed: () => _confirmDelete(cls),
-                                  child: const Text(
-                                    'remove',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ),

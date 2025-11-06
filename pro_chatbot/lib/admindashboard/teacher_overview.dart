@@ -279,6 +279,22 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
               ],
             ),
           ),
+          Positioned(
+            bottom: 30,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: GestureDetector(
+                onTap: () => Navigator.of(context).maybePop(),
+                child: Image.asset(
+                  'assets/images/return.png',
+                  width: 70,
+                  height: 70,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
