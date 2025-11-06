@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
+import 'settings_page.dart';
+import 'package:provider/provider.dart';
+import '/wave_background_layout.dart';
+import '/theme_manager.dart';
 
 void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: const SettingsPageSpraak(),
-  ));
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeManager(),
+      child: const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: SettingsPageSpraak(),
+      ),
+    ),
+  );
 }
 
 class SettingsPageSpraak extends StatefulWidget {
@@ -20,14 +29,11 @@ class _SettingsPageSpraakState extends State<SettingsPageSpraak> {
 
   @override
   Widget build(BuildContext context) {
+    final themeManager = Provider.of<ThemeManager>(context);
+
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/background.png'),
-            fit: BoxFit.cover,
-          ),
-        ),
+      body: WaveBackgroundLayout(
+        backgroundColor: themeManager.backgroundColor,
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(20.0),
@@ -152,11 +158,16 @@ class _SettingsPageSpraakState extends State<SettingsPageSpraak> {
 
                 const Spacer(),
 
-                // Return button
+                // Return button (to SettingsPage)
                 Center(
                   child: GestureDetector(
                     onTap: () {
-                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SettingsPage(),
+                        ),
+                      );
                     },
                     child: Image.asset(
                       'assets/images/return.png',
@@ -166,7 +177,6 @@ class _SettingsPageSpraakState extends State<SettingsPageSpraak> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 20),
               ],
             ),

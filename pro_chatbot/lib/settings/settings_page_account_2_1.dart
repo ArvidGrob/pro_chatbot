@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:pro_chatbot/settings/settings_page_account.dart';
+import 'package:provider/provider.dart';
+import '/theme_manager.dart';
+import '/wave_background_layout.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -28,157 +32,156 @@ class _SettingsPageAccount21State extends State<SettingsPageAccount21> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/background.png'),
-            fit: BoxFit.cover,
-          ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              children: [
-                // Title with icon
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'Account',
-                      style: TextStyle(
-                        color: Color(0xFF6464FF),
-                        fontSize: 40,
-                        fontWeight: FontWeight.bold,
-                      ),
+    final themeManager = Provider.of<ThemeManager>(context);
+
+    return WaveBackgroundLayout(
+      backgroundColor: themeManager.backgroundColor,
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            children: [
+              // Title with icon
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'Account',
+                    style: TextStyle(
+                      color: Color(0xFF6464FF),
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
                     ),
-                    const SizedBox(width: 15),
-                    Image.asset(
-                      'assets/images/account_2.png',
-                      width: 60,
-                      height: 60,
-                      fit: BoxFit.contain,
-                    ),
-                  ],
+                  ),
+                  const SizedBox(width: 15),
+                  Image.asset(
+                    'assets/images/account_2.png',
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.contain,
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 40),
+
+              // Persoonlijke gegevens title
+              Text(
+                'Persoonlijke gegevens',
+                style: TextStyle(
+                  color: themeManager.subtitleTextColor,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
                 ),
+              ),
 
-                const SizedBox(height: 40),
+              const SizedBox(height: 30),
 
-                // Persoonlijke gegevens title
-                const Text(
-                  'Persoonlijke gegevens',
+              // Nieuwe voornaam
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Nieuwe voornaam:',
                   style: TextStyle(
-                    color: Color(0xFF2323AD),
-                    fontSize: 28,
+                    color: themeManager.subtitleTextColor,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+              ),
 
-                const SizedBox(height: 30),
+              const SizedBox(height: 10),
 
-                // Nieuwe voornaam
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Nieuwe voornaam:',
-                    style: TextStyle(
-                      color: Color(0xFF2323AD),
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+              Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD9D9D9),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: TextField(
+                  controller: _voornaamController,
+                  style: const TextStyle(fontSize: 18),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    hintText: '',
                   ),
                 ),
+              ),
 
-                const SizedBox(height: 10),
+              const SizedBox(height: 25),
 
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20.0, vertical: 5.0),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFD9D9D9),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: TextField(
-                    controller: _voornaamController,
-                    style: const TextStyle(fontSize: 18),
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      hintText: '',
-                    ),
+              // Nieuwe naam
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Nieuwe naam:',
+                  style: TextStyle(
+                    color: themeManager.subtitleTextColor,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
+              ),
 
-                const SizedBox(height: 25),
+              const SizedBox(height: 10),
 
-                // Nieuwe naam
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Nieuwe naam:',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+              Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD9D9D9),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: TextField(
+                  controller: _naamController,
+                  style: const TextStyle(fontSize: 18),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    hintText: '',
                   ),
                 ),
+              ),
 
-                const SizedBox(height: 10),
+              const SizedBox(height: 40),
 
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20.0, vertical: 5.0),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFD9D9D9),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: TextField(
-                    controller: _naamController,
-                    style: const TextStyle(fontSize: 18),
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      hintText: '',
-                    ),
+              // Registreren button
+              Align(
+                alignment: Alignment.centerRight,
+                child: _buildRegisterButton(
+                  buttonId: 'registreren',
+                  label: 'Registreren',
+                  onTap: () {
+                    print('Registreren tapped');
+                  },
+                ),
+              ),
+
+              const Spacer(),
+
+              // Return button (to SettingsPage)
+              Center(
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SettingsPageAccount(),
+                      ),
+                    );
+                  },
+                  child: Image.asset(
+                    'assets/images/return.png',
+                    width: 70,
+                    height: 70,
+                    fit: BoxFit.contain,
                   ),
                 ),
-
-                const SizedBox(height: 40),
-
-                // Registreren button
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: _buildRegisterButton(
-                    buttonId: 'registreren',
-                    label: 'Registreren',
-                    onTap: () {
-                      print('Registreren tapped');
-                    },
-                  ),
-                ),
-
-                const Spacer(),
-
-                // Return button
-                Center(
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: Image.asset(
-                      'assets/images/return.png',
-                      width: 70,
-                      height: 70,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-              ],
-            ),
+              ),
+              const SizedBox(height: 20),
+            ],
           ),
         ),
       ),

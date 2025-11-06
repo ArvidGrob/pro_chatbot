@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '/theme_manager.dart';
+import '/wave_background_layout.dart';
+import 'settings_page_hulp.dart';
 
 void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: const SettingsPageHulp23(
-      title: 'Over',
-      content: '',
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeManager(),
+      child: const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: SettingsPageHulp23(
+          title: 'Over',
+          content: '',
+        ),
+      ),
     ),
-  ));
+  );
 }
 
 class SettingsPageHulp23 extends StatefulWidget {
@@ -27,14 +36,11 @@ class SettingsPageHulp23 extends StatefulWidget {
 class _SettingsPageHulp23State extends State<SettingsPageHulp23> {
   @override
   Widget build(BuildContext context) {
+    final themeManager = Provider.of<ThemeManager>(context);
+
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/background.png'),
-            fit: BoxFit.cover,
-          ),
-        ),
+      body: WaveBackgroundLayout(
+        backgroundColor: themeManager.backgroundColor,
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(20.0),
@@ -67,8 +73,8 @@ class _SettingsPageHulp23State extends State<SettingsPageHulp23> {
                 // Over title
                 Text(
                   widget.title,
-                  style: const TextStyle(
-                    color: Color(0xFF2323AD),
+                  style: TextStyle(
+                    color: themeManager.subtitleTextColor,
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                   ),
@@ -87,9 +93,9 @@ class _SettingsPageHulp23State extends State<SettingsPageHulp23> {
                   child: Column(
                     children: [
                       if (widget.content.isNotEmpty) ...[
-                        Text(
+                        const Text(
                           'Ontwikkelaar:',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.black,
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -124,7 +130,12 @@ class _SettingsPageHulp23State extends State<SettingsPageHulp23> {
                 Center(
                   child: GestureDetector(
                     onTap: () {
-                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SettingsPageHulp(),
+                        ),
+                      );
                     },
                     child: Image.asset(
                       'assets/images/return.png',
@@ -134,7 +145,6 @@ class _SettingsPageHulp23State extends State<SettingsPageHulp23> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 20),
               ],
             ),

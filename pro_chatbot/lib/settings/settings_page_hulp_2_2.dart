@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '/theme_manager.dart';
+import '/wave_background_layout.dart';
+import 'settings_page_hulp.dart';
 
 void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: const SettingsPageHulp22(),
-  ));
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeManager(),
+      child: const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: SettingsPageHulp22(),
+      ),
+    ),
+  );
 }
 
 class SettingsPageHulp22 extends StatefulWidget {
@@ -28,14 +37,11 @@ class _SettingsPageHulp22State extends State<SettingsPageHulp22> {
 
   @override
   Widget build(BuildContext context) {
+    final themeManager = Provider.of<ThemeManager>(context);
+
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/background.png'),
-            fit: BoxFit.cover,
-          ),
-        ),
+      body: WaveBackgroundLayout(
+        backgroundColor: themeManager.backgroundColor,
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(20.0),
@@ -66,10 +72,10 @@ class _SettingsPageHulp22State extends State<SettingsPageHulp22> {
                 const SizedBox(height: 40),
 
                 // Contact opnemen title
-                const Text(
+                Text(
                   'Contact opnemen',
                   style: TextStyle(
-                    color: Color(0xFF2323AD),
+                    color: themeManager.subtitleTextColor,
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                   ),
@@ -152,7 +158,12 @@ class _SettingsPageHulp22State extends State<SettingsPageHulp22> {
                 Center(
                   child: GestureDetector(
                     onTap: () {
-                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SettingsPageHulp(),
+                        ),
+                      );
                     },
                     child: Image.asset(
                       'assets/images/return.png',
@@ -162,7 +173,6 @@ class _SettingsPageHulp22State extends State<SettingsPageHulp22> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 20),
               ],
             ),
@@ -179,7 +189,7 @@ class _SettingsPageHulp22State extends State<SettingsPageHulp22> {
   }) {
     bool isPressed = _pressedButton == buttonId;
     Color buttonColor =
-        isPressed ? const Color(0xFF4545BD) : const Color(0xFF6464FF);
+        isPressed ? const Color(0xFF018F6F) : const Color(0xFF01BA8F);
 
     return GestureDetector(
       onTapDown: (_) {

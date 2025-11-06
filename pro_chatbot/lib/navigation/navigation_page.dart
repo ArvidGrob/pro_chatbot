@@ -2,13 +2,20 @@ import 'package:flutter/material.dart';
 import '../settings/settings_page.dart';
 import '../admindashboard/admin_dashboard.dart';
 import '../training/training_page.dart';
-import '../chat/chat_page.dart';
+import 'package:provider/provider.dart';
+import '/theme_manager.dart';
+import '/wave_background_layout.dart';
 
 void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: const NavigationPage(),
-  ));
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeManager(),
+      child: const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: NavigationPage(),
+      ),
+    ),
+  );
 }
 
 class NavigationPage extends StatefulWidget {
@@ -23,284 +30,180 @@ class _NavigationPageState extends State<NavigationPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/background.png'),
-            fit: BoxFit.cover,
-          ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Navigation title
-                Center(
-                  child: const Text(
-                    'Navigation',
-                    style: TextStyle(
-                      color: Color(0xFF3B3B98),
-                      fontSize: 36,
-                      fontWeight: FontWeight.bold,
-                    ),
+    final themeManager = Provider.of<ThemeManager>(context);
+
+    return WaveBackgroundLayout(
+      backgroundColor: themeManager.backgroundColor,
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: const Text(
+                  'Navigation',
+                  style: TextStyle(
+                    color: Color(0xFF3B3B98),
+                    fontSize: 36,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-
-                const SizedBox(height: 40),
-
-                // Chat button (large, full width)
-                _buildLargeButton(
-                  buttonId: 'chat',
-                  title: 'Chat',
-                  iconPath: 'assets/images/chat.png',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ChatPage(),
-                      ),
-                    );
-                  },
-                ),
-
-                const SizedBox(height: 20),
-
-                // Training button (large, full width)
-                _buildLargeButton(
-                  buttonId: 'training',
-                  title: 'Training',
-                  iconPath: 'assets/images/training.png',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const TrainingPage(),
-                      ),
-                    );
-                  },
-                ),
-
-                const SizedBox(height: 20),
-
-                // Bottom row with two smaller buttons
-                Row(
-                  children: [
-                    // Instellingen button
-                    Expanded(
-                      child: _buildSmallButton(
-                        buttonId: 'instellingen',
-                        title: 'Instellingen',
-                        iconPath: 'assets/images/settings.png',
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const SettingsPage(),
-                            ),
-                          );
-                        },
-                      ),
+              ),
+              const SizedBox(height: 40),
+              _buildNavigationButton(
+                id: 'chat',
+                title: 'Chat',
+                iconPath: 'assets/images/chat.png',
+                primaryColor: themeManager.getOptionSoftBlue(),
+                secondaryColor: themeManager
+                    .getSecondaryColor(themeManager.getOptionSoftBlue()),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TrainingPage(),
                     ),
-
-                    const SizedBox(width: 20),
-
-                    // Admin button
-                    Expanded(
-                      child: _buildSmallButton(
-                        buttonId: 'admin',
-                        title: 'Admin',
-                        iconPath: 'assets/images/admin.png',
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const AdminDashboard(),
-                            ),
-                          );
-                        },
-                      ),
+                  );
+                },
+              ),
+              const SizedBox(height: 30),
+              _buildNavigationButton(
+                id: 'training',
+                title: 'Training',
+                iconPath: 'assets/images/training.png',
+                primaryColor: themeManager.getOptionBrightPink(),
+                secondaryColor: themeManager
+                    .getSecondaryColor(themeManager.getOptionBrightPink()),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TrainingPage(),
                     ),
-                  ],
-                ),
-
-                const Spacer(),
-              ],
-            ),
+                  );
+                },
+              ),
+              const SizedBox(height: 30),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildNavigationButton(
+                      id: 'instellingen',
+                      title: 'Instellingen',
+                      iconPath: 'assets/images/settings.png',
+                      primaryColor: themeManager.getOptionBlazeOrange(),
+                      secondaryColor: themeManager.getSecondaryColor(
+                          themeManager.getOptionBlazeOrange()),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SettingsPage(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 30),
+                  Expanded(
+                    child: _buildNavigationButton(
+                      id: 'admin',
+                      title: 'Admin',
+                      iconPath: 'assets/images/admin.png',
+                      primaryColor: themeManager.getOptionYellowSea(),
+                      secondaryColor: themeManager
+                          .getSecondaryColor(themeManager.getOptionYellowSea()),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AdminDashboard(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const Spacer(),
+            ],
           ),
         ),
       ),
     );
   }
 
-  // Build large navigation button
-  Widget _buildLargeButton({
-    required String buttonId,
+  Widget _buildNavigationButton({
+    required String id,
     required String title,
     required String iconPath,
+    required Color primaryColor,
+    required Color secondaryColor,
     required VoidCallback onTap,
   }) {
-    bool isPressed = _pressedButton == buttonId;
-    Color primaryColor =
-        isPressed ? const Color(0xFF4545BD) : const Color(0xFF6464FF);
-    Color secondaryColor =
-        isPressed ? const Color(0xFF6D6DCA) : const Color(0xFF8989FF);
+    final themeManager = Provider.of<ThemeManager>(context, listen: false);
+    final isPressed = _pressedButton == id;
+
+    // Darken both primary and secondary when pressed
+    final Color displayPrimary =
+        isPressed ? themeManager.darkenColor(primaryColor, 0.25) : primaryColor;
+
+    final Color displaySecondary = isPressed
+        ? themeManager.darkenColor(secondaryColor, 0.25)
+        : secondaryColor;
 
     return GestureDetector(
-      onTapDown: (_) {
-        setState(() {
-          _pressedButton = buttonId;
-        });
-      },
+      onTapDown: (_) => setState(() => _pressedButton = id),
       onTapUp: (_) {
-        setState(() {
-          _pressedButton = '';
-        });
-        onTap();
-      },
-      onTapCancel: () {
-        setState(() {
-          _pressedButton = '';
+        Future.delayed(const Duration(milliseconds: 100), () {
+          setState(() => _pressedButton = '');
+          onTap();
         });
       },
+      onTapCancel: () => setState(() => _pressedButton = ''),
       child: Container(
         height: 120,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: primaryColor, // Dynamic purple primary color
+          color: displayPrimary,
           borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 15,
-              offset: const Offset(0, 8),
-            ),
-          ],
         ),
         child: Row(
           children: [
-            // Text zone (left side)
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
+                padding:
+                    const EdgeInsets.only(left: 20.0, right: 10.0, bottom: 0.0),
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 38,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
             ),
-
-            // Icon zone (right side with lighter color)
             Container(
-              width: 120,
+              width: 150,
               height: 120,
               decoration: BoxDecoration(
-                color: secondaryColor, // Dynamic lighter color for icon
+                color: displaySecondary,
                 borderRadius: const BorderRadius.only(
                   topRight: Radius.circular(20),
                   bottomRight: Radius.circular(20),
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
+              child: Center(
                 child: Image.asset(
                   iconPath,
+                  width: 80,
+                  height: 80,
                   fit: BoxFit.contain,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Build small navigation button
-  Widget _buildSmallButton({
-    required String buttonId,
-    required String title,
-    required String iconPath,
-    required VoidCallback onTap,
-  }) {
-    bool isPressed = _pressedButton == buttonId;
-    Color primaryColor =
-        isPressed ? const Color(0xFF4545BD) : const Color(0xFF6464FF);
-    Color secondaryColor =
-        isPressed ? const Color(0xFF6D6DCA) : const Color(0xFF8989FF);
-
-    return GestureDetector(
-      onTapDown: (_) {
-        setState(() {
-          _pressedButton = buttonId;
-        });
-      },
-      onTapUp: (_) {
-        setState(() {
-          _pressedButton = '';
-        });
-        onTap();
-      },
-      onTapCancel: () {
-        setState(() {
-          _pressedButton = '';
-        });
-      },
-      child: Container(
-        height: 150,
-        decoration: BoxDecoration(
-          color: primaryColor, // Dynamic purple primary color
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 15,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            // Text zone (upper part)
-            Container(
-              width: double.infinity,
-              height: 70,
-              child: Center(
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-
-            // Icon zone (lower part with lighter color)
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: secondaryColor, // Dynamic lighter color for icon
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(20),
-                    bottomRight: Radius.circular(20),
-                  ),
-                ),
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Image.asset(
-                      iconPath,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
                 ),
               ),
             ),
