@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Students',
+      title: 'Studenten',
       home: const StudentOverviewPage(),
     );
   }
@@ -63,11 +63,9 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
       ),
       body: Stack(
         children: [
-          //_buildBackground(),
-
           Column(
             children: [
-              // Suchfeld
+              // Searchbar
               Padding(
                 padding: const EdgeInsets.fromLTRB(12, 8, 12, 6),
                 child: TextField(
@@ -100,6 +98,8 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                   ),
                 ),
               ),
+
+              const SizedBox(height: 16),
 
               // Buttons "Add student" + "Delete student"
               Padding(
@@ -140,14 +140,14 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                                 size: 20,
                               ),
                               SizedBox(width: 6),
-                              Text('Add student'),
+                              Text('Student toevoegen'),
                             ],
                           ),
                         ),
                       ),
                     ),
 
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 16),
 
                     // Delete student button
                     Expanded(
@@ -183,7 +183,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                                 size: 20,
                               ),
                               SizedBox(width: 6),
-                              Text('Delete student'),
+                              Text('Student verwijderen'),
                             ],
                           ),
                         ),
@@ -193,7 +193,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                 ),
               ),
 
-              const Divider(height: 0),
+              const SizedBox(height: 5),
 
               // studentlist
               Expanded(
@@ -261,42 +261,24 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                   },
                 ),
               ),
-
-              // Return button
-              Center(
-                child: _buildReturnButton(
-                  buttonId: 'return',
-                  iconPath: 'assets/images/return.png',
-                  onTap: () {
-                    debugPrint('Return tapped');
-                  },
-                ),
-              ),
             ],
+          ),
+          Positioned(
+            bottom: 20,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: _buildReturnButton(
+                buttonId: 'return',
+                iconPath: 'assets/images/return.png',
+                onTap: () => Navigator.of(context).maybePop(),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
-
-  // Return-Button
-  Widget _buildReturnButton({
-    required String buttonId,
-    required String iconPath,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Image.asset(
-        iconPath,
-        width: 70,
-        height: 70,
-        fit: BoxFit.contain,
-      ),
-    );
-  }
-
-
   void _openStudentActions(Student s) {
     showModalBottomSheet(
       context: context,
@@ -479,14 +461,19 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
       },
     );
   }
-
-
-//  Widget _buildBackground() {
-//    return SizedBox.expand(
-//      child: Image.asset(
-//        'assets/images/background.png',
-//        fit: BoxFit.cover,
-//      ),
-//    );
-//  }
+  Widget _buildReturnButton({
+    required String buttonId,
+    required String iconPath,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Image.asset(
+        iconPath,
+        width: 70,
+        height: 70,
+        fit: BoxFit.contain,
+      ),
+    );
+  }
 }
