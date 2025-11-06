@@ -127,7 +127,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                               borderRadius: BorderRadius.circular(16),
                             ),
                             textStyle: const TextStyle(
-                              fontSize: 15,
+                              fontSize: 13,
                               fontWeight: FontWeight.w900,
                             ),
                           ),
@@ -147,7 +147,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                       ),
                     ),
 
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 5),
 
                     // Delete student button
                     Expanded(
@@ -170,7 +170,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                               borderRadius: BorderRadius.circular(16),
                             ),
                             textStyle: const TextStyle(
-                              fontSize: 15,
+                              fontSize: 12,
                               fontWeight: FontWeight.w900,
                             ),
                           ),
