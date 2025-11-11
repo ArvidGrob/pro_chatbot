@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 import 'add_class.dart';
+import 'package:provider/provider.dart';
+import '/theme_manager.dart';
+import '/wave_background_layout.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeManager(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -26,8 +34,6 @@ class ClassOverviewPage extends StatefulWidget {
 }
 
 class _ClassOverviewPageState extends State<ClassOverviewPage> {
-  static const Color primary = Color(0xFF4A4AFF);
-
   final TextEditingController _searchCtrl = TextEditingController();
 
   List<String> _classes = [
@@ -47,37 +53,17 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
 
   @override
   Widget build(BuildContext context) {
+    final themeManager = Provider.of<ThemeManager>(context);
     final query = _searchCtrl.text.trim().toLowerCase();
     final filtered = query.isEmpty
         ? _classes
         : _classes.where((c) => c.toLowerCase().contains(query)).toList();
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Stack(
+    return WaveBackgroundLayout(
+      backgroundColor: themeManager.backgroundColor,
+      child: Stack(
         children: [
-          SizedBox.expand(
-            child: Image.asset(
-              'assets/images/background.png',
-              fit: BoxFit.cover,
-            ),
-          ),
-          Positioned(
-            bottom: 30,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: GestureDetector(
-                onTap: () => Navigator.of(context).maybePop(),
-                child: Image.asset(
-                  'assets/images/return.png',
-                  width: 70,
-                  height: 70,
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ),
-          ),
+          // Main content
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -85,9 +71,9 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                 children: [
                   // Header
                   Row(
-                    children: [
-                      const SizedBox(width: 12),
-                      const Text(
+                    children: const [
+                      SizedBox(width: 12),
+                      Text(
                         'Klas overzicht',
                         style: TextStyle(
                           color: Color(0xFF3D4ED8),
@@ -104,10 +90,9 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 18),
 
-                  // search
+                  // Search field
                   TextField(
                     controller: _searchCtrl,
                     onChanged: (_) => setState(() {}),
@@ -117,16 +102,13 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                       filled: true,
                       fillColor: const Color(0xFFEFEFEF),
                       contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 10,
-                      ),
+                          horizontal: 14, vertical: 10),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: BorderSide.none,
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 12),
 
                   // Add class button
@@ -172,10 +154,9 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 14),
 
-                  // List
+                  // Class list
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 100),
@@ -192,9 +173,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                           ],
                         ),
                         child: filtered.isEmpty
-                            ? const Center(
-                                child: Text('Geen klassen gevonden'),
-                              )
+                            ? const Center(child: Text('Geen klassen gevonden'))
                             : ListView.separated(
                                 itemCount: filtered.length,
                                 separatorBuilder: (_, __) =>
@@ -247,6 +226,24 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                     ),
                   ),
                 ],
+              ),
+            ),
+          ),
+
+          // Return button
+          Positioned(
+            bottom: 30,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: GestureDetector(
+                onTap: () => Navigator.of(context).maybePop(),
+                child: Image.asset(
+                  'assets/images/return.png',
+                  width: 70,
+                  height: 70,
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
           ),
@@ -326,9 +323,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
 
                 setState(() {
                   final idx = _classes.indexOf(oldName);
-                  if (idx != -1) {
-                    _classes[idx] = newName;
-                  }
+                  if (idx != -1) _classes[idx] = newName;
                 });
                 Navigator.pop(context);
               },

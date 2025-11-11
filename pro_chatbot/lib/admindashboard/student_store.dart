@@ -1,4 +1,7 @@
 import 'package:flutter/foundation.dart';
+import 'package:provider/provider.dart';
+import '/theme_manager.dart';
+import '/wave_background_layout.dart';
 
 class Student {
   Student(this.name, {this.online = false, this.password});
@@ -41,7 +44,10 @@ class StudentStore {
   // Neuer Weg zum Hinzufügen, damit Passwort gesetzt werden kann
   void addStudent(String name, {bool online = false, String? password}) {
     if (containsName(name)) return;
-    final list = [...students.value, Student(name, online: online, password: password)];
+    final list = [
+      ...students.value,
+      Student(name, online: online, password: password)
+    ];
     students.value = list;
   }
 
@@ -61,6 +67,7 @@ class StudentStore {
     list[i].online = online;
     students.value = List<Student>.from(list); // trigger listeners
   }
+
   void renameStudent(String oldName, String newName) {
     final list = students.value;
     final i = list.indexWhere((s) => s.name == oldName);
@@ -68,6 +75,7 @@ class StudentStore {
     list[i].name = newName;
     students.value = List<Student>.from(list);
   }
+
   void setPassword(String name, String newPassword) {
     final list = students.value;
     final i = list.indexWhere((s) => s.name == name);
@@ -75,6 +83,7 @@ class StudentStore {
     list[i].password = newPassword;
     students.value = List<Student>.from(list);
   }
+
   String? getPassword(String name) {
     final list = students.value;
     final i = list.indexWhere((s) => s.name == name);

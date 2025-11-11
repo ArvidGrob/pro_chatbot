@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'student_store.dart';
 import 'student_delete.dart';
 import 'addstudent.dart';
+import 'package:provider/provider.dart';
+import '/theme_manager.dart';
+import '/wave_background_layout.dart';
 
 void main() {
   runApp(const MyApp());
@@ -39,8 +42,9 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
 
   @override
   Widget build(BuildContext context) {
+    final themeManager = Provider.of<ThemeManager>(context);
+
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -61,224 +65,226 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
         ),
         centerTitle: false,
       ),
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              // Searchbar
-              Padding(
-                padding: const EdgeInsets.fromLTRB(12, 8, 12, 6),
-                child: TextField(
-                  controller: _searchCtrl,
-                  textInputAction: TextInputAction.search,
-                  onChanged: (_) => setState(() {}),
-                  decoration: InputDecoration(
-                    hintText: 'Een chat zoeken',
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: (_searchCtrl.text.isEmpty)
-                        ? const Icon(Icons.manage_search_outlined)
-                        : IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        _searchCtrl.clear();
-                        FocusScope.of(context).unfocus();
-                        setState(() {});
-                      },
-                    ),
-                    filled: true,
-                    fillColor: const Color(0xFFEFEFEF),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 12,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none,
+      body: WaveBackgroundLayout(
+        backgroundColor: themeManager.backgroundColor,
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                // Searchbar
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 6),
+                  child: TextField(
+                    controller: _searchCtrl,
+                    textInputAction: TextInputAction.search,
+                    onChanged: (_) => setState(() {}),
+                    decoration: InputDecoration(
+                      hintText: 'Een chat zoeken',
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: (_searchCtrl.text.isEmpty)
+                          ? const Icon(Icons.manage_search_outlined)
+                          : IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _searchCtrl.clear();
+                                FocusScope.of(context).unfocus();
+                                setState(() {});
+                              },
+                            ),
+                      filled: true,
+                      fillColor: const Color(0xFFEFEFEF),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide.none,
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              // Buttons "Add student" + "Delete student"
-              Padding(
-                padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-                child: Row(
-                  children: [
-                    // Add student button
-                    Expanded(
-                      child: SizedBox(
-                        height: 44,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => const AddStudentPage(),
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF6F73FF),
-                            foregroundColor: Colors.white,
-                            elevation: 6,
-                            shadowColor: Colors.black.withOpacity(.2),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            textStyle: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.person_add_alt_1_rounded,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                              SizedBox(width: 6),
-                              Text('Student toevoegen'),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(width: 5),
-
-                    // Delete student button
-                    Expanded(
-                      child: SizedBox(
-                        height: 44,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => const StudentDeletePage(),
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFFF4D4D),
-                            foregroundColor: Colors.white,
-                            elevation: 6,
-                            shadowColor: Colors.black.withOpacity(.2),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            textStyle: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.delete_forever_rounded,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                              SizedBox(width: 6),
-                              Text('Student verwijderen'),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 5),
-
-              // studentlist
-              Expanded(
-                child: ValueListenableBuilder<List<Student>>(
-                  valueListenable: StudentStore.instance.students,
-                  builder: (context, list, _) {
-                    final q = _searchCtrl.text.trim().toLowerCase();
-                    final filtered = q.isEmpty
-                        ? list
-                        : list
-                        .where(
-                          (s) => s.name.toLowerCase().contains(q),
-                    )
-                        .toList();
-
-                    if (filtered.isEmpty) {
-                      return const Center(
-                        child: Text('Geen studenten gevonden'),
-                      );
-                    }
-
-                    return ListView.separated(
-                      itemCount: filtered.length,
-                      separatorBuilder: (_, __) =>
-                      const Divider(height: 0),
-                      itemBuilder: (context, i) {
-                        final s = filtered[i];
-
-                        return MouseRegion(
-                          cursor: SystemMouseCursors.click,
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 4,
-                            ),
-                            title: Text(
-                              s.name,
-                              style: const TextStyle(
-                                color: Colors.blue,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            subtitle: Text(
-                              s.online ? 'Online' : 'Offline',
-                              style: TextStyle(
-                                color:
-                                s.online ? Colors.green : Colors.red,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.more_vert),
-                              onPressed: () => _openStudentActions(s),
-                            ),
-                            onLongPress: () => _openStudentActions(s),
-                            onTap: () {
-                              final newStatus = !s.online;
-                              StudentStore.instance
-                                  .setStatus(s.name, newStatus);
+                // Buttons "Add student" + "Delete student"
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                  child: Row(
+                    children: [
+                      // Add student button
+                      Expanded(
+                        child: SizedBox(
+                          height: 44,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const AddStudentPage(),
+                                ),
+                              );
                             },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF6F73FF),
+                              foregroundColor: Colors.white,
+                              elevation: 6,
+                              shadowColor: Colors.black.withOpacity(.2),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              textStyle: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.person_add_alt_1_rounded,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                                SizedBox(width: 6),
+                                Text('Student toevoegen'),
+                              ],
+                            ),
                           ),
-                        );
-                      },
-                    );
-                  },
+                        ),
+                      ),
+
+                      const SizedBox(width: 5),
+
+                      // Delete student button
+                      Expanded(
+                        child: SizedBox(
+                          height: 44,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const StudentDeletePage(),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFFF4D4D),
+                              foregroundColor: Colors.white,
+                              elevation: 6,
+                              shadowColor: Colors.black.withOpacity(.2),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              textStyle: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.delete_forever_rounded,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                                SizedBox(width: 6),
+                                Text('Student verwijderen'),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-          Positioned(
-            bottom: 20,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: _buildReturnButton(
-                buttonId: 'return',
-                iconPath: 'assets/images/return.png',
-                onTap: () => Navigator.of(context).maybePop(),
+
+                const SizedBox(height: 5),
+
+                // Student list
+                Expanded(
+                  child: ValueListenableBuilder<List<Student>>(
+                    valueListenable: StudentStore.instance.students,
+                    builder: (context, list, _) {
+                      final q = _searchCtrl.text.trim().toLowerCase();
+                      final filtered = q.isEmpty
+                          ? list
+                          : list
+                              .where(
+                                (s) => s.name.toLowerCase().contains(q),
+                              )
+                              .toList();
+
+                      if (filtered.isEmpty) {
+                        return const Center(
+                          child: Text('Geen studenten gevonden'),
+                        );
+                      }
+
+                      return ListView.separated(
+                        itemCount: filtered.length,
+                        separatorBuilder: (_, __) => const Divider(height: 0),
+                        itemBuilder: (context, i) {
+                          final s = filtered[i];
+
+                          return MouseRegion(
+                            cursor: SystemMouseCursors.click,
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 4,
+                              ),
+                              title: Text(
+                                s.name,
+                                style: const TextStyle(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              subtitle: Text(
+                                s.online ? 'Online' : 'Offline',
+                                style: TextStyle(
+                                  color: s.online ? Colors.green : Colors.red,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.more_vert),
+                                onPressed: () => _openStudentActions(s),
+                              ),
+                              onLongPress: () => _openStudentActions(s),
+                              onTap: () {
+                                final newStatus = !s.online;
+                                StudentStore.instance
+                                    .setStatus(s.name, newStatus);
+                              },
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+            Positioned(
+              bottom: 20,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: _buildReturnButton(
+                  buttonId: 'return',
+                  iconPath: 'assets/images/return.png',
+                  onTap: () => Navigator.of(context).maybePop(),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
+
   void _openStudentActions(Student s) {
     showModalBottomSheet(
       context: context,
@@ -366,8 +372,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
               onPressed: () {
                 final newName = ctrl.text.trim();
                 if (newName.isNotEmpty) {
-                  StudentStore.instance
-                      .renameStudent(s.name, newName);
+                  StudentStore.instance.renameStudent(s.name, newName);
                 }
                 Navigator.pop(context);
               },
@@ -461,6 +466,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
       },
     );
   }
+
   Widget _buildReturnButton({
     required String buttonId,
     required String iconPath,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pro_chatbot/chat/chat_page.dart';
 import '../settings/settings_page.dart';
 import '../admindashboard/admin_dashboard.dart';
 import '../training/training_page.dart';
@@ -62,7 +63,7 @@ class _NavigationPageState extends State<NavigationPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const TrainingPage(),
+                      builder: (context) => const ChatPage(),
                     ),
                   );
                 },
