@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../navigation/navigation_page.dart';
 import '../api/api_services.dart';
 import '../models/user.dart';
+import '../theme_manager.dart';
 
 void main() {
-  runApp(const _DebugLoginApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeManager(),
+      child: const _DebugLoginApp(),
+    ),
+  );
 }
 
 class _DebugLoginApp extends StatelessWidget {
@@ -64,7 +71,7 @@ class _LoginPageState extends State<LoginPage> {
       // Successful -> Navigation Page
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (_) => const NavigationPage(),
+          builder: (context) => const NavigationPage(),
         ),
       );
     } catch (e) {
