@@ -1,3 +1,4 @@
+/*
 // all the roles within the organisation
 enum Role {
   admin,
@@ -39,3 +40,4 @@ class User {
     );
   }
 }
+*/

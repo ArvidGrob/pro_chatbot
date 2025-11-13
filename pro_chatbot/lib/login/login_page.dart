@@ -2,13 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../navigation/navigation_page.dart';
 import '../api/api_services.dart';
-import '../models/user.dart';
+import '../models/user.dart'; // Use the unified User class
+import '../api/user_provider.dart'; // UserProvider
 import '../theme_manager.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => ThemeManager(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeManager()),
+        ChangeNotifierProvider(
+            create: (_) => UserProvider()), // Save logged-in user
+      ],
       child: const _DebugLoginApp(),
     ),
   );
@@ -64,11 +69,15 @@ class _LoginPageState extends State<LoginPage> {
     final api = ApiService();
 
     try {
+      // Log in
       User user = await api.login(_idCtrl.text.trim(), _pwCtrl.text.trim());
 
       if (!mounted) return;
 
-      // Successful -> Navigation Page
+      // Save the user in UserProvider
+      Provider.of<UserProvider>(context, listen: false).login(user);
+
+      // Navigate to main page
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => const NavigationPage(),
@@ -96,161 +105,161 @@ class _LoginPageState extends State<LoginPage> {
     const primary = Color(0xFF6464FF);
 
     return Scaffold(
-        body: Container(
-      width: double.infinity,
-      height: double.infinity,
-      decoration: const BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage('assets/images/background.png'),
-          fit: BoxFit.cover,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/background.png'),
+            fit: BoxFit.cover,
+          ),
         ),
-      ),
-      child: SafeArea(
+        child: SafeArea(
           child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Column(
-          children: [
-            const SizedBox(height: 8),
-            const Text(
-              'Inloggen',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.w800,
-                color: primary,
-                letterSpacing: .5,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-
-            // Logo
-            SizedBox(
-              height: 240,
-              child: Image.asset(
-                'assets/images/luminara_logo.png',
-                fit: BoxFit.contain,
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  // E-mail
-                  _RoundedField(
-                    label: 'E-mail',
-                    controller: _idCtrl,
-                    textInputAction: TextInputAction.next,
-                    validator: (v) {
-                      if (v == null || v.isEmpty) {
-                        return 'Voer uw e-mail in';
-                      }
-                      if (!v.contains('@') || !v.contains('.')) {
-                        return 'Voer een geldig e-mailadres in';
-                      }
-                      // More comprehensive email validation
-                      final emailRegex =
-                          RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                      if (!emailRegex.hasMatch(v)) {
-                        return 'Voer een geldig e-mailadres in';
-                      }
-                      return null;
-                    },
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Column(
+              children: [
+                const SizedBox(height: 8),
+                const Text(
+                  'Inloggen',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w800,
+                    color: primary,
+                    letterSpacing: .5,
                   ),
-                  const SizedBox(height: 16),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
 
-                  // Password
-                  _RoundedField(
-                    label: 'Wachtwoord',
-                    controller: _pwCtrl,
-                    obscureText: _obscure,
-                    validator: (v) => (v == null || v.isEmpty)
-                        ? 'Voer uw wachtwoord in'
-                        : null,
-                    suffix: IconButton(
-                      onPressed: () => setState(() => _obscure = !_obscure),
-                      icon: Icon(
-                        _obscure ? Icons.visibility_off : Icons.visibility,
-                        color: Colors.grey[600],
-                      ),
-                    ),
+                // Logo
+                SizedBox(
+                  height: 240,
+                  child: Image.asset(
+                    'assets/images/luminara_logo.png',
+                    fit: BoxFit.contain,
                   ),
-                  const SizedBox(height: 24),
+                ),
+                const SizedBox(height: 12),
 
-                  // Error message display
-                  if (_errorMessage != null)
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.red.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.red.shade200),
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      // Email field
+                      _RoundedField(
+                        label: 'E-mail',
+                        controller: _idCtrl,
+                        textInputAction: TextInputAction.next,
+                        validator: (v) {
+                          if (v == null || v.isEmpty) {
+                            return 'Voer uw e-mail in';
+                          }
+                          if (!v.contains('@') || !v.contains('.')) {
+                            return 'Voer een geldig e-mailadres in';
+                          }
+                          final emailRegex =
+                              RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                          if (!emailRegex.hasMatch(v)) {
+                            return 'Voer een geldig e-mailadres in';
+                          }
+                          return null;
+                        },
                       ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.error_outline,
-                              color: Colors.red.shade700, size: 20),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              _errorMessage!,
-                              style: TextStyle(
-                                color: Colors.red.shade700,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
+                      const SizedBox(height: 16),
+
+                      // Password field
+                      _RoundedField(
+                        label: 'Wachtwoord',
+                        controller: _pwCtrl,
+                        obscureText: _obscure,
+                        validator: (v) => (v == null || v.isEmpty)
+                            ? 'Voer uw wachtwoord in'
+                            : null,
+                        suffix: IconButton(
+                          onPressed: () => setState(() => _obscure = !_obscure),
+                          icon: Icon(
+                            _obscure ? Icons.visibility_off : Icons.visibility,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Error message
+                      if (_errorMessage != null)
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.red.shade200),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.error_outline,
+                                  color: Colors.red.shade700, size: 20),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  _errorMessage!,
+                                  style: TextStyle(
+                                    color: Colors.red.shade700,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ),
+                            ],
+                          ),
+                        ),
+
+                      const SizedBox(height: 24),
+
+                      // Login button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 70,
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _handleLogin,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF8F8FFF),
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            textStyle: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-
-                  const SizedBox(height: 24),
-
-                  // Login Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 70,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _handleLogin,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF8F8FFF),
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        textStyle: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
+                          child: _isLoading
+                              ? const SizedBox(
+                                  height: 22,
+                                  width: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.6,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text('Inloggen'),
                         ),
                       ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              height: 22,
-                              width: 22,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.6,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Text('Inloggen'),
-                    ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 60),
+              ],
             ),
-            const SizedBox(height: 60),
-          ],
+          ),
         ),
-      )),
-    ));
+      ),
+    );
   }
 }
 
-/// text field
+/// Rounded input field widget
 class _RoundedField extends StatelessWidget {
   final String label;
   final TextEditingController controller;
@@ -285,7 +294,7 @@ class _RoundedField extends StatelessWidget {
       ),
       decoration: InputDecoration(
         hintText: label,
-        hintStyle: TextStyle(
+        hintStyle: const TextStyle(
           color: Color(0xFF2D2D2D),
           fontSize: 17,
           fontWeight: FontWeight.w600,
