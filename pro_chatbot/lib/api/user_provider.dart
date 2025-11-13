@@ -4,21 +4,27 @@ import 'user.dart';
 class UserProvider extends ChangeNotifier {
   User? _currentUser;
 
-  /// Returns the currently logged-in user (or null if not logged in)
+  /// Currently logged-in user (null if not logged in)
   User? get currentUser => _currentUser;
 
-  /// Returns true if a user is logged in
+  /// True if a user is logged in
   bool get isLoggedIn => _currentUser != null;
 
-  /// Logs in a user (for example, after successful authentication)
+  /// Logs in a user
   void login(User user) {
     _currentUser = user;
-    notifyListeners(); // notifies the UI that the state has changed
+    notifyListeners();
   }
 
   /// Logs out the user
   void logout() {
     _currentUser = null;
+    notifyListeners();
+  }
+
+  /// Updates current user info
+  void updateUser(User user) {
+    _currentUser = user;
     notifyListeners();
   }
 
