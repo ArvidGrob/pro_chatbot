@@ -70,25 +70,15 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
               child: Column(
                 children: [
                   // Header
-                  Row(
-                    children: const [
-                      SizedBox(width: 12),
-                      Text(
-                        'Klas overzicht',
-                        style: TextStyle(
-                          color: Color(0xFF3D4ED8),
-                          fontSize: 26,
-                          fontWeight: FontWeight.w800,
-                          shadows: [
-                            Shadow(
-                              offset: Offset(0, 2),
-                              blurRadius: 3,
-                              color: Colors.black26,
-                            ),
-                          ],
-                        ),
+                  Center(
+                    child: const Text(
+                      'Klas overzicht',
+                      style: TextStyle(
+                        color: Color(0xFF3D4ED8),
+                        fontSize: 26,
+                        fontWeight: FontWeight.w800,
                       ),
-                    ],
+                    ),
                   ),
                   const SizedBox(height: 18),
 

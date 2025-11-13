@@ -83,6 +83,37 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
     );
   }
 
+  void _showDeleteConfirmation(BuildContext context, String name) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Bevestiging'),
+          content: Text('Weet je zeker dat je $name wilt verwijderen?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Annuleren'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                StudentStore.instance.removeByName(name);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Verwijderd: $name')),
+                );
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+              ),
+              child: const Text('Verwijderen'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeManager = Provider.of<ThemeManager>(context);
@@ -92,29 +123,27 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
       backgroundColor: themeManager.backgroundColor,
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                color: Colors.black87),
-            onPressed: () => Navigator.of(context).maybePop(),
-          ),
-          title: const Text(
-            'Beheer',
-            style: TextStyle(
-              color: primary,
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          centerTitle: false,
-        ),
-        body: Stack(
-          children: [
-            SafeArea(
-              child: Column(
+        body: SafeArea(
+          child: Stack(
+            children: [
+              Column(
                 children: [
+                  const SizedBox(height: 16),
+
+                  // Title centered
+                  const Center(
+                    child: Text(
+                      'Beheer',
+                      style: TextStyle(
+                        color: primary,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
                   // Blue "Student" header bar
                   Padding(
                     padding: const EdgeInsets.fromLTRB(12, 8, 12, 6),
@@ -151,25 +180,9 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
                     ),
                   ),
 
-                  // Section title
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(16, 6, 16, 6),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Student',
-                        style: TextStyle(
-                          color: primary,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                  ),
-
                   // Search field
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                    padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
                     child: TextField(
                       controller: _searchCtrl,
                       focusNode: _searchFocus,
@@ -177,10 +190,6 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
                       decoration: InputDecoration(
                         hintText: 'Een student zoeken',
                         prefixIcon: const Icon(Icons.search),
-                        suffixIcon: IconButton(
-                          icon: const Icon(Icons.manage_search_outlined),
-                          onPressed: _onSearchChanged,
-                        ),
                         filled: true,
                         fillColor: const Color(0xFFEFEFEF),
                         contentPadding: const EdgeInsets.symmetric(
@@ -193,12 +202,13 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
                     ),
                   ),
 
-                  const Divider(height: 0),
-
                   // Current student list in white container
-                  Expanded(
+                  Padding(
+                    padding: const EdgeInsets.all(12),
                     child: Container(
-                      margin: const EdgeInsets.all(12),
+                      constraints: const BoxConstraints(
+                        maxHeight: 380, // Limite la hauteur de la bulle
+                      ),
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -246,12 +256,7 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
                                     ),
                                   ),
                                   onPressed: () {
-                                    StudentStore.instance.removeByName(s.name);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                          content:
-                                              Text('Verwijderd: ${s.name}')),
-                                    );
+                                    _showDeleteConfirmation(context, s.name);
                                   },
                                   child: const Text('verwijder'),
                                 ),
@@ -262,57 +267,77 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
                       ),
                     ),
                   ),
+
+                  const Spacer(), // Espace flexible
                 ],
               ),
-            ),
 
-            // Search popup
-            if (_showPopup && results.isNotEmpty)
+              // Bouton retour en bas centré
               Positioned(
-                top: 158,
-                left: 12,
-                right: 12,
-                child: Material(
-                  elevation: 8,
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    constraints: const BoxConstraints(maxHeight: 260),
-                    child: ListView.separated(
-                      shrinkWrap: true,
-                      itemCount: results.length,
-                      separatorBuilder: (_, __) =>
-                          const Divider(height: 0, thickness: .6),
-                      itemBuilder: (context, i) {
-                        final name = results[i];
-                        return ListTile(
-                          title: Text(name),
-                          trailing: ElevatedButton(
-                            onPressed: () => _add(name),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF4CAF50),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 8),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              textStyle: const TextStyle(
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            child: const Text('add'),
-                          ),
-                        );
-                      },
+                bottom: 20,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).maybePop(),
+                    child: Image.asset(
+                      'assets/images/return.png',
+                      width: 70,
+                      height: 70,
+                      fit: BoxFit.contain,
                     ),
                   ),
                 ),
               ),
-          ],
+
+              // Search popup
+              if (_showPopup && results.isNotEmpty)
+                Positioned(
+                  top: 158,
+                  left: 12,
+                  right: 12,
+                  child: Material(
+                    elevation: 8,
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      constraints: const BoxConstraints(maxHeight: 260),
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        itemCount: results.length,
+                        separatorBuilder: (_, __) =>
+                            const Divider(height: 0, thickness: .6),
+                        itemBuilder: (context, i) {
+                          final name = results[i];
+                          return ListTile(
+                            title: Text(name),
+                            trailing: ElevatedButton(
+                              onPressed: () => _add(name),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF4CAF50),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 8),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                textStyle: const TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              child: const Text('add'),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

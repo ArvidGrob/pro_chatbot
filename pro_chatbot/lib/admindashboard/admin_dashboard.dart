@@ -95,7 +95,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
               // Beheer button
               _buildDashboardButton(
                 buttonId: 'klas',
-                label: 'klas',
+                label: 'Klas',
                 iconPath: 'assets/images/beheer.png',
                 primaryColor: themeManager.getOptionBlazeOrange(),
                 secondaryColor: themeManager.getSecondaryColor(
@@ -164,7 +164,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 padding:
                     const EdgeInsets.only(left: 20.0, right: 10.0, bottom: 0.0),
                 child: Align(
-                  alignment: Alignment.center,
+                  alignment: Alignment.centerLeft,
                   child: Text(
                     label,
                     style: const TextStyle(
