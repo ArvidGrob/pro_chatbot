@@ -48,22 +48,16 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        automaticallyImplyLeading: false,
         title: const Text(
           'Studentenoverzicht',
           style: TextStyle(
             color: primary,
             fontSize: 22,
             fontWeight: FontWeight.w800,
-            shadows: [
-              Shadow(
-                offset: Offset(0, 2),
-                blurRadius: 4,
-                color: Colors.black26,
-              ),
-            ],
           ),
         ),
-        centerTitle: false,
+        centerTitle: true,
       ),
       body: WaveBackgroundLayout(
         backgroundColor: themeManager.backgroundColor,
@@ -82,7 +76,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                       hintText: 'Een chat zoeken',
                       prefixIcon: const Icon(Icons.search),
                       suffixIcon: (_searchCtrl.text.isEmpty)
-                          ? const Icon(Icons.manage_search_outlined)
+                          ? null
                           : IconButton(
                               icon: const Icon(Icons.clear),
                               onPressed: () {
@@ -132,6 +126,8 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
                               textStyle: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w900,
@@ -139,6 +135,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                             ),
                             child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
                                   Icons.person_add_alt_1_rounded,
@@ -146,7 +143,12 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                                   size: 20,
                                 ),
                                 SizedBox(width: 6),
-                                Text('Student toevoegen'),
+                                Flexible(
+                                  child: Text(
+                                    'Student toevoegen',
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -175,6 +177,8 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
                               textStyle: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w900,
@@ -182,6 +186,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                             ),
                             child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
                                   Icons.delete_forever_rounded,
@@ -189,7 +194,12 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                                   size: 20,
                                 ),
                                 SizedBox(width: 6),
-                                Text('Student verwijderen'),
+                                Flexible(
+                                  child: Text(
+                                    'Student verwijderen',
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
