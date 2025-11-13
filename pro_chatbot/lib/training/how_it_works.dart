@@ -89,8 +89,14 @@ class HowItWorks extends StatelessWidget {
                                     'Je typt: "Kun je mij helpen met wiskunde?" → Dit is je input',
                               ),
                               const SizedBox(height: 12),
-                              _buildImagePlaceholder(
-                                  'Screenshot: Input veld met verschillende opties'),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.asset(
+                                  'assets/images/interaction.png',
+                                  width: double.infinity,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
                             ],
                           ),
 
@@ -406,8 +412,6 @@ class HowItWorks extends StatelessWidget {
           _buildArchitectureStep('3', 'Verwerkt in Tokens', Colors.orange),
           _buildArchitectureArrow(),
           _buildArchitectureStep('4', 'Genereert een Output', Colors.green),
-          const SizedBox(height: 16),
-          _buildImagePlaceholder('Diagram: Chatbot architectuur'),
         ],
       ),
     );

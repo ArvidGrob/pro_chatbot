@@ -78,8 +78,14 @@ class GettingStarted extends StatelessWidget {
                                 'Je kunt later je instellingen aanpassen via het Instellingen menu',
                               ),
                               const SizedBox(height: 12),
-                              _buildImagePlaceholder(
-                                  'Screenshot: Luminara Login scherm'),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.asset(
+                                  'assets/images/login_page.png',
+                                  width: double.infinity,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
                             ],
                           ),
 
@@ -104,8 +110,14 @@ class GettingStarted extends StatelessWidget {
                                 'Admin: (Voor beheerders) Beheer studenten, docenten en klassen',
                               ),
                               const SizedBox(height: 12),
-                              _buildImagePlaceholder(
-                                  'Screenshot: Navigatiepagina met 4 knoppen'),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.asset(
+                                  'assets/images/navigation_page.png',
+                                  width: double.infinity,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
                               const SizedBox(height: 16),
                               _buildSubsectionTitle('💬 Chat functie'),
                               _buildBulletPoint(
@@ -121,8 +133,14 @@ class GettingStarted extends StatelessWidget {
                                 'Luminara antwoordt met "Hallo! Hoe kan ik u helpen?" wanneer je begint',
                               ),
                               const SizedBox(height: 12),
-                              _buildImagePlaceholder(
-                                  'Screenshot: Chat interface met tekstinvoer'),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.asset(
+                                  'assets/images/chat_page.png',
+                                  width: double.infinity,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
                               const SizedBox(height: 16),
                               _buildSubsectionTitle('📚 Chat geschiedenis'),
                               _buildBulletPoint(
@@ -135,8 +153,61 @@ class GettingStarted extends StatelessWidget {
                                 'Voorbeelden: "Gerecyclede kunst", "Webstrip maken", "Spel programmeren"',
                               ),
                               const SizedBox(height: 12),
-                              _buildImagePlaceholder(
-                                  'Screenshot: Chat geschiedenis overzicht'),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.asset(
+                                  'assets/images/chat_history.png',
+                                  width: double.infinity,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              _buildSubsectionTitle(
+                                  '🎨 Thema\'s personaliseren'),
+                              _buildBulletPoint(
+                                'Kies je favoriete kleur: ga naar Instellingen → Thema',
+                              ),
+                              _buildBulletPoint(
+                                'Beschikbare thema\'s: Blauw (standaard), Groen, Paars, Roze, Oranje',
+                              ),
+                              _buildBulletPoint(
+                                'Het thema past de achtergrond, knoppen en wave-animatie aan',
+                              ),
+                              _buildBulletPoint(
+                                'Je keuze wordt automatisch opgeslagen en toegepast bij elke sessie',
+                              ),
+                              const SizedBox(height: 12),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.asset(
+                                  'assets/images/thema_page.png',
+                                  width: double.infinity,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              _buildSubsectionTitle('🚪 Uitloggen'),
+                              _buildBulletPoint(
+                                'Om uit te loggen: ga naar Instellingen → scroll naar beneden',
+                              ),
+                              _buildBulletPoint(
+                                'Tik op de rode "Uitloggen" knop onderaan',
+                              ),
+                              _buildBulletPoint(
+                                'Je wordt teruggebracht naar het login scherm',
+                              ),
+                              _buildBulletPoint(
+                                'Log altijd uit op gedeelde apparaten voor je privacy!',
+                              ),
+                              const SizedBox(height: 12),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.asset(
+                                  'assets/images/uitloggen.png',
+                                  width: double.infinity,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
                             ],
                           ),
 
@@ -159,8 +230,14 @@ class GettingStarted extends StatelessWidget {
                                 ],
                               ),
                               const SizedBox(height: 12),
-                              _buildImagePlaceholder(
-                                  'Screenshot: Eerste chat met Luminara'),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.asset(
+                                  'assets/images/starten_chat.png',
+                                  width: double.infinity,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
                             ],
                           ),
 
