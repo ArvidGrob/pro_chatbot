@@ -130,13 +130,6 @@ class _AddStudentPageState extends State<AddStudentPage> {
                 fontSize: 28,
                 fontWeight: FontWeight.w800,
                 color: primaryBlue,
-                shadows: [
-                  Shadow(
-                    offset: const Offset(0, 3),
-                    blurRadius: 6,
-                    color: Colors.black.withOpacity(0.25),
-                  ),
-                ],
               ),
             ),
             const SizedBox(height: 24),
