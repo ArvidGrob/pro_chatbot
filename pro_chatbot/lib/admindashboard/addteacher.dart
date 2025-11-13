@@ -46,168 +46,183 @@ class _TeacherPageState extends State<AddTeacherPage> {
 
     return WaveBackgroundLayout(
       backgroundColor: themeManager.backgroundColor,
-      child: Stack(
-        children: [
-          // Backgroundwaves
-          // Positioned(
-          //   bottom: 0,
-          //   left: 0,
-          //   right: 0,
-          //   child: CustomPaint(
-          //     size: Size(MediaQuery.of(context).size.width, 520),
-          //     painter: WaveBackgroundPainter(),
-          //   ),
-          // ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          child: Stack(
+            children: [
+              // Content
+              LayoutBuilder(
+                builder: (context, c) => SingleChildScrollView(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: c.maxHeight - 32),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const SizedBox(height: 6),
+                        const Text(
+                          'Docent toevoegen',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w800,
+                            color: primary,
+                            letterSpacing: .5,
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const _FieldLabel('Naam:'),
+                              _InputCard(
+                                child: TextFormField(
+                                  controller: _nameCtrl,
+                                  textInputAction: TextInputAction.next,
+                                  validator: (v) =>
+                                      (v == null || v.trim().isEmpty)
+                                          ? 'Voer een naam in'
+                                          : null,
+                                  decoration: const InputDecoration(
+                                    hintText: 'Voornaam en Achternaam',
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
 
-          // Content
-          LayoutBuilder(
-            builder: (context, c) => SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: c.maxHeight - 32),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: 6),
-                    const Text(
-                      'Docent toevoegen',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w800,
-                        color: primary,
-                        letterSpacing: .5,
-                      ),
+                              const _FieldLabel('Email'),
+                              _InputCard(
+                                child: TextFormField(
+                                  controller: _emailCtrl,
+                                  keyboardType: TextInputType.emailAddress,
+                                  textInputAction: TextInputAction.next,
+                                  validator: (v) {
+                                    if (v == null || v.trim().isEmpty) {
+                                      return 'Voer een email in';
+                                    }
+                                    final ok = RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                                        .hasMatch(v.trim());
+                                    return ok ? null : 'Ongeldig emailadres';
+                                  },
+                                  decoration: const InputDecoration(
+                                    hintText: 'Voer een Email in',
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+
+                              const _FieldLabel('Wachtwoord'),
+                              _InputCard(
+                                child: TextFormField(
+                                  controller: _pwCtrl,
+                                  obscureText: _obscure1,
+                                  obscuringCharacter: '•',
+                                  textInputAction: TextInputAction.next,
+                                  validator: (v) => (v == null || v.length < 6)
+                                      ? 'Min. 6 tekens'
+                                      : null,
+                                  decoration: InputDecoration(
+                                    hintText: 'Voer een Wachtwoord in',
+                                    suffixIcon: IconButton(
+                                      onPressed: () => setState(
+                                          () => _obscure1 = !_obscure1),
+                                      icon: Icon(
+                                        _obscure1
+                                            ? Icons.visibility_off
+                                            : Icons.visibility,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+
+                              const _FieldLabel('Herhaal wachtwoord:'),
+                              _InputCard(
+                                child: TextFormField(
+                                  controller: _pw2Ctrl,
+                                  obscureText: _obscure2,
+                                  obscuringCharacter: '•',
+                                  textInputAction: TextInputAction.done,
+                                  validator: (v) => (v == _pwCtrl.text)
+                                      ? null
+                                      : 'Wachtwoorden komen niet overeen',
+                                  decoration: InputDecoration(
+                                    hintText: 'Herhaal Wachtwoord',
+                                    suffixIcon: IconButton(
+                                      onPressed: () => setState(
+                                          () => _obscure2 = !_obscure2),
+                                      icon: Icon(
+                                        _obscure2
+                                            ? Icons.visibility_off
+                                            : Icons.visibility,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              const SizedBox(height: 20),
+
+                              // Register-Button
+                              Align(
+                                alignment: Alignment.center,
+                                child: SizedBox(
+                                  width: 220,
+                                  height: 56,
+                                  child: ElevatedButton(
+                                    onPressed: _submit,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF8F8FFF),
+                                      foregroundColor: Colors.white,
+                                      elevation: 6,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      textStyle: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    child: const Text('Registreren'),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(
+                            height: 100), // Espace pour le bouton return
+                      ],
                     ),
-                    const SizedBox(height: 14),
-                    Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const _FieldLabel('Naam:'),
-                          _InputCard(
-                            child: TextFormField(
-                              controller: _nameCtrl,
-                              textInputAction: TextInputAction.next,
-                              validator: (v) => (v == null || v.trim().isEmpty)
-                                  ? 'Voer een naam in'
-                                  : null,
-                              decoration: const InputDecoration(
-                                hintText: 'Voornaam en Achternaam',
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          const _FieldLabel('Email'),
-                          _InputCard(
-                            child: TextFormField(
-                              controller: _emailCtrl,
-                              keyboardType: TextInputType.emailAddress,
-                              textInputAction: TextInputAction.next,
-                              validator: (v) {
-                                if (v == null || v.trim().isEmpty) {
-                                  return 'Voer een email in';
-                                }
-                                final ok = RegExp(r'^[^@]+@[^@]+\.[^@]+')
-                                    .hasMatch(v.trim());
-                                return ok ? null : 'Ongeldig emailadres';
-                              },
-                              decoration: const InputDecoration(
-                                hintText: 'Voer een Email in',
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-
-                          const _FieldLabel('Wachtwoord'),
-                          _InputCard(
-                            child: TextFormField(
-                              controller: _pwCtrl,
-                              obscureText: _obscure1,
-                              obscuringCharacter: '•',
-                              textInputAction: TextInputAction.next,
-                              validator: (v) => (v == null || v.length < 6)
-                                  ? 'Min. 6 tekens'
-                                  : null,
-                              decoration: InputDecoration(
-                                hintText: 'Voer een Wachtwoord in',
-                                suffixIcon: IconButton(
-                                  onPressed: () =>
-                                      setState(() => _obscure1 = !_obscure1),
-                                  icon: Icon(
-                                    _obscure1
-                                        ? Icons.visibility_off
-                                        : Icons.visibility,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          const _FieldLabel('Herhaal wachtwoord:'),
-                          _InputCard(
-                            child: TextFormField(
-                              controller: _pw2Ctrl,
-                              obscureText: _obscure2,
-                              obscuringCharacter: '•',
-                              textInputAction: TextInputAction.done,
-                              validator: (v) => (v == _pwCtrl.text)
-                                  ? null
-                                  : 'Wachtwoorden komen niet overeen',
-                              decoration: InputDecoration(
-                                hintText: 'Herhaal Wachtwoord',
-                                suffixIcon: IconButton(
-                                  onPressed: () =>
-                                      setState(() => _obscure2 = !_obscure2),
-                                  icon: Icon(
-                                    _obscure2
-                                        ? Icons.visibility_off
-                                        : Icons.visibility,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          // Register-Button
-                          Align(
-                            alignment: Alignment.center,
-                            child: SizedBox(
-                              width: 220,
-                              height: 56,
-                              child: ElevatedButton(
-                                onPressed: _submit,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF8F8FFF),
-                                  foregroundColor: Colors.white,
-                                  elevation: 6,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  textStyle: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                child: const Text('Registreren'),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-                  ],
+                  ),
                 ),
               ),
-            ),
+
+              // Bouton retour en bas centré
+              Positioned(
+                bottom: 20,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).maybePop(),
+                    child: Image.asset(
+                      'assets/images/return.png',
+                      width: 70,
+                      height: 70,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
