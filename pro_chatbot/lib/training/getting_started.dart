@@ -134,6 +134,9 @@ class GettingStarted extends StatelessWidget {
                               _buildBulletPoint(
                                 'Voorbeelden: "Gerecyclede kunst", "Webstrip maken", "Spel programmeren"',
                               ),
+                              const SizedBox(height: 12),
+                              _buildImagePlaceholder(
+                                  'Screenshot: Chat geschiedenis overzicht'),
                             ],
                           ),
 
