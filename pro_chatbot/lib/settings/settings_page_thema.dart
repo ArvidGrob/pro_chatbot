@@ -101,7 +101,7 @@ class SettingsPageThema extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text(
-                      'Kleurenblind IBM Design Library',
+                      'Kleurenblind IBM Design',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
