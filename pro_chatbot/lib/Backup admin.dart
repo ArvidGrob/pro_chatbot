@@ -1,12 +1,13 @@
-import 'package:flutter/material.dart';
+/* import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '/theme_manager.dart';
 import '/wave_background_layout.dart';
+import 'package:pro_chatbot/admindashboard/addstudent.dart';
 import 'package:pro_chatbot/admindashboard/teacher_overview.dart';
 import 'student_overview.dart';
 import 'class_overview.dart';
-import '../models/user.dart';
-import '../api/user_provider.dart';
+import '/api/user.dart';
+import '/api/user_provider.dart';
 
 void main() {
   runApp(
@@ -36,7 +37,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
   @override
   Widget build(BuildContext context) {
     final themeManager = Provider.of<ThemeManager>(context);
-    final currentUser = Provider.of<UserProvider>(context).currentUser;
 
     return WaveBackgroundLayout(
       backgroundColor: themeManager.backgroundColor,
@@ -45,30 +45,15 @@ class _AdminDashboardState extends State<AdminDashboard> {
           padding: const EdgeInsets.all(20.0),
           child: Column(
             children: [
-              // Title + Welcome Message ofr user
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Admin dashboard',
-                    maxLines: 1,
-                    style: TextStyle(
-                      color: Color(0xFF4242BD),
-                      fontSize: 36,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  if (currentUser != null)
-                    Text(
-                      'Hallo ${currentUser.firstname} ${currentUser.middlename} ${currentUser.lastname}, youw rol is ${currentUser.role.name}',
-                      style: const TextStyle(
-                        color: Color(0xFF4242BD),
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                ],
+              // Title
+              const Text(
+                'Admin dashboard',
+                maxLines: 1,
+                style: TextStyle(
+                  color: Color(0xFF4242BD),
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 40),
 
@@ -235,3 +220,4 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 }
+*/

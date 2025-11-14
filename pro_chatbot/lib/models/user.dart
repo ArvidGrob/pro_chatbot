@@ -1,10 +1,16 @@
+enum Role {
+  admin,
+  teacher,
+  student,
+}
+
 class User {
   final int id;
   final String email;
   final String firstname;
   final String lastname;
   final String? middlename;
-  final String role;
+  final Role role;
 
   User({
     required this.id,
@@ -23,7 +29,8 @@ class User {
       lastname: json['lastname'],
       middlename: json['middlename'],
       email: json['email'],
-      role: json['role'],
+      role:
+          Role.values.firstWhere((r) => r.toString() == 'Role.${json['role']}'),
     );
   }
 
