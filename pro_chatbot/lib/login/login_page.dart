@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../navigation/navigation_page.dart';
 import '../api/api_services.dart';
-import '../models/user.dart'; // Use the unified User class
+import '../models/user.dart'; // User (student, teacher, admin) class
 import '../api/user_provider.dart'; // UserProvider
 import '../theme_manager.dart';
 
