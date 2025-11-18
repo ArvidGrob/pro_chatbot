@@ -2,6 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '/theme_manager.dart';
 import '/wave_background_layout.dart';
+import '../models/user.dart';
+import '../api/user_provider.dart';
+import '/api/auth_guard.dart';
+
+void main() {
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeManager()),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+      ],
+      child: const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: AuthGuard(
+          allowedRoles: [Role.admin, Role.teacher],
+          child: AddClassPage(),
+        ),
+      ),
+    ),
+  );
+}
 
 class AddClassPage extends StatefulWidget {
   const AddClassPage({super.key});

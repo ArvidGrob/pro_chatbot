@@ -6,6 +6,7 @@ import 'package:pro_chatbot/admindashboard/teacher_overview.dart';
 import 'student_overview.dart';
 import 'class_overview.dart';
 import '../models/user.dart';
+import '/api/auth_guard.dart';
 import '../api/user_provider.dart';
 
 void main() {
@@ -17,7 +18,10 @@ void main() {
       ],
       child: const MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: AdminDashboard(),
+        home: AuthGuard(
+          allowedRoles: [Role.admin, Role.teacher],
+          child: AdminDashboard(),
+        ),
       ),
     ),
   );
@@ -45,7 +49,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           padding: const EdgeInsets.all(20.0),
           child: Column(
             children: [
-              // Title + Welcome Message ofr user
+              // Title + Welcome Message for user
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -72,6 +76,57 @@ class _AdminDashboardState extends State<AdminDashboard> {
               ),
               const SizedBox(height: 40),
 
+              // Docent button
+              _buildDashboardButton(
+                buttonId: 'docent',
+                label: 'Docent',
+                iconPath: 'assets/images/docent.png',
+                primaryColor: themeManager.getOptionBrightPink(),
+                secondaryColor: themeManager.getSecondaryColor(
+                    themeManager.getOptionBrightPink(),
+                    lightenAmount: 0.2),
+                onTap: () {
+                  final userProvider =
+                      Provider.of<UserProvider>(context, listen: false);
+
+                  if (userProvider.hasRole(Role.admin)) {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const TeacherOverviewPage(),
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: RichText(
+                          text: const TextSpan(
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                            children: [
+                              TextSpan(
+                                text:
+                                    "Toegang geweigerd. Deze pagina vereist de rol ",
+                              ),
+                              TextSpan(
+                                text: "admin",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        backgroundColor: Colors.red,
+                        duration: const Duration(seconds: 3),
+                      ),
+                    );
+                  }
+                },
+              ),
+              const SizedBox(height: 25),
+
               // Student button
               _buildDashboardButton(
                 buttonId: 'student',
@@ -85,25 +140,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => const StudentOverviewPage(),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 25),
-
-              // Docent button
-              _buildDashboardButton(
-                buttonId: 'docent',
-                label: 'Docent',
-                iconPath: 'assets/images/docent.png',
-                primaryColor: themeManager.getOptionBrightPink(),
-                secondaryColor: themeManager.getSecondaryColor(
-                    themeManager.getOptionBrightPink(),
-                    lightenAmount: 0.2),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const TeacherOverviewPage(),
                     ),
                   );
                 },

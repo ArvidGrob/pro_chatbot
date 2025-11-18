@@ -6,6 +6,8 @@ import '../training/training_page.dart';
 import 'package:provider/provider.dart';
 import '/theme_manager.dart';
 import '/wave_background_layout.dart';
+import '/api/user_provider.dart';
+import '/models/user.dart';
 
 void main() {
   runApp(
@@ -116,12 +118,51 @@ class _NavigationPageState extends State<NavigationPage> {
                       secondaryColor: themeManager
                           .getSecondaryColor(themeManager.getOptionYellowSea()),
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const AdminDashboard(),
-                          ),
-                        );
+                        final userProvider =
+                            Provider.of<UserProvider>(context, listen: false);
+
+                        if (userProvider.hasRole(Role.admin) ||
+                            userProvider.hasRole(Role.teacher)) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AdminDashboard(),
+                            ),
+                          );
+                        } else {
+                          // Create a list of allowed roles
+                          final allowedRoles = [Role.admin, Role.teacher];
+                          final roleNames = allowedRoles
+                              .map((role) => role.toString().split('.').last)
+                              .join(' of ');
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: RichText(
+                                text: TextSpan(
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                  ),
+                                  children: [
+                                    const TextSpan(
+                                      text:
+                                          "Toegang geweigerd. Deze pagina vereist de rol ",
+                                    ),
+                                    TextSpan(
+                                      text: roleNames,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              backgroundColor: Colors.red,
+                              duration: const Duration(seconds: 3),
+                            ),
+                          );
+                        }
                       },
                     ),
                   ),
@@ -174,8 +215,7 @@ class _NavigationPageState extends State<NavigationPage> {
           children: [
             Expanded(
               child: Padding(
-                padding:
-                    const EdgeInsets.only(left: 20.0, right: 10.0, bottom: 0.0),
+                padding: const EdgeInsets.only(left: 20.0, right: 10.0),
                 child: Align(
                   alignment: Alignment.center,
                   child: Text(
