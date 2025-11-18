@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:pro_chatbot/settings/settings_page_account.dart';
 import 'package:provider/provider.dart';
+
+import 'package:pro_chatbot/settings/settings_page_account.dart';
+import 'package:pro_chatbot/api/user_provider.dart';
+
 import '/theme_manager.dart';
 import '/wave_background_layout.dart';
+
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
 
 void main() {
   runApp(MaterialApp(
@@ -24,6 +31,78 @@ class _SettingsPageAccount22State extends State<SettingsPageAccount22> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
   String _pressedButton = '';
+
+  Future<void> changePassword() async {
+    final oldPw = _oldPasswordController.text.trim();
+    final newPw = _newPasswordController.text.trim();
+    final confPw = _confirmPasswordController.text.trim();
+
+    // 1. New passwords dont align
+    if (newPw != confPw) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Nieuw wachtwoord en bevestiging zijn niet hetzelfde."),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // 2. get UserProvider
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final user = userProvider.currentUser;
+
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Geen gebruiker ingelogd."),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final email = user.email;
+
+    // 3. send Request
+    final response = await http.post(
+      Uri.parse('http://145.44.202.195:80/api/change-password'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': email,
+        'old_password': oldPw,
+        'new_password': newPw,
+      }),
+    );
+
+    final data = jsonDecode(response.body);
+
+    // 4. error
+    if (data['success'] != true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(data['error'] ?? "Het oude wachtwoord is onjuist."),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // 5. sucessful
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Wachtwoord succesvol gewijzigd!"),
+        backgroundColor: Colors.green,
+        duration: Duration(seconds: 2),
+      ),
+    );
+
+    // Optional: go back after 2sec delay
+    Future.delayed(const Duration(seconds: 2), () {
+      Navigator.pop(context);
+    });
+  }
+
 
   @override
   void dispose() {
@@ -185,15 +264,13 @@ class _SettingsPageAccount22State extends State<SettingsPageAccount22> {
 
               const SizedBox(height: 30),
 
-              // Registreren button - aligned to right
+              // wijzigen button - aligned to right
               Align(
                 alignment: Alignment.centerRight,
                 child: _buildRegisterButton(
-                  buttonId: 'registreren',
-                  label: 'Registreren',
-                  onTap: () {
-                    print('Registreren tapped');
-                  },
+                  buttonId: 'wijzigen',
+                  label: 'wijzigen',
+                  onTap: changePassword,
                 ),
               ),
 
