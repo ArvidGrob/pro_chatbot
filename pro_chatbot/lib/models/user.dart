@@ -33,6 +33,4 @@ class User {
           Role.values.firstWhere((r) => r.toString() == 'Role.${json['role']}'),
     );
   }
-
-  // String get fullName => '$firstname $middlename $lastname';
 }
