@@ -33,4 +33,21 @@ class User {
           Role.values.firstWhere((r) => r.toString() == 'Role.${json['role']}'),
     );
   }
+  User copyWith({
+    int? id,
+    String? email,
+    String? firstname,
+    String? lastname,
+    String? middlename,
+    Role? role,
+  }) {
+    return User(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      firstname: firstname ?? this.firstname,
+      lastname: lastname ?? this.lastname,
+      middlename: middlename ?? this.middlename,
+      role: role ?? this.role,
+    );
+  }
 }
