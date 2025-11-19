@@ -251,16 +251,48 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                     ),
-                                    onPressed: () {
-                                      setState(() {
-                                        _teachers.remove(name);
-                                      });
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          content: Text('Verwijderd: $name'),
-                                        ),
+                                    onPressed: () async {
+                                      final confirmed = await showDialog<bool>(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: const Text('Bevestiging'),
+                                            content: Text(
+                                              'Weet je zeker dat je $name wilt verwijderen?',
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () =>
+                                                    Navigator.of(context)
+                                                        .pop(false),
+                                                child: const Text('Annuleren'),
+                                              ),
+                                              TextButton(
+                                                onPressed: () =>
+                                                    Navigator.of(context)
+                                                        .pop(true),
+                                                style: TextButton.styleFrom(
+                                                  foregroundColor: Colors.red,
+                                                ),
+                                                child:
+                                                    const Text('Verwijderen'),
+                                              ),
+                                            ],
+                                          );
+                                        },
                                       );
+
+                                      if (confirmed == true) {
+                                        setState(() {
+                                          _teachers.remove(name);
+                                        });
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text('Verwijderd: $name'),
+                                          ),
+                                        );
+                                      }
                                     },
                                     child: const Text(
                                       'verwijder',
