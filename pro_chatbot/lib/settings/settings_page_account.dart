@@ -5,6 +5,7 @@ import '/wave_background_layout.dart';
 import 'settings_page.dart';
 import 'settings_page_account_2_1.dart';
 import 'settings_page_account_2_2.dart';
+import 'package:pro_chatbot/api/user_provider.dart';
 
 void main() {
   runApp(const TestSettingsAccountApp());
@@ -43,6 +44,8 @@ class _SettingsPageAccountState extends State<SettingsPageAccount> {
   @override
   Widget build(BuildContext context) {
     final themeManager = Provider.of<ThemeManager>(context);
+    final userProvider = Provider.of<UserProvider>(context);
+    final user = userProvider.currentUser;
 
     return WaveBackgroundLayout(
       backgroundColor: themeManager.backgroundColor,
@@ -119,22 +122,14 @@ class _SettingsPageAccountState extends State<SettingsPageAccount> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Persoonlijke gegevens',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Voornaam:\nAchternaam:',
-                      style: TextStyle(
+                    Text(
+                      'Voornaam: ${user?.firstname ?? ''}\nAchternaam: ${user?.lastname ?? ''}',
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
                       ),
                     ),
+                    
                     const SizedBox(height: 20),
                     Align(
                       alignment: Alignment.bottomRight,
