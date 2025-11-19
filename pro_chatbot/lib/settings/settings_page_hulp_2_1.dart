@@ -50,233 +50,247 @@ class _SettingsPageHulp21State extends State<SettingsPageHulp21> {
     return WaveBackgroundLayout(
       backgroundColor: themeManager.backgroundColor,
       child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            children: [
-              // Title with icon
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Hulp',
-                    style: TextStyle(
-                      color: Color(0xFF6464FF),
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(width: 15),
-                  Image.asset(
-                    'assets/images/hulp_2.png',
-                    width: 60,
-                    height: 60,
-                    fit: BoxFit.contain,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 40),
-
-              // Veelgestelde vragen title
-              Text(
-                'Veelgestelde vragen',
-                style: TextStyle(
-                  color: themeManager.subtitleTextColor,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 30),
-
-              // Questions container
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20.0),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFCCCCCC),
-                  borderRadius: BorderRadius.circular(20),
-                ),
+        child: Stack(
+          children: [
+            // Scrollable content in background
+            SingleChildScrollView(
+              controller: _scrollController,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 110.0),
                 child: Column(
                   children: [
-                    _buildQuestion(
-                      themeManager,
-                      questionId: 'question1',
-                      text: 'Hoe gebruik je de app?',
-                      baseColor: themeManager.getOptionSoftBlue(),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const HelpQuestion1(),
+                    // Title with icon
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'Hulp',
+                          style: TextStyle(
+                            color: Color(0xFF6464FF),
+                            fontSize: 40,
+                            fontWeight: FontWeight.bold,
                           ),
-                        );
-                      },
+                        ),
+                        const SizedBox(width: 15),
+                        Image.asset(
+                          'assets/images/hulp_2.png',
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.contain,
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 12),
-                    _buildQuestion(
-                      themeManager,
-                      questionId: 'question2',
-                      text: 'Hoe verander je je stem?',
-                      baseColor: themeManager.getOptionBrightPink(),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const HelpQuestion2(),
-                          ),
-                        );
-                      },
+                    const SizedBox(height: 40),
+
+                    // Veelgestelde vragen title
+                    Text(
+                      'Veelgestelde vragen',
+                      style: TextStyle(
+                        color: themeManager.subtitleTextColor,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    const SizedBox(height: 12),
-                    _buildQuestion(
-                      themeManager,
-                      questionId: 'question3',
-                      text: 'Hoe importeer ik een bestand in de chat?',
-                      baseColor: themeManager.getOptionBlazeOrange(),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const HelpQuestion3(),
+                    const SizedBox(height: 30),
+
+                    // Questions container
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20.0),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFCCCCCC),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Column(
+                        children: [
+                          _buildQuestion(
+                            themeManager,
+                            questionId: 'question1',
+                            text: 'Hoe gebruik je de app?',
+                            baseColor: themeManager.getOptionSoftBlue(),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const HelpQuestion1(),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    _buildQuestion(
-                      themeManager,
-                      questionId: 'question4',
-                      text: 'Hoe wijzig ik mijn wachtwoord?',
-                      baseColor: themeManager.getOptionYellowSea(),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const HelpQuestion4(),
+                          const SizedBox(height: 12),
+                          _buildQuestion(
+                            themeManager,
+                            questionId: 'question2',
+                            text: 'Hoe verander je je stem?',
+                            baseColor: themeManager.getOptionBrightPink(),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const HelpQuestion2(),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    _buildQuestion(
-                      themeManager,
-                      questionId: 'question5',
-                      text:
-                          'Hoe verwijder ik een\ngesprek uit de geschiedenis?',
-                      baseColor: themeManager.getOptionYellowSea(),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const HelpQuestion5(),
+                          const SizedBox(height: 12),
+                          _buildQuestion(
+                            themeManager,
+                            questionId: 'question3',
+                            text: 'Hoe importeer ik een bestand in de chat?',
+                            baseColor: themeManager.getOptionBlazeOrange(),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const HelpQuestion3(),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    _buildQuestion(
-                      themeManager,
-                      questionId: 'question6',
-                      text: 'Hoe neem ik contact op\nmet ondersteuning?',
-                      baseColor: themeManager.getOptionYellowSea(),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const HelpQuestion6(),
+                          const SizedBox(height: 12),
+                          _buildQuestion(
+                            themeManager,
+                            questionId: 'question4',
+                            text: 'Hoe wijzig ik mijn wachtwoord?',
+                            baseColor: themeManager.getOptionYellowSea(),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const HelpQuestion4(),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    _buildQuestion(
-                      themeManager,
-                      questionId: 'question7',
-                      text: 'Hoe werk ik met de\nspraak-naar-tekst functie?',
-                      baseColor: themeManager.getOptionYellowSea(),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const HelpQuestion7(),
+                          const SizedBox(height: 12),
+                          _buildQuestion(
+                            themeManager,
+                            questionId: 'question5',
+                            text:
+                                'Hoe verwijder ik een\ngesprek uit de geschiedenis?',
+                            baseColor: themeManager.getOptionYellowSea(),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const HelpQuestion5(),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    _buildQuestion(
-                      themeManager,
-                      questionId: 'question8',
-                      text:
-                          'Wat is de Training-sectie en\nhoe gebruik ik deze?',
-                      baseColor: themeManager.getOptionYellowSea(),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const HelpQuestion8(),
+                          const SizedBox(height: 12),
+                          _buildQuestion(
+                            themeManager,
+                            questionId: 'question6',
+                            text: 'Hoe neem ik contact op\nmet ondersteuning?',
+                            baseColor: themeManager.getOptionYellowSea(),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const HelpQuestion6(),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    _buildQuestion(
-                      themeManager,
-                      questionId: 'question9',
-                      text: 'Hoe wijzig ik mijn naam\nin mijn profiel?',
-                      baseColor: themeManager.getOptionYellowSea(),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const HelpQuestion9(),
+                          const SizedBox(height: 12),
+                          _buildQuestion(
+                            themeManager,
+                            questionId: 'question7',
+                            text:
+                                'Hoe werk ik met de\nspraak-naar-tekst functie?',
+                            baseColor: themeManager.getOptionYellowSea(),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const HelpQuestion7(),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    _buildQuestion(
-                      themeManager,
-                      questionId: 'question10',
-                      text: 'Welke bestandsformaten\nkan ik uploaden?',
-                      baseColor: themeManager.getOptionYellowSea(),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const HelpQuestion10(),
+                          const SizedBox(height: 12),
+                          _buildQuestion(
+                            themeManager,
+                            questionId: 'question8',
+                            text:
+                                'Wat is de Training-sectie en\nhoe gebruik ik deze?',
+                            baseColor: themeManager.getOptionYellowSea(),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const HelpQuestion8(),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
+                          const SizedBox(height: 12),
+                          _buildQuestion(
+                            themeManager,
+                            questionId: 'question9',
+                            text: 'Hoe wijzig ik mijn naam\nin mijn profiel?',
+                            baseColor: themeManager.getOptionYellowSea(),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const HelpQuestion9(),
+                                ),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 12),
+                          _buildQuestion(
+                            themeManager,
+                            questionId: 'question10',
+                            text: 'Welke bestandsformaten\nkan ik uploaden?',
+                            baseColor: themeManager.getOptionYellowSea(),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const HelpQuestion10(),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
+            ),
 
-              const Spacer(),
-
-              // Return button
-              Center(
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const SettingsPageHulp(),
-                      ),
-                    );
-                  },
-                  child: Image.asset(
-                    'assets/images/return.png',
-                    width: 70,
-                    height: 70,
-                    fit: BoxFit.contain,
+            // Return button fixed at bottom in foreground
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Center(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SettingsPageHulp(),
+                        ),
+                      );
+                    },
+                    child: Image.asset(
+                      'assets/images/return.png',
+                      width: 70,
+                      height: 70,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -300,6 +314,7 @@ class _SettingsPageHulp21State extends State<SettingsPageHulp21> {
         Future.delayed(const Duration(milliseconds: 80), () {
           setState(() => _pressedButton = '');
           print('$questionId tapped');
+          onTap();
         });
       },
       onTapCancel: () => setState(() => _pressedButton = ''),
