@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:pro_chatbot/api/user_provider.dart';
 import 'package:provider/provider.dart';
 import '/theme_manager.dart';
 import '/wave_background_layout.dart';
 import 'settings_page.dart';
 import 'settings_page_account_2_1.dart';
 import 'settings_page_account_2_2.dart';
+import '/login/login_page.dart';
 
 void main() {
   runApp(const TestSettingsAccountApp());
@@ -182,14 +184,14 @@ class _SettingsPageAccountState extends State<SettingsPageAccount> {
 
               const SizedBox(height: 25),
 
-              // Uitloggen button -> Red
+              // Logout button
               _buildButton(
                 themeManager: themeManager,
                 buttonId: 'uitloggen',
                 label: 'Uitloggen',
                 baseColor: const Color(0xFFFE445A),
                 onTap: () {
-                  print('Uitloggen tapped');
+                  _showLogoutConfirmationDialog(context); // builder context
                 },
                 isLogout: true,
               ),
@@ -219,6 +221,64 @@ class _SettingsPageAccountState extends State<SettingsPageAccount> {
           ),
         ),
       ),
+    );
+  }
+
+  /// Logout confirmation popup
+  void _showLogoutConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: const Text(
+            "Uitloggen",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+          ),
+          content: const Text(
+            "Weet je zeker dat je wilt uitloggen?",
+            style: TextStyle(fontSize: 18),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Cancel
+              },
+              child: const Text(
+                "Annuleren",
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                final userProvider =
+                    Provider.of<UserProvider>(context, listen: false);
+
+                userProvider.logout();
+                Navigator.of(context).pop(); // close popup
+
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const LoginPage(),
+                  ),
+                  (route) => false,
+                );
+              },
+              child: const Text(
+                "Uitloggen",
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
