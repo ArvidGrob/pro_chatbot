@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '/theme_manager.dart';
 import '/wave_background_layout.dart';
+import '/api/user_provider.dart';
+import '/models/user.dart';
 import 'settings_page.dart';
 import 'settings_page_hulp_2_1.dart';
 import 'settings_page_hulp_2_2.dart';
 import 'settings_page_hulp_2_3.dart';
+import 'teacher_help_inbox_page.dart';
+import 'student_help_responses_page.dart';
 
 void main() {
   runApp(
@@ -32,6 +36,19 @@ class _SettingsPageHulpState extends State<SettingsPageHulp> {
   @override
   Widget build(BuildContext context) {
     final themeManager = Provider.of<ThemeManager>(context);
+
+    // Essayer de récupérer le UserProvider de manière sûre
+    UserProvider? userProvider;
+    bool isTeacherOrAdmin = false;
+
+    try {
+      userProvider = Provider.of<UserProvider>(context, listen: false);
+      isTeacherOrAdmin = userProvider.currentUser != null &&
+          userProvider.hasAnyRole([Role.teacher, Role.admin]);
+    } catch (e) {
+      // Si le provider n'est pas disponible, on considère que c'est un étudiant
+      isTeacherOrAdmin = false;
+    }
 
     return WaveBackgroundLayout(
       backgroundColor: themeManager.backgroundColor,
@@ -78,20 +95,38 @@ class _SettingsPageHulpState extends State<SettingsPageHulp> {
               ),
               const SizedBox(height: 20),
 
-              // Contact opnemen -> Bright Pink
+              // Contact opnemen (students) of Berichten inbox (teachers/admin)
               _buildButton(
                 themeManager,
                 buttonId: 'contact',
-                label: 'Contact opnemen',
+                label: isTeacherOrAdmin ? 'Berichten inbox' : 'Contact opnemen',
                 baseColor: themeManager.getOptionBrightPink(),
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const SettingsPageHulp22(),
+                    builder: (context) => isTeacherOrAdmin
+                        ? const TeacherHelpInboxPage()
+                        : const SettingsPageHulp22(),
                   ),
                 ),
               ),
               const SizedBox(height: 20),
+
+              // Mijn berichten (students) - option supplémentaire pour voir les réponses
+              if (!isTeacherOrAdmin)
+                _buildButton(
+                  themeManager,
+                  buttonId: 'mijn_berichten',
+                  label: 'Mijn berichten',
+                  baseColor: themeManager.getOptionYellowSea(),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const StudentHelpResponsesPage(),
+                    ),
+                  ),
+                ),
+              if (!isTeacherOrAdmin) const SizedBox(height: 20),
 
               // Appversie -> Blaze Orange
               _buildButton(

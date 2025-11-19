@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '/theme_manager.dart';
 import '/wave_background_layout.dart';
+import '/api/user_provider.dart';
+import '/api/help_request_service.dart';
 import 'settings_page_hulp.dart';
 
 void main() {
@@ -26,13 +28,86 @@ class SettingsPageHulp22 extends StatefulWidget {
 class _SettingsPageHulp22State extends State<SettingsPageHulp22> {
   final TextEditingController _subjectController = TextEditingController();
   final TextEditingController _messageController = TextEditingController();
+  final HelpRequestService _helpRequestService = HelpRequestService();
   String _pressedButton = '';
+  bool _isSending = false;
 
   @override
   void dispose() {
     _subjectController.dispose();
     _messageController.dispose();
     super.dispose();
+  }
+
+  Future<void> _sendHelpRequest() async {
+    // Validation
+    if (_subjectController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a subject'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (_messageController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a message'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final currentUser = userProvider.currentUser;
+
+    if (currentUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('User not logged in'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isSending = true);
+
+    try {
+      await _helpRequestService.sendHelpRequest(
+        studentId: currentUser.id,
+        studentName: '${currentUser.firstname} ${currentUser.lastname}',
+        subject: _subjectController.text.trim(),
+        message: _messageController.text.trim(),
+      );
+
+      if (mounted) {
+        setState(() => _isSending = false);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Message sent successfully!'),
+            backgroundColor: Color(0xFF01BA8F),
+          ),
+        ); // Clear fields
+        _subjectController.clear();
+        _messageController.clear();
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isSending = false);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -145,10 +220,8 @@ class _SettingsPageHulp22State extends State<SettingsPageHulp22> {
                 Center(
                   child: _buildSendButton(
                     buttonId: 'verzenden',
-                    label: 'Verzenden',
-                    onTap: () {
-                      print('Verzenden tapped');
-                    },
+                    label: _isSending ? 'Verzenden...' : 'Verzenden',
+                    onTap: _isSending ? () {} : _sendHelpRequest,
                   ),
                 ),
 
