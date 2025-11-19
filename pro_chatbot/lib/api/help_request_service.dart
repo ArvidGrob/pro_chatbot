@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '/models/help_request.dart';
 
 class HelpRequestService {
-  static const String baseUrl = 'http://145.44.202.195:80';
+  static const String baseUrl = 'https://chatbot.duonra.nl';
 
   /// Send help request (for students)
   Future<bool> sendHelpRequest({

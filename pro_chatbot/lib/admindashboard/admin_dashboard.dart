@@ -36,7 +36,15 @@ class _AdminDashboardState extends State<AdminDashboard> {
   @override
   Widget build(BuildContext context) {
     final themeManager = Provider.of<ThemeManager>(context);
-    final currentUser = Provider.of<UserProvider>(context).currentUser;
+
+    // Récupérer le UserProvider de manière sûre
+    User? currentUser;
+    try {
+      currentUser =
+          Provider.of<UserProvider>(context, listen: false).currentUser;
+    } catch (e) {
+      currentUser = null;
+    }
 
     return WaveBackgroundLayout(
       backgroundColor: themeManager.backgroundColor,
