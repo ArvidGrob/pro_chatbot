@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '/theme_manager.dart';
 import '/wave_background_layout.dart';
 import '/models/help_request.dart';
+import '/models/help_request_message.dart';
 import '/api/help_request_service.dart';
 import '/api/user_provider.dart';
 
@@ -19,40 +20,63 @@ class TeacherHelpDetailPage extends StatefulWidget {
 }
 
 class _TeacherHelpDetailPageState extends State<TeacherHelpDetailPage> {
-  final TextEditingController _responseController = TextEditingController();
+  final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   final HelpRequestService _helpRequestService = HelpRequestService();
+  List<HelpRequestMessage> _messages = [];
+  bool _isLoading = true;
   bool _isSending = false;
-  String _pressedButton = '';
 
   @override
   void initState() {
     super.initState();
-    // Als al beantwoord, toon het antwoord
-    if (widget.helpRequest.teacherResponse != null) {
-      _responseController.text = widget.helpRequest.teacherResponse!;
-    }
+    _loadConversation();
   }
 
   @override
   void dispose() {
-    _responseController.dispose();
+    _messageController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
-  String _formatDateTime(DateTime date) {
-    final day = date.day.toString().padLeft(2, '0');
-    final month = date.month.toString().padLeft(2, '0');
-    final year = date.year;
-    final hour = date.hour.toString().padLeft(2, '0');
-    final minute = date.minute.toString().padLeft(2, '0');
-    return '$day/$month/$year à $hour:$minute';
+  Future<void> _loadConversation() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final messages = await _helpRequestService
+          .getConversationMessages(widget.helpRequest.id);
+
+      setState(() {
+        _messages = messages;
+        _isLoading = false;
+      });
+
+      // Scroll to bottom after loading
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+        }
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading conversation: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
-  Future<void> _sendResponse() async {
-    if (_responseController.text.trim().isEmpty) {
+  Future<void> _sendMessage() async {
+    if (_messageController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please write a response'),
+          content: Text('Please enter a message'),
           backgroundColor: Colors.red,
         ),
       );
@@ -75,33 +99,22 @@ class _TeacherHelpDetailPageState extends State<TeacherHelpDetailPage> {
     setState(() => _isSending = true);
 
     try {
-      await _helpRequestService.respondToHelpRequest(
-        requestId: widget.helpRequest.id,
-        teacherId: currentUser.id,
-        response: _responseController.text.trim(),
+      await _helpRequestService.addConversationMessage(
+        helpRequestId: widget.helpRequest.id,
+        sender: 'teacher',
+        senderId: currentUser.id,
+        senderName: '${currentUser.firstname} ${currentUser.lastname}',
+        message: _messageController.text.trim(),
       );
 
-      if (mounted) {
-        setState(() => _isSending = false);
+      _messageController.clear();
+      await _loadConversation();
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Response sent successfully!'),
-            backgroundColor: Color(0xFF6BCF7F),
-          ),
-        );
-
-        // Terug naar inbox na korte vertraging
-        Future.delayed(const Duration(milliseconds: 500), () {
-          if (mounted) {
-            Navigator.pop(context);
-          }
-        });
-      }
+      setState(() => _isSending = false);
     } catch (e) {
-      if (mounted) {
-        setState(() => _isSending = false);
+      setState(() => _isSending = false);
 
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: ${e.toString()}'),
@@ -123,236 +136,264 @@ class _TeacherHelpDetailPageState extends State<TeacherHelpDetailPage> {
           padding: const EdgeInsets.all(20.0),
           child: Column(
             children: [
-              // Title
-              const Text(
-                'Hulpverzoek',
-                style: TextStyle(
-                  color: Color(0xFF2A2AFF),
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: 30),
-
-              // Content
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              // Title and subject
+              Column(
+                children: [
+                  const Text(
+                    'Conversatie',
+                    style: TextStyle(
+                      color: Color(0xFF2A2AFF),
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Student info card
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(15),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Student name
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.person,
-                                  color: Color(0xFF2A2AFF),
-                                  size: 24,
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    widget.helpRequest.studentName,
-                                    style: const TextStyle(
-                                      color: Color(0xFF2A2AFF),
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
-
-                            // Date
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.access_time,
-                                  color: Color(0xFF888888),
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 10),
-                                Text(
-                                  _formatDateTime(widget.helpRequest.createdAt),
-                                  style: const TextStyle(
-                                    color: Color(0xFF888888),
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                      const Icon(
+                        Icons.person,
+                        color: Color(0xFF2A2AFF),
+                        size: 20,
                       ),
-
-                      const SizedBox(height: 20),
-
-                      // Subject
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE8E8FF),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Onderwerp:',
-                              style: TextStyle(
-                                color: Color(0xFF2A2AFF),
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              widget.helpRequest.subject,
-                              style: const TextStyle(
-                                color: Color(0xFF333333),
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // Message
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(15),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Bericht:',
-                              style: TextStyle(
-                                color: Color(0xFF2A2AFF),
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              widget.helpRequest.message,
-                              style: const TextStyle(
-                                color: Color(0xFF333333),
-                                fontSize: 16,
-                                height: 1.5,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 30),
-
-                      // Response section
-                      Text(
-                        widget.helpRequest.status == HelpRequestStatus.pending
-                            ? 'Uw antwoord:'
-                            : 'Antwoord verzonden:',
-                        style: const TextStyle(
-                          color: Color(0xFF2A2AFF),
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-
-                      // Response text field
-                      TextField(
-                        controller: _responseController,
-                        maxLines: 6,
-                        enabled: widget.helpRequest.status ==
-                            HelpRequestStatus.pending,
-                        decoration: InputDecoration(
-                          hintText: 'Schrijf hier uw antwoord...',
-                          hintStyle: const TextStyle(
-                            color: Color(0xFF888888),
-                            fontSize: 16,
-                          ),
-                          filled: true,
-                          fillColor: widget.helpRequest.status ==
-                                  HelpRequestStatus.pending
-                              ? const Color(0xFFD9D9D9)
-                              : const Color(0xFFF5F5F5),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                        style: const TextStyle(
-                          color: Color(0xFF333333),
-                          fontSize: 16,
-                        ),
-                      ),
-
-                      if (widget.helpRequest.status ==
-                          HelpRequestStatus.pending) ...[
-                        const SizedBox(height: 20),
-
-                        // Send button
-                        _buildButton(
-                          themeManager,
-                          buttonId: 'send',
-                          label: _isSending ? 'Verzenden...' : 'Verzenden',
-                          baseColor: const Color(0xFF6BCF7F),
-                          onTap: _isSending ? () {} : _sendResponse,
-                        ),
-                      ],
-
-                      if (widget.helpRequest.respondedAt != null) ...[
-                        const SizedBox(height: 12),
-                        Text(
-                          'Beantwoord op ${_formatDateTime(widget.helpRequest.respondedAt!)}',
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          widget.helpRequest.studentName,
                           style: const TextStyle(
                             color: Color(0xFF888888),
-                            fontSize: 14,
-                            fontStyle: FontStyle.italic,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                           ),
+                          textAlign: TextAlign.center,
                         ),
-                      ],
+                      ),
                     ],
                   ),
-                ),
+                  const SizedBox(height: 4),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE8E8FF),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      widget.helpRequest.subject,
+                      style: const TextStyle(
+                        color: Color(0xFF2A2AFF),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
               ),
 
               const SizedBox(height: 20),
+
+              // Messages list
+              Expanded(
+                child: _isLoading
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                          color: Color(0xFF2A2AFF),
+                        ),
+                      )
+                    : _messages.isEmpty
+                        ? Center(
+                            child: Text(
+                              'Nog geen berichten',
+                              style: TextStyle(
+                                color: themeManager.subtitleTextColor,
+                                fontSize: 16,
+                              ),
+                            ),
+                          )
+                        : ListView.builder(
+                            controller: _scrollController,
+                            itemCount: _messages.length,
+                            itemBuilder: (context, index) {
+                              final message = _messages[index];
+                              final isTeacher =
+                                  message.sender == MessageSender.teacher;
+
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: Row(
+                                  mainAxisAlignment: isTeacher
+                                      ? MainAxisAlignment.end
+                                      : MainAxisAlignment.start,
+                                  children: [
+                                    if (!isTeacher) ...[
+                                      Container(
+                                        width: 40,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF2A2AFF),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.person,
+                                          color: Colors.white,
+                                          size: 24,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                    ],
+                                    Flexible(
+                                      child: Container(
+                                        padding: const EdgeInsets.all(16),
+                                        decoration: BoxDecoration(
+                                          color: isTeacher
+                                              ? const Color(0xFF6BCF7F)
+                                              : Colors.white,
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: const Radius.circular(20),
+                                            topRight: const Radius.circular(20),
+                                            bottomLeft: Radius.circular(
+                                                isTeacher ? 20 : 4),
+                                            bottomRight: Radius.circular(
+                                                isTeacher ? 4 : 20),
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                                  Colors.black.withOpacity(0.1),
+                                              blurRadius: 4,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            if (!isTeacher)
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    bottom: 4),
+                                                child: Text(
+                                                  message.senderName,
+                                                  style: const TextStyle(
+                                                    color: Color(0xFF2A2AFF),
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                            Text(
+                                              message.message,
+                                              style: TextStyle(
+                                                color: isTeacher
+                                                    ? Colors.white
+                                                    : const Color(0xFF333333),
+                                                fontSize: 15,
+                                                height: 1.4,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 6),
+                                            Text(
+                                              _formatTime(message.createdAt),
+                                              style: TextStyle(
+                                                color: isTeacher
+                                                    ? Colors.white70
+                                                    : const Color(0xFF888888),
+                                                fontSize: 11,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    if (isTeacher) ...[
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        width: 40,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF6BCF7F),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.school,
+                                          color: Colors.white,
+                                          size: 24,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Message input
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(25),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: TextField(
+                        controller: _messageController,
+                        decoration: const InputDecoration(
+                          hintText: 'Typ je antwoord...',
+                          hintStyle: TextStyle(
+                            color: Color(0xFF888888),
+                            fontSize: 15,
+                          ),
+                          border: InputBorder.none,
+                        ),
+                        maxLines: null,
+                        textCapitalization: TextCapitalization.sentences,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  GestureDetector(
+                    onTap: _isSending ? null : _sendMessage,
+                    child: _isSending
+                        ? Container(
+                            width: 45,
+                            height: 45,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF888888),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Padding(
+                              padding: EdgeInsets.all(12),
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            ),
+                          )
+                        : Image.asset(
+                            'assets/images/arrow.png',
+                            width: 45,
+                            height: 45,
+                            fit: BoxFit.contain,
+                          ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 12),
 
               // Return button
               Center(
@@ -362,8 +403,8 @@ class _TeacherHelpDetailPageState extends State<TeacherHelpDetailPage> {
                   },
                   child: Image.asset(
                     'assets/images/return.png',
-                    width: 70,
-                    height: 70,
+                    width: 60,
+                    height: 60,
                     fit: BoxFit.contain,
                   ),
                 ),
@@ -375,54 +416,21 @@ class _TeacherHelpDetailPageState extends State<TeacherHelpDetailPage> {
     );
   }
 
-  Widget _buildButton(
-    ThemeManager themeManager, {
-    required String buttonId,
-    required String label,
-    required VoidCallback onTap,
-    required Color baseColor,
-  }) {
-    bool isPressed = _pressedButton == buttonId;
-    Color buttonColor =
-        themeManager.getButtonColor(baseColor, isPressed: isPressed);
+  String _formatTime(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
 
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressedButton = buttonId),
-      onTapUp: (_) {
-        Future.delayed(const Duration(milliseconds: 80), () {
-          if (mounted) {
-            setState(() => _pressedButton = '');
-            onTap();
-          }
-        });
-      },
-      onTapCancel: () => setState(() => _pressedButton = ''),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 18.0),
-        decoration: BoxDecoration(
-          color: buttonColor,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.15),
-              blurRadius: isPressed ? 6 : 8,
-              offset: Offset(0, isPressed ? 4 : 5),
-            ),
-          ],
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ),
-    );
+    final hour = date.hour.toString().padLeft(2, '0');
+    final minute = date.minute.toString().padLeft(2, '0');
+
+    if (difference.inDays == 0) {
+      return 'Vandaag $hour:$minute';
+    } else if (difference.inDays == 1) {
+      return 'Gisteren $hour:$minute';
+    } else {
+      final day = date.day.toString().padLeft(2, '0');
+      final month = date.month.toString().padLeft(2, '0');
+      return '$day/$month $hour:$minute';
+    }
   }
 }
