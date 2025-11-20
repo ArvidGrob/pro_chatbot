@@ -12,6 +12,9 @@ class User {
   final String? middlename;
   final Role role;
 
+  // Placeholder for online or ofline --> implemented later --> see Student_overview
+  bool online = false;
+
   User({
     required this.id,
     required this.email,
