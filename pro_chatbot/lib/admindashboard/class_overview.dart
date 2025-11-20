@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
-import 'add_class.dart';
 import 'package:provider/provider.dart';
+
+import 'add_class.dart';
 import '/theme_manager.dart';
 import '/wave_background_layout.dart';
 import '../models/user.dart';
 import '../api/user_provider.dart';
 import '/api/auth_guard.dart';
+
+import '../api/api_services.dart';
+import '../models/school_class.dart';
 
 void main() {
   runApp(
@@ -25,19 +29,6 @@ void main() {
   );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'School',
-      home: const ClassOverviewPage(),
-    );
-  }
-}
-
 class ClassOverviewPage extends StatefulWidget {
   const ClassOverviewPage({super.key});
 
@@ -47,15 +38,31 @@ class ClassOverviewPage extends StatefulWidget {
 
 class _ClassOverviewPageState extends State<ClassOverviewPage> {
   final TextEditingController _searchCtrl = TextEditingController();
+  final ApiService _api = ApiService();
 
-  List<String> _classes = [
-    'Klas 1A',
-    'Klas 2B',
-    'Klas 3C',
-    'Wiskunde groep',
-    'Nederlands 5V',
-    'Projectgroep ICT',
-  ];
+  List<SchoolClass> _classes = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadClasses();
+  }
+
+  Future<void> _loadClasses() async {
+    try {
+      final classes = await _api.getClasses(); // <- muss List<SchoolClass> zurückgeben
+      setState(() {
+        _classes = classes;
+        _loading = false;
+      });
+    } catch (e) {
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Fehler beim Laden der klassen: $e')),
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -66,24 +73,25 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
   @override
   Widget build(BuildContext context) {
     final themeManager = Provider.of<ThemeManager>(context);
+
     final query = _searchCtrl.text.trim().toLowerCase();
     final filtered = query.isEmpty
         ? _classes
-        : _classes.where((c) => c.toLowerCase().contains(query)).toList();
+        : _classes
+        .where((c) => c.name.toLowerCase().contains(query))
+        .toList();
 
     return WaveBackgroundLayout(
       backgroundColor: themeManager.backgroundColor,
       child: Stack(
         children: [
-          // Main content
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  // Header
-                  Center(
-                    child: const Text(
+                  const Center(
+                    child: Text(
                       'Klas overzicht',
                       style: TextStyle(
                         color: Color(0xFF3D4ED8),
@@ -94,7 +102,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                   ),
                   const SizedBox(height: 18),
 
-                  // Search field
+                  // Suchfeld
                   TextField(
                     controller: _searchCtrl,
                     onChanged: (_) => setState(() {}),
@@ -104,7 +112,9 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                       filled: true,
                       fillColor: const Color(0xFFEFEFEF),
                       contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 10),
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: BorderSide.none,
@@ -113,37 +123,12 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                   ),
                   const SizedBox(height: 12),
 
-                  // Add class button
+                  // Klasse hinzufügen
                   SizedBox(
                     width: double.infinity,
                     height: 42,
                     child: ElevatedButton.icon(
-                      onPressed: () async {
-                        final newClassName =
-                            await Navigator.of(context).push<String>(
-                          MaterialPageRoute(
-                            builder: (_) => const AddClassPage(),
-                          ),
-                        );
-
-                        if (newClassName != null &&
-                            newClassName.trim().isNotEmpty) {
-                          setState(() {
-                            if (!_classes.any((c) =>
-                                c.toLowerCase() ==
-                                newClassName.trim().toLowerCase())) {
-                              _classes.add(newClassName.trim());
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content:
-                                      Text('Klas "$newClassName" bestaat al'),
-                                ),
-                              );
-                            }
-                          });
-                        }
-                      },
+                      onPressed: _onAddClass,
                       icon: const Icon(Icons.add),
                       label: const Text('Klasse toevoegen'),
                       style: ElevatedButton.styleFrom(
@@ -158,7 +143,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                   ),
                   const SizedBox(height: 14),
 
-                  // Class list
+                  // Klassenliste
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 100),
@@ -174,56 +159,63 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                             ),
                           ],
                         ),
-                        child: filtered.isEmpty
-                            ? const Center(child: Text('Geen klassen gevonden'))
+                        child: _loading
+                            ? const Center(child: CircularProgressIndicator())
+                            : filtered.isEmpty
+                            ? const Center(
+                          child: Text('Geen klassen gevonden'),
+                        )
                             : ListView.separated(
-                                itemCount: filtered.length,
-                                separatorBuilder: (_, __) =>
-                                    const Divider(height: 0),
-                                itemBuilder: (context, i) {
-                                  final cls = filtered[i];
-                                  return ListTile(
-                                    title: Text(
-                                      cls,
-                                      style: const TextStyle(
-                                        color: Colors.blue,
-                                        fontWeight: FontWeight.w600,
+                          itemCount: filtered.length,
+                          separatorBuilder: (_, __) =>
+                          const Divider(height: 0),
+                          itemBuilder: (context, i) {
+                            final cls = filtered[i];
+                            return ListTile(
+                              title: Text(
+                                cls.name,
+                                style: const TextStyle(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.more_vert),
+                                    onPressed: () =>
+                                        _openClassActions(cls),
+                                  ),
+                                  TextButton(
+                                    style: TextButton.styleFrom(
+                                      backgroundColor:
+                                      const Color(0xFFFF4D4D),
+                                      foregroundColor: Colors.white,
+                                      padding:
+                                      const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 4,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                        BorderRadius.circular(10),
                                       ),
                                     ),
-                                    trailing: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(Icons.more_vert),
-                                          onPressed: () =>
-                                              _openClassActions(cls),
-                                        ),
-                                        TextButton(
-                                          style: TextButton.styleFrom(
-                                            backgroundColor:
-                                                const Color(0xFFFF4D4D),
-                                            foregroundColor: Colors.white,
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 10,
-                                              vertical: 4,
-                                            ),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                            ),
-                                          ),
-                                          onPressed: () => _confirmDelete(cls),
-                                          child: const Text(
-                                            'verwijderen',
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.w700),
-                                          ),
-                                        ),
-                                      ],
+                                    onPressed: () =>
+                                        _confirmDelete(cls),
+                                    child: const Text(
+                                      'verwijderen',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                      ),
                                     ),
-                                  );
-                                },
+                                  ),
+                                ],
                               ),
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ),
@@ -232,7 +224,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
             ),
           ),
 
-          // Return button
+          // Zurück-Button
           Positioned(
             bottom: 30,
             left: 0,
@@ -254,7 +246,35 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
     );
   }
 
-  void _openClassActions(String cls) {
+  // ===== Aktionen =====
+
+  Future<void> _onAddClass() async {
+    final newClassName = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        builder: (_) => const AddClassPage(),
+      ),
+    );
+
+    if (newClassName == null || newClassName.trim().isEmpty) return;
+
+    try {
+      final created = await _api.createClass(newClassName.trim());
+
+      setState(() {
+        _classes.add(created);
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Klas "${created.name}" aangemaakt')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Kon klas niet aanmaken: $e')),
+      );
+    }
+  }
+
+  void _openClassActions(SchoolClass cls) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -291,17 +311,18 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
     );
   }
 
-  void _showRenameDialog(String oldName) {
-    final ctrl = TextEditingController(text: oldName);
+  void _showRenameDialog(SchoolClass cls) {
+    final ctrl = TextEditingController(text: cls.name);
 
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('klasse hernoemen'),
+          title: const Text('Klasse hernoemen'),
           content: TextField(
             controller: ctrl,
-            decoration: const InputDecoration(hintText: 'Nieuwe naam'),
+            decoration:
+            const InputDecoration(hintText: 'Nieuwe naam'),
           ),
           actions: [
             TextButton(
@@ -309,25 +330,38 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 final newName = ctrl.text.trim();
-                if (newName.isEmpty) return;
-
-                final exists = _classes.any((c) =>
-                    c.toLowerCase() == newName.toLowerCase() && c != oldName);
-                if (exists) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Naam bestaat al voor een andere klas')),
-                  );
+                if (newName.isEmpty || newName == cls.name) {
+                  Navigator.pop(context);
                   return;
                 }
 
-                setState(() {
-                  final idx = _classes.indexOf(oldName);
-                  if (idx != -1) _classes[idx] = newName;
-                });
-                Navigator.pop(context);
+                try {
+                  await _api.renameClass(cls.id, newName);
+
+                  setState(() {
+                    _classes = _classes
+                        .map((c) => c.id == cls.id
+                        ? SchoolClass(id: c.id, name: newName)
+                        : c)
+                        .toList();
+                  });
+
+                  Navigator.pop(context);
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content:
+                        Text('Klas hernoemd naar "$newName"')),
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content:
+                        Text('Kon klas niet hernoemen: $e')),
+                  );
+                }
               },
               child: const Text('Save'),
             ),
@@ -337,27 +371,43 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
     );
   }
 
-  void _confirmDelete(String cls) {
+  void _confirmDelete(SchoolClass cls) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: const Text('Klas verwijderen?'),
-          content: Text('Weet je zeker dat je "$cls" wilt verwijderen?'),
+          content: Text(
+            'Weet je zeker dat je "${cls.name}" wilt verwijderen?',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: const Text('Annuleer'),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.pop(context);
-                setState(() {
-                  _classes.remove(cls);
-                });
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Removed: $cls')),
-                );
+
+                try {
+                  await _api.deleteClass(cls.id);
+
+                  setState(() {
+                    _classes.removeWhere((c) => c.id == cls.id);
+                  });
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content:
+                        Text('Klas "${cls.name}" verwijderd')),
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content:
+                        Text('Kon klas niet verwijderen: $e')),
+                  );
+                }
               },
               child: const Text(
                 'Verwijder',
