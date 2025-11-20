@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '/models/help_request.dart';
+import '/models/help_request_message.dart';
 
 class HelpRequestService {
   static const String baseUrl = 'https://chatbot.duonra.nl';
@@ -158,6 +159,68 @@ class HelpRequestService {
         throw Exception('Failed to retrieve request');
       }
     } catch (e) {
+      if (e is Exception) rethrow;
+      throw Exception('Server connection error');
+    }
+  }
+
+  /// Get conversation messages for a help request
+  Future<List<HelpRequestMessage>> getConversationMessages(
+      int helpRequestId) async {
+    try {
+      final url =
+          Uri.parse('$baseUrl/api/help-requests/$helpRequestId/messages');
+
+      final response = await http.get(
+        url,
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((json) => HelpRequestMessage.fromJson(json)).toList();
+      } else {
+        print('Error getting conversation messages: ${response.statusCode}');
+        throw Exception('Failed to retrieve conversation messages');
+      }
+    } catch (e) {
+      print('Exception in getConversationMessages: $e');
+      if (e is Exception) rethrow;
+      throw Exception('Server connection error');
+    }
+  }
+
+  /// Add a message to conversation (student or teacher)
+  Future<bool> addConversationMessage({
+    required int helpRequestId,
+    required String sender, // 'student' or 'teacher'
+    required int senderId,
+    required String senderName,
+    required String message,
+  }) async {
+    try {
+      final url =
+          Uri.parse('$baseUrl/api/help-requests/$helpRequestId/messages');
+
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'sender': sender,
+          'sender_id': senderId,
+          'sender_name': senderName,
+          'message': message,
+        }),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return true;
+      } else {
+        print('Error adding conversation message: ${response.statusCode}');
+        throw Exception('Failed to add message');
+      }
+    } catch (e) {
+      print('Exception in addConversationMessage: $e');
       if (e is Exception) rethrow;
       throw Exception('Server connection error');
     }
