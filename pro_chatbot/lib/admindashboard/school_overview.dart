@@ -4,6 +4,7 @@ import '/theme_manager.dart';
 import '/wave_background_layout.dart';
 import '../models/user.dart';
 import '../api/user_provider.dart';
+import '/api/api_services.dart';
 import '/api/auth_guard.dart';
 
 void main() {
@@ -24,19 +25,6 @@ void main() {
   );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'School',
-      home: const SchoolOverviewPage(),
-    );
-  }
-}
-
 class SchoolOverviewPage extends StatefulWidget {
   const SchoolOverviewPage({super.key});
 
@@ -45,30 +33,116 @@ class SchoolOverviewPage extends StatefulWidget {
 }
 
 class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
-  static const Color primary = Color(0xFF4A4AFF);
+  static const Color primaryBlue = Color(0xFF4A4AFF);
 
-  final TextEditingController _schoolNameCtrl =
-      TextEditingController(text: "Windesheim, Zwolle");
-
-  String _currentSchool = "Windesheim, Zwolle";
+  User? user;
+  bool _loading = true;
+  final ApiService api = ApiService();
 
   @override
-  void dispose() {
-    _schoolNameCtrl.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    _loadUserSchool();
   }
 
-  void _applyChange() {
-    final name = _schoolNameCtrl.text.trim();
-    if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a school name')),
-      );
-      return;
+  Future<void> _loadUserSchool() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (userProvider.currentUser != null) {
+      user = userProvider.currentUser!;
+      if (user!.school != null) {
+        setState(() => _loading = false);
+      } else {
+        try {
+          final school = await api.fetchUserSchool(user!.id);
+          setState(() {
+            user!.school = school;
+            _loading = false;
+          });
+        } catch (e) {
+          setState(() => _loading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Kon school niet ophalen: $e')),
+          );
+        }
+      }
     }
-    setState(() => _currentSchool = name);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('School changed to: $name')),
+  }
+
+  Future<void> _updateSchool(School updatedSchool) async {
+    try {
+      await api.updateSchool(updatedSchool);
+      setState(() {
+        user!.school = updatedSchool;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('School succesvol bijgewerkt')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Kon school niet bijwerken: $e')),
+      );
+    }
+  }
+
+  void _showEditDialog(User user) {
+    final nameCtrl = TextEditingController(text: user.school?.name ?? '');
+    final zipCtrl = TextEditingController(text: user.school?.zipCode ?? '');
+    final streetCtrl =
+        TextEditingController(text: user.school?.streetName ?? '');
+    final houseCtrl =
+        TextEditingController(text: user.school?.houseNumber ?? '');
+    final townCtrl = TextEditingController(text: user.school?.town ?? '');
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Wijzig schoolinformatie'),
+        content: SingleChildScrollView(
+          child: Column(
+            children: [
+              _dialogField('Naam', nameCtrl),
+              _dialogField('Postcode', zipCtrl),
+              _dialogField('Straat', streetCtrl),
+              _dialogField('Huisnummer', houseCtrl),
+              _dialogField('Stad', townCtrl),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Annuleren'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final updatedSchool = School(
+                id: user.school?.id ?? 0,
+                name: nameCtrl.text.trim(),
+                zipCode: zipCtrl.text.trim(),
+                streetName: streetCtrl.text.trim(),
+                houseNumber: houseCtrl.text.trim(),
+                town: townCtrl.text.trim(),
+              );
+              _updateSchool(updatedSchool);
+              Navigator.of(context).pop();
+            },
+            child: const Text('Opslaan'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _dialogField(String label, TextEditingController controller) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+      ),
     );
   }
 
@@ -76,200 +150,65 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
   Widget build(BuildContext context) {
     final themeManager = Provider.of<ThemeManager>(context);
 
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return WaveBackgroundLayout(
       backgroundColor: themeManager.backgroundColor,
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(
-          child: Stack(
-            children: [
-              Column(
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          // Title
-                          const Text(
-                            'Wijziging school',
-                            style: TextStyle(
-                              color: Color(0xFF3D4ED8),
-                              fontSize: 24,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          const SizedBox(height: 18),
-
-                          // Input field
-                          Container(
-                            padding: const EdgeInsets.only(left: 12),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFD9D9D9),
-                              borderRadius: BorderRadius.circular(28),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(.12),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: TextField(
-                                    controller: _schoolNameCtrl,
-                                    decoration: const InputDecoration(
-                                      hintText:
-                                          'Voer de naam van de school in…',
-                                      border: InputBorder.none,
-                                      contentPadding:
-                                          EdgeInsets.symmetric(vertical: 14),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                GestureDetector(
-                                  onTap: _applyChange,
-                                  child: Container(
-                                    margin: const EdgeInsets.only(right: 6),
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 14, vertical: 6),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF33CC66),
-                                      borderRadius: BorderRadius.circular(20),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(.15),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 3),
-                                        ),
-                                      ],
-                                    ),
-                                    child: const Text(
-                                      'Wijziging',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          // Current school
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              'Huidige school: $_currentSchool',
-                              style: const TextStyle(
-                                color: Color(0xFF3D4ED8),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Statistics
-                          _StatCard(title: 'Gebruiks­tijd:', value: '180 uur'),
-                          const SizedBox(height: 12),
-                          _StatCard(title: 'Vragen:', value: '860'),
-                          const SizedBox(height: 32),
-
-                          // More statistics
-                          const Text(
-                            'Meer statistieken volgen later…',
-                            style: TextStyle(
-                              color: Colors.black54,
-                              fontSize: 18,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                          const SizedBox(
-                              height: 100), // Espace pour le bouton return
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              // Return button
-              Positioned(
-                bottom: 20,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: GestureDetector(
-                    onTap: () => Navigator.of(context).maybePop(),
-                    child: Image.asset(
-                      'assets/images/return.png',
-                      width: 70,
-                      height: 70,
-                      fit: BoxFit.contain,
-                    ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Schoolinformatie',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                    color: primaryBlue,
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 20),
+                if (user?.school != null)
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD9D9D9),
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Naam: ${user!.school!.name}'),
+                        Text('Postcode: ${user!.school!.zipCode}'),
+                        Text('Straat: ${user!.school!.streetName}'),
+                        Text('Huisnummer: ${user!.school!.houseNumber}'),
+                        Text('Stad: ${user!.school!.town}'),
+                        const SizedBox(height: 12),
+                        Center(
+                          child: ElevatedButton(
+                            onPressed: () => _showEditDialog(user!),
+                            child: const Text('Wijzig school'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  final String title;
-  final String value;
-
-  const _StatCard({required this.title, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 24),
-      decoration: BoxDecoration(
-        color: const Color(0xFFD9D9D9),
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: Color(0xFF3D4ED8),
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(
-              color: Color(0xFF3D4ED8),
-              fontSize: 36,
-              fontWeight: FontWeight.w800,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
       ),
     );
   }

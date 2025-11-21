@@ -11,8 +11,7 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeManager()),
-        ChangeNotifierProvider(
-            create: (_) => UserProvider()), // Save logged-in user
+        ChangeNotifierProvider(create: (_) => UserProvider()),
       ],
       child: const _DebugLoginApp(),
     ),
@@ -63,38 +62,44 @@ class _LoginPageState extends State<LoginPage> {
 
     setState(() {
       _isLoading = true;
-      _errorMessage = null; // Clear previous error
+      _errorMessage = null;
     });
 
     final api = ApiService();
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     try {
-      // Log in
+      // 1️⃣ Login user
       User user = await api.login(_idCtrl.text.trim(), _pwCtrl.text.trim());
 
+      // 2️⃣ Fetch school for the logged-in user
+      School school = await api.fetchUserSchool(user.id);
+
+      // 3️⃣ Attach school to user
+      user = User(
+        id: user.id,
+        email: user.email,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        middlename: user.middlename,
+        role: user.role,
+        school: school,
+      );
+
+      // 4️⃣ Save updated user in provider
+      userProvider.login(user);
+
+      // 5️⃣ Navigate to main page
       if (!mounted) return;
-
-      // Save the user in UserProvider
-      Provider.of<UserProvider>(context, listen: false).login(user);
-
-      // Navigate to main page
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => const NavigationPage(),
-        ),
+        MaterialPageRoute(builder: (context) => const NavigationPage()),
       );
     } catch (e) {
       if (!mounted) return;
-
       setState(() {
-        String errorMsg = e.toString();
-        if (errorMsg.startsWith('Exception: ')) {
-          errorMsg = errorMsg.substring('Exception: '.length);
-        }
-        _errorMessage = errorMsg;
+        _errorMessage = e.toString().replaceFirst('Exception: ', '');
         _isLoading = false;
       });
-      return;
     }
 
     setState(() => _isLoading = false);
@@ -131,8 +136,6 @@ class _LoginPageState extends State<LoginPage> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
-
-                // Logo
                 SizedBox(
                   height: 240,
                   child: Image.asset(
@@ -141,12 +144,10 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 const SizedBox(height: 12),
-
                 Form(
                   key: _formKey,
                   child: Column(
                     children: [
-                      // Email field
                       _RoundedField(
                         label: 'E-mail',
                         controller: _idCtrl,
@@ -167,8 +168,6 @@ class _LoginPageState extends State<LoginPage> {
                         },
                       ),
                       const SizedBox(height: 16),
-
-                      // Password field
                       _RoundedField(
                         label: 'Wachtwoord',
                         controller: _pwCtrl,
@@ -185,8 +184,6 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                       const SizedBox(height: 24),
-
-                      // Error message
                       if (_errorMessage != null)
                         Container(
                           padding: const EdgeInsets.all(12),
@@ -213,10 +210,7 @@ class _LoginPageState extends State<LoginPage> {
                             ],
                           ),
                         ),
-
                       const SizedBox(height: 24),
-
-                      // Login button
                       SizedBox(
                         width: double.infinity,
                         height: 70,
@@ -259,7 +253,6 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
-/// Rounded input field widget
 class _RoundedField extends StatelessWidget {
   final String label;
   final TextEditingController controller;

@@ -151,4 +151,30 @@ class ApiService {
       throw Exception('Het is niet gelukt om docenten en admins op te halen.');
     }
   }
+
+  Future<School> fetchUserSchool(int userId) async {
+    final url = Uri.parse('$baseUrl/api/users/$userId/school');
+    final response =
+        await http.get(url, headers: {'Content-Type': 'application/json'});
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return School.fromJson(data);
+    } else {
+      throw Exception('Kon school niet ophalen');
+    }
+  }
+
+  Future<void> updateSchool(School school) async {
+    final url = Uri.parse('$baseUrl/api/schools/${school.id}');
+    final response = await http.put(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(school.toJson()),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Het is niet gelukt om de school bij te werken');
+    }
+  }
 }
