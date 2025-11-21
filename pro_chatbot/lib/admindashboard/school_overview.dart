@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pro_chatbot/admindashboard/teacher_overview.dart';
 import 'package:provider/provider.dart';
 import '/theme_manager.dart';
 import '/wave_background_layout.dart';
@@ -33,7 +34,7 @@ class SchoolOverviewPage extends StatefulWidget {
 }
 
 class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
-  static const Color primaryBlue = Color(0xFF4A4AFF);
+  static const Color primaryBlue = Color(0xFF6464FF);
 
   User? user;
   bool _loading = true;
@@ -75,7 +76,12 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
         user!.school = updatedSchool;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('School succesvol bijgewerkt')),
+        SnackBar(
+          content: Text(
+            'School is succesvol bijgewerkt naar ${updatedSchool.name}, ${updatedSchool.zipCode} ${updatedSchool.streetName} ${updatedSchool.houseNumber}, ${updatedSchool.town}',
+          ),
+          backgroundColor: const Color(0xFF018F6F),
+        ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -93,42 +99,64 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
         TextEditingController(text: user.school?.houseNumber ?? '');
     final townCtrl = TextEditingController(text: user.school?.town ?? '');
 
+    bool isPressed = false;
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Wijzig schoolinformatie'),
-        content: SingleChildScrollView(
-          child: Column(
-            children: [
-              _dialogField('Naam', nameCtrl),
-              _dialogField('Postcode', zipCtrl),
-              _dialogField('Straat', streetCtrl),
-              _dialogField('Huisnummer', houseCtrl),
-              _dialogField('Stad', townCtrl),
-            ],
+      builder: (context) => StatefulBuilder(
+        builder: (context, setStateDialog) => AlertDialog(
+          title: const Text('Wijzig schoolinformatie'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                _dialogField('Naam', nameCtrl),
+                _dialogField('Postcode', zipCtrl),
+                _dialogField('Straat', streetCtrl),
+                _dialogField('Huisnummer', houseCtrl),
+                _dialogField('Stad', townCtrl),
+              ],
+            ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: ButtonStyle(
+                backgroundColor:
+                    MaterialStateProperty.all(const Color(0xFFFF4D4D)),
+              ),
+              child: const Text(
+                'Annuleren',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.resolveWith((states) {
+                  if (states.contains(MaterialState.pressed)) {
+                    return const Color(0xFF018F6F);
+                  }
+                  return const Color(0xFF01BA8F);
+                }),
+              ),
+              onPressed: () {
+                final updatedSchool = School(
+                  id: user.school?.id ?? 0,
+                  name: nameCtrl.text.trim(),
+                  zipCode: zipCtrl.text.trim(),
+                  streetName: streetCtrl.text.trim(),
+                  houseNumber: houseCtrl.text.trim(),
+                  town: townCtrl.text.trim(),
+                );
+                _updateSchool(updatedSchool);
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                'Opslaan',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Annuleren'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final updatedSchool = School(
-                id: user.school?.id ?? 0,
-                name: nameCtrl.text.trim(),
-                zipCode: zipCtrl.text.trim(),
-                streetName: streetCtrl.text.trim(),
-                houseNumber: houseCtrl.text.trim(),
-                town: townCtrl.text.trim(),
-              );
-              _updateSchool(updatedSchool);
-              Navigator.of(context).pop();
-            },
-            child: const Text('Opslaan'),
-          ),
-        ],
       ),
     );
   }
@@ -162,8 +190,9 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                const SizedBox(height: 20),
                 const Text(
                   'Schoolinformatie',
                   style: TextStyle(
@@ -171,10 +200,12 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
                     fontWeight: FontWeight.w800,
                     color: primaryBlue,
                   ),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 20),
                 if (user?.school != null)
                   Container(
+                    width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: const Color(0xFFD9D9D9),
@@ -188,7 +219,7 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
                       ],
                     ),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text('Naam: ${user!.school!.name}'),
                         Text('Postcode: ${user!.school!.zipCode}'),
@@ -196,19 +227,99 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
                         Text('Huisnummer: ${user!.school!.houseNumber}'),
                         Text('Stad: ${user!.school!.town}'),
                         const SizedBox(height: 12),
-                        Center(
-                          child: ElevatedButton(
-                            onPressed: () => _showEditDialog(user!),
-                            child: const Text('Wijzig school'),
+                        ElevatedButton(
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.resolveWith(
+                                (states) =>
+                                    states.contains(MaterialState.pressed)
+                                        ? const Color(0xFF4A4AEE)
+                                        : primaryBlue),
+                          ),
+                          onPressed: () => _showEditDialog(user!),
+                          child: const Text(
+                            'Wijzig school',
+                            style: TextStyle(color: Colors.white),
                           ),
                         ),
                       ],
                     ),
                   ),
+                const SizedBox(height: 20),
+                // Two side-by-side containers
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _infoContainer('Gebruikstijd alle gebruikers', '180 uur'),
+                    _infoContainer(
+                        'Aantal vragen alle gebruikers', '6500 vragen'),
+                  ],
+                ),
+                const Spacer(),
+
+                // Return button (to SettingsPage - Custom made image)
+                Center(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const TeacherOverviewPage(),
+                        ),
+                      );
+                    },
+                    child: Image.asset(
+                      'assets/images/return.png',
+                      width: 70,
+                      height: 70,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _infoContainer(String title, String value) {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.42,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.blueGrey.shade50,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: primaryBlue,
+            ),
+          ),
+        ],
       ),
     );
   }

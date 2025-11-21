@@ -74,7 +74,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                   // Header
                   Padding(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
                     child: Center(
                       child: const Text(
                         'Principal overzicht',
@@ -86,7 +86,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 10),
 
                   // School tile
                   Padding(
@@ -142,10 +142,12 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Teacher/Admin list
-                  Expanded(
+// Teacher/Admin list
+                  Flexible(
+                    flex: 6, // reduced from 8 to make container smaller
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12.0, vertical: 8),
                       child: Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -199,9 +201,9 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                             ),
                             const SizedBox(height: 6),
                             const Divider(height: 0),
-
                             // List
-                            Expanded(
+                            Flexible(
+                              // changed from Expanded
                               child: FutureBuilder<List<User>>(
                                 future: _usersFuture,
                                 builder: (context, snapshot) {
@@ -219,6 +221,8 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                                   }
 
                                   final list = snapshot.data ?? [];
+                                  final query =
+                                      _searchCtrl.text.trim().toLowerCase();
                                   final filtered = query.isEmpty
                                       ? list
                                       : list.where((u) {
