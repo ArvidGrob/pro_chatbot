@@ -132,22 +132,20 @@ class ApiService {
       // Only show email duplicate message
       throw Exception('E-mail bestaat al');
     } else {
-      // Generic message for other errors
+      // message for all other errors (if there are any)
       throw Exception('Het is niet gelukt om de docent aan te maken');
     }
   }
 
   Future<List<User>> fetchTeachersAndAdmins() async {
-    final url = Uri.parse('$baseUrl/api/users');
+    final url =
+        Uri.parse('$baseUrl/api/users/teachers'); // matches backend route
     final response =
         await http.get(url, headers: {'Content-Type': 'application/json'});
 
     if (response.statusCode == 200) {
       final List data = jsonDecode(response.body);
-      final users = data
-          .map((json) => User.fromJson(json))
-          .where((u) => u.role == Role.teacher || u.role == Role.admin)
-          .toList();
+      final users = data.map((json) => User.fromJson(json)).toList();
       return users;
     } else {
       throw Exception('Het is niet gelukt om docenten en admins op te halen.');
