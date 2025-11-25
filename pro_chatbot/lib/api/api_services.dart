@@ -100,6 +100,35 @@ class ApiService {
     }
   }
 
+  Future<void> updateStudent({
+    required User student,
+    String? oldPassword,
+    String? newPassword,
+  }) async {
+    final url = Uri.parse('$baseUrl/api/users/${student.id}');
+    final body = {
+      'firstname': student.firstname,
+      'middlename': student.middlename,
+      'lastname': student.lastname,
+      'email': student.email,
+    };
+
+    if (oldPassword != null && newPassword != null) {
+      body['oldPassword'] = oldPassword;
+      body['newPassword'] = newPassword;
+    }
+
+    final response = await _client.put(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Kon student niet bijwerken');
+    }
+  }
+
   // ------- Creating teachers ----------
   Future<User> createTeacher({
     required String firstname,
