@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pro_chatbot/admindashboard/class_overview.dart';
+import 'package:pro_chatbot/api/api_services.dart';
 import 'addteacher.dart';
 import 'school_overview.dart';
 import 'package:provider/provider.dart';
@@ -27,19 +28,6 @@ void main() {
   );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Teachers',
-      home: const TeacherOverviewPage(),
-    );
-  }
-}
-
 class TeacherOverviewPage extends StatefulWidget {
   const TeacherOverviewPage({super.key});
 
@@ -49,16 +37,18 @@ class TeacherOverviewPage extends StatefulWidget {
 
 class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
   final TextEditingController _searchCtrl = TextEditingController();
+  late Future<List<User>> _usersFuture; // Teachers and admins
 
-  final List<String> _teachers = [
-    'Daan de Vries',
-    'Sanne Janssen',
-    'Fleur van Dijk',
-    'Tim Visser',
-    'Bram Meijer',
-    'Lotte Smit',
-    'Eva Mulder',
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _fetchUsers();
+  }
+
+  void _fetchUsers() {
+    final api = ApiService();
+    _usersFuture = api.fetchTeachersAndAdmins();
+  }
 
   @override
   void dispose() {
@@ -69,11 +59,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
   @override
   Widget build(BuildContext context) {
     final themeManager = Provider.of<ThemeManager>(context);
-
     final query = _searchCtrl.text.trim().toLowerCase();
-    final filtered = query.isEmpty
-        ? _teachers
-        : _teachers.where((t) => t.toLowerCase().contains(query)).toList();
 
     return WaveBackgroundLayout(
       backgroundColor: themeManager.backgroundColor,
@@ -88,7 +74,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                   // Header
                   Padding(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
                     child: Center(
                       child: const Text(
                         'Principal overzicht',
@@ -100,29 +86,23 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 10),
 
-                  const SizedBox(height: 30),
-
+                  // School tile
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 14),
-                        _bigTile(
-                          label: 'School',
-                          icon: Icons.apartment_rounded,
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => const SchoolOverviewPage(),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
+                    child: _bigTile(
+                      label: 'School',
+                      icon: Icons.apartment_rounded,
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const SchoolOverviewPage(),
+                          ),
+                        );
+                      },
                     ),
                   ),
-
                   const SizedBox(height: 24),
 
                   // Add teacher button
@@ -133,11 +113,14 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                       height: 42,
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const AddTeacherPage(),
-                            ),
-                          );
+                          Navigator.of(context)
+                              .push(
+                                MaterialPageRoute(
+                                  builder: (_) => const AddTeacherPage(),
+                                ),
+                              )
+                              .then(
+                                  (_) => setState(_fetchUsers)); // Refresh list
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF6F73FF),
@@ -157,162 +140,151 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 24),
 
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                    child: Container(
-                      constraints: const BoxConstraints(
-                        maxHeight: 320, // Limite la hauteur de la bulle
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(22),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.08),
-                            blurRadius: 16,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 10),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0),
-                            child: Text(
-                              'Recente Docenten',
-                              style: TextStyle(
-                                color: Color(0xFF1A2B8F),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                              ),
+// Teacher/Admin list
+                  Flexible(
+                    flex: 6, // reduced from 8 to make container smaller
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12.0, vertical: 8),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(22),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 16,
+                              offset: const Offset(0, 6),
                             ),
-                          ),
-                          const SizedBox(height: 10),
-                          // searchfield
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12.0,
-                            ),
-                            child: TextField(
-                              controller: _searchCtrl,
-                              onChanged: (_) => setState(() {}),
-                              decoration: InputDecoration(
-                                hintText: 'Een docent zoeken',
-                                prefixIcon: const Icon(Icons.search),
-                                filled: true,
-                                fillColor: const Color(0xFFEFEFEF),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 10,
-                                ),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  borderSide: BorderSide.none,
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 10),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 16.0),
+                              child: Text(
+                                'Recente Docenten / Admins',
+                                style: TextStyle(
+                                  color: Color(0xFF1A2B8F),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
                                 ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 6),
-                          const Divider(height: 0),
-
-                          // Liste scrollable avec hauteur limitée
-                          Flexible(
-                            child: ListView.separated(
-                              shrinkWrap: true,
-                              itemCount: filtered.length > 4
-                                  ? 4
-                                  : filtered.length, // Limite à 4 éléments
-                              separatorBuilder: (_, __) =>
-                                  const Divider(height: 0, thickness: .4),
-                              itemBuilder: (context, i) {
-                                final name = filtered[i];
-                                return ListTile(
-                                  title: Text(
-                                    name,
-                                    style: const TextStyle(
-                                      color: Colors.blue,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                            const SizedBox(height: 10),
+                            // Search field
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12.0),
+                              child: TextField(
+                                controller: _searchCtrl,
+                                onChanged: (_) => setState(() {}),
+                                decoration: InputDecoration(
+                                  hintText: 'Een docent zoeken',
+                                  prefixIcon: const Icon(Icons.search),
+                                  filled: true,
+                                  fillColor: const Color(0xFFEFEFEF),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 10,
                                   ),
-                                  trailing: TextButton(
-                                    style: TextButton.styleFrom(
-                                      backgroundColor: const Color(0xFFFF4D4D),
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 4,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            const Divider(height: 0),
+                            // List
+                            Flexible(
+                              // changed from Expanded
+                              child: FutureBuilder<List<User>>(
+                                future: _usersFuture,
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return const Center(
+                                        child: CircularProgressIndicator());
+                                  } else if (snapshot.hasError) {
+                                    return Center(
+                                      child: Text(
+                                        'Fout bij het ophalen: ${snapshot.error}',
+                                        textAlign: TextAlign.center,
                                       ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                    ),
-                                    onPressed: () async {
-                                      final confirmed = await showDialog<bool>(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return AlertDialog(
-                                            title: const Text('Bevestiging'),
-                                            content: Text(
-                                              'Weet je zeker dat je $name wilt verwijderen?',
-                                            ),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () =>
-                                                    Navigator.of(context)
-                                                        .pop(false),
-                                                child: const Text('Annuleren'),
-                                              ),
-                                              TextButton(
-                                                onPressed: () =>
-                                                    Navigator.of(context)
-                                                        .pop(true),
-                                                style: TextButton.styleFrom(
-                                                  foregroundColor: Colors.red,
-                                                ),
-                                                child:
-                                                    const Text('Verwijderen'),
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                      );
+                                    );
+                                  }
 
-                                      if (confirmed == true) {
-                                        setState(() {
-                                          _teachers.remove(name);
-                                        });
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                            content: Text('Verwijderd: $name'),
+                                  final list = snapshot.data ?? [];
+                                  final query =
+                                      _searchCtrl.text.trim().toLowerCase();
+                                  final filtered = query.isEmpty
+                                      ? list
+                                      : list.where((u) {
+                                          final fullName =
+                                              '${u.firstname} ${u.middlename ?? ''} ${u.lastname}';
+                                          return fullName
+                                              .toLowerCase()
+                                              .contains(query);
+                                        }).toList();
+
+                                  if (filtered.isEmpty) {
+                                    return const Center(
+                                      child: Text(
+                                          'Geen docenten of admins gevonden'),
+                                    );
+                                  }
+
+                                  return ListView.separated(
+                                    itemCount: filtered.length,
+                                    separatorBuilder: (_, __) =>
+                                        const Divider(height: 0, thickness: .4),
+                                    itemBuilder: (context, i) {
+                                      final user = filtered[i];
+                                      final fullName =
+                                          '${user.firstname} ${user.middlename ?? ''} ${user.lastname}'
+                                              .trim();
+
+                                      return ListTile(
+                                        title: Text(
+                                          fullName,
+                                          style: const TextStyle(
+                                            color: Colors.blue,
+                                            fontWeight: FontWeight.w600,
                                           ),
-                                        );
-                                      }
+                                        ),
+                                        subtitle: Text(
+                                          user.role == Role.admin
+                                              ? 'Admin'
+                                              : 'Teacher',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                        trailing: IconButton(
+                                          icon: const Icon(Icons.more_vert),
+                                          onPressed: () =>
+                                              _openUserActions(user),
+                                        ),
+                                      );
                                     },
-                                    child: const Text(
-                                      'verwijder',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
+                                  );
+                                },
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
-
-                  const Spacer(), // Ajoute un espace flexible en bas
                 ],
               ),
+              // Return button
               Positioned(
                 bottom: 20,
                 left: 0,
@@ -336,7 +308,40 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
     );
   }
 
-  // Großer Kachel-Button oben
+  void _openUserActions(User user) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit),
+              title: const Text('Naam wijzigen'),
+              onTap: () {
+                Navigator.pop(context);
+                // TODO: implement rename API
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete_forever, color: Colors.red),
+              title: const Text('Verwijderen',
+                  style: TextStyle(color: Colors.red)),
+              onTap: () {
+                Navigator.pop(context);
+                // TODO: implement delete API
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Big tile button
   Widget _bigTile({
     required String label,
     required IconData icon,

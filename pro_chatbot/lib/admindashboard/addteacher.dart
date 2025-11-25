@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:pro_chatbot/admindashboard/teacher_overview.dart';
+import 'package:pro_chatbot/api/api_services.dart';
 import 'package:provider/provider.dart';
 import '/theme_manager.dart';
 import '/wave_background_layout.dart';
 import '../models/user.dart';
 import '../api/user_provider.dart';
 import '/api/auth_guard.dart';
-// import 'login/login_page.dart';
 
+// import 'login/login_page.dart';
 void main() {
   runApp(
     MultiProvider(
@@ -19,7 +19,7 @@ void main() {
         debugShowCheckedModeBanner: false,
         home: AuthGuard(
           allowedRoles: [Role.admin],
-          child: TeacherOverviewPage(),
+          child: AddTeacherPage(),
         ),
       ),
     ),
@@ -30,274 +30,325 @@ class AddTeacherPage extends StatefulWidget {
   const AddTeacherPage({super.key});
 
   @override
-  State<AddTeacherPage> createState() => _TeacherPageState();
+  State<AddTeacherPage> createState() => _AddTeacherPageState();
 }
 
-class _TeacherPageState extends State<AddTeacherPage> {
-  static const primary = Color(0xFF6464FF);
+class _AddTeacherPageState extends State<AddTeacherPage> {
+  // Colors
+  static const primaryBlue = Color(0xFF1A2B8F);
+  static const accentPurple = Color(0xFF6F73FF);
 
-  final _formKey = GlobalKey<FormState>();
-  final _nameCtrl = TextEditingController();
-  final _emailCtrl = TextEditingController();
-  final _pwCtrl = TextEditingController();
-  final _pw2Ctrl = TextEditingController();
+  // Controllers
+  final TextEditingController _firstNameCtrl = TextEditingController();
+  final TextEditingController _middleNameCtrl = TextEditingController();
+  final TextEditingController _lastNameCtrl = TextEditingController();
+  final TextEditingController _emailCtrl = TextEditingController();
+  final TextEditingController _pwCtrl = TextEditingController();
+  final TextEditingController _pwRepeatCtrl = TextEditingController();
 
-  bool _obscure1 = true;
-  bool _obscure2 = true;
+  bool _submitting = false;
 
   @override
   void dispose() {
-    _nameCtrl.dispose();
+    _firstNameCtrl.dispose();
+    _middleNameCtrl.dispose();
+    _lastNameCtrl.dispose();
     _emailCtrl.dispose();
     _pwCtrl.dispose();
-    _pw2Ctrl.dispose();
+    _pwRepeatCtrl.dispose();
     super.dispose();
   }
 
-  void _submit() {
-    if (!_formKey.currentState!.validate()) return;
-    // TODO: add registration logic
+  // Email validation
+  bool _isValidEmail(String value) {
+    final regex = RegExp(r"^[\w\.\-]+@[a-zA-Z0-9]+\.[a-zA-Z]+$");
+    return regex.hasMatch(value);
+  }
+
+  // Toast/snackbar with color
+  void _toast(String msg, {bool success = true}) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Docent geregistreerd (Demo).')),
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: success ? Colors.green : Colors.red,
+        duration: const Duration(seconds: 2),
+      ),
     );
   }
 
+  //---------  SAVE → API -------------
+  Future<void> _save() async {
+    if (_submitting) return;
+
+    final firstName = _firstNameCtrl.text.trim();
+    final middleName = _middleNameCtrl.text.trim();
+    final lastName = _lastNameCtrl.text.trim();
+    final email = _emailCtrl.text.trim();
+    final pw = _pwCtrl.text.trim();
+    final repw = _pwRepeatCtrl.text.trim();
+
+    if (firstName.isEmpty)
+      return _toast('Vul een voornaam in.', success: false);
+    if (lastName.isEmpty)
+      return _toast('Vul een achternaam in.', success: false);
+    if (!_isValidEmail(email))
+      return _toast('Vul een geldig e-mailadres in.', success: false);
+    if (pw.isEmpty || repw.isEmpty)
+      return _toast('Vul beide wachtwoorden in.', success: false);
+    if (pw != repw)
+      return _toast('Wachtwoorden komen niet overeen.', success: false);
+
+    setState(() => _submitting = true);
+
+    try {
+      final api = ApiService();
+
+      await api.createTeacher(
+        firstname: firstName,
+        middlename: middleName.isEmpty ? null : middleName,
+        lastname: lastName,
+        email: email,
+        password: pw,
+      );
+
+      // Success message
+      String fullName = firstName;
+      if (middleName.isNotEmpty) {
+        fullName += ' $middleName';
+      }
+      fullName += ' $lastName';
+
+      _toast("Docent $fullName succesvol aangemaakt!", success: true);
+
+      // Clear fields for next entry
+      _firstNameCtrl.clear();
+      _middleNameCtrl.clear();
+      _lastNameCtrl.clear();
+      _emailCtrl.clear();
+      _pwCtrl.clear();
+      _pwRepeatCtrl.clear();
+    } catch (e) {
+      if (e.toString().contains('E-mail bestaat al')) {
+        _toast('Er bestaat al een docent met dit e-mailadres.', success: false);
+      } else {
+        _toast('Het is niet gelukt om de docent aan te maken.', success: false);
+      }
+    } finally {
+      setState(() => _submitting = false);
+    }
+  }
+
+  // --------------  UI  -----------------------
   @override
   Widget build(BuildContext context) {
     final themeManager = Provider.of<ThemeManager>(context);
 
     return WaveBackgroundLayout(
       backgroundColor: themeManager.backgroundColor,
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: SafeArea(
-          child: Stack(
-            children: [
-              // Content
-              LayoutBuilder(
-                builder: (context, c) => SingleChildScrollView(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(minHeight: c.maxHeight - 32),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const SizedBox(height: 6),
-                        const Text(
-                          'Docent toevoegen',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.w800,
-                            color: primary,
-                            letterSpacing: .5,
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        Form(
-                          key: _formKey,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              const _FieldLabel('Naam:'),
-                              _InputCard(
-                                child: TextFormField(
-                                  controller: _nameCtrl,
-                                  textInputAction: TextInputAction.next,
-                                  validator: (v) =>
-                                      (v == null || v.trim().isEmpty)
-                                          ? 'Voer een naam in'
-                                          : null,
-                                  decoration: const InputDecoration(
-                                    hintText: 'Voornaam en Achternaam',
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 12),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Title
+            Text(
+              'Teacher Management',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w800,
+                color: primaryBlue,
+              ),
+            ),
+            const SizedBox(height: 24),
 
-                              const _FieldLabel('Email'),
-                              _InputCard(
-                                child: TextFormField(
-                                  controller: _emailCtrl,
-                                  keyboardType: TextInputType.emailAddress,
-                                  textInputAction: TextInputAction.next,
-                                  validator: (v) {
-                                    if (v == null || v.trim().isEmpty) {
-                                      return 'Voer een email in';
-                                    }
-                                    final ok = RegExp(r'^[^@]+@[^@]+\.[^@]+')
-                                        .hasMatch(v.trim());
-                                    return ok ? null : 'Ongeldig emailadres';
-                                  },
-                                  decoration: const InputDecoration(
-                                    hintText: 'Voer een Email in',
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-
-                              const _FieldLabel('Wachtwoord'),
-                              _InputCard(
-                                child: TextFormField(
-                                  controller: _pwCtrl,
-                                  obscureText: _obscure1,
-                                  obscuringCharacter: '•',
-                                  textInputAction: TextInputAction.next,
-                                  validator: (v) => (v == null || v.length < 6)
-                                      ? 'Min. 6 tekens'
-                                      : null,
-                                  decoration: InputDecoration(
-                                    hintText: 'Voer een Wachtwoord in',
-                                    suffixIcon: IconButton(
-                                      onPressed: () => setState(
-                                          () => _obscure1 = !_obscure1),
-                                      icon: Icon(
-                                        _obscure1
-                                            ? Icons.visibility_off
-                                            : Icons.visibility,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-
-                              const _FieldLabel('Herhaal wachtwoord:'),
-                              _InputCard(
-                                child: TextFormField(
-                                  controller: _pw2Ctrl,
-                                  obscureText: _obscure2,
-                                  obscuringCharacter: '•',
-                                  textInputAction: TextInputAction.done,
-                                  validator: (v) => (v == _pwCtrl.text)
-                                      ? null
-                                      : 'Wachtwoorden komen niet overeen',
-                                  decoration: InputDecoration(
-                                    hintText: 'Herhaal Wachtwoord',
-                                    suffixIcon: IconButton(
-                                      onPressed: () => setState(
-                                          () => _obscure2 = !_obscure2),
-                                      icon: Icon(
-                                        _obscure2
-                                            ? Icons.visibility_off
-                                            : Icons.visibility,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-
-                              const SizedBox(height: 20),
-
-                              // Register-Button
-                              Align(
-                                alignment: Alignment.center,
-                                child: SizedBox(
-                                  width: 220,
-                                  height: 56,
-                                  child: ElevatedButton(
-                                    onPressed: _submit,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF8F8FFF),
-                                      foregroundColor: Colors.white,
-                                      elevation: 6,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                      textStyle: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                    child: const Text('Registreren'),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(
-                            height: 100), // Espace pour le bouton return
-                      ],
-                    ),
+            // Row: first + middle
+            Row(
+              children: [
+                Expanded(
+                  flex: 4,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _label('Voornaam:'),
+                      _inputField(
+                        controller: _firstNameCtrl,
+                        hint: 'Voornaam invoeren',
+                        keyboardType: TextInputType.name,
+                      ),
+                    ],
                   ),
                 ),
-              ),
-
-              // Bouton retour en bas centré
-              Positioned(
-                bottom: 20,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: GestureDetector(
-                    onTap: () => Navigator.of(context).maybePop(),
-                    child: Image.asset(
-                      'assets/images/return.png',
-                      width: 70,
-                      height: 70,
-                      fit: BoxFit.contain,
-                    ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 3,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _label('Tussenvoegsel:'),
+                      _inputField(
+                        controller: _middleNameCtrl,
+                        hint: 'Tussenvoegsel (optioneel)',
+                        keyboardType: TextInputType.name,
+                      ),
+                    ],
                   ),
                 ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            _label('Achternaam:'),
+            _inputField(
+              controller: _lastNameCtrl,
+              hint: 'Achternaam invoeren',
+              keyboardType: TextInputType.name,
+            ),
+
+            const SizedBox(height: 16),
+
+            _label('Email:'),
+            _inputField(
+              controller: _emailCtrl,
+              hint: 'Geldig email invoeren',
+              keyboardType: TextInputType.emailAddress,
+            ),
+
+            const SizedBox(height: 16),
+
+            _label('Wachtwoord:'),
+            _inputField(
+              controller: _pwCtrl,
+              hint: 'Wachtwoord invoeren',
+              obscure: true,
+            ),
+
+            const SizedBox(height: 16),
+
+            _label('Wachtwoord herhalen:'),
+            _inputField(
+              controller: _pwRepeatCtrl,
+              hint: 'Wachtwoord herhalen',
+              obscure: true,
+            ),
+
+            const SizedBox(height: 28),
+
+            // CREATE button
+            Center(
+              child: SizedBox(
+                width: 180,
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: _save,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: accentPurple,
+                    foregroundColor: Colors.white,
+                    elevation: 10,
+                    shadowColor: Colors.black.withOpacity(.4),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                    textStyle: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  child: _submitting
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text('Create'),
+                ),
               ),
-            ],
-          ),
+            ),
+
+            const SizedBox(height: 32),
+
+            Center(
+              child: _buildReturnButton(
+                onTap: () => Navigator.of(context).maybePop(),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
-}
 
-/// Label on top of a field
-class _FieldLabel extends StatelessWidget {
-  const _FieldLabel(this.text);
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6, left: 4),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Color(0xFF6464FF),
-          fontWeight: FontWeight.w800,
-        ),
+  // Label
+  Widget _label(String text, {Color color = const Color(0xFF1A2B8F)}) {
+    return Text(
+      text,
+      style: TextStyle(
+        color: color,
+        fontSize: 14,
+        fontWeight: FontWeight.w700,
       ),
     );
   }
-}
 
-class _InputCard extends StatelessWidget {
-  const _InputCard({required this.child});
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
+  // Input field
+  Widget _inputField({
+    required TextEditingController controller,
+    required String hint,
+    bool obscure = false,
+    TextInputType? keyboardType,
+  }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      margin: const EdgeInsets.only(top: 6),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        color: const Color(0xFFD9D9D9),
+        borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.10),
-            blurRadius: 10,
+            color: Colors.black.withOpacity(.25),
+            blurRadius: 8,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Theme(
-        data: Theme.of(context).copyWith(
-          inputDecorationTheme: const InputDecorationTheme(
-            hintStyle:
-                TextStyle(color: Colors.black38, fontWeight: FontWeight.w600),
-            border: InputBorder.none,
+      child: TextField(
+        controller: controller,
+        obscureText: obscure,
+        keyboardType: keyboardType,
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          hintText: hint,
+          hintStyle: const TextStyle(
+            color: Colors.black54,
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
           ),
         ),
-        child: child,
+        style: const TextStyle(
+          color: Colors.black,
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  // Return button
+  Widget _buildReturnButton({required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: SizedBox(
+        width: 70,
+        height: 70,
+        child: Image.asset(
+          'assets/images/return.png',
+          width: 70,
+          height: 70,
+          fit: BoxFit.contain,
+        ),
       ),
     );
   }
