@@ -38,6 +38,7 @@ class ApiService {
     }
   }
 
+  // ------- Creating Students ----------
   Future<User> createStudent({
     required String firstname,
     String? middlename,
@@ -81,6 +82,7 @@ class ApiService {
     }
   }
 
+  // ------- Fetching Students from database ----------
   Future<List<User>> fetchStudents() async {
     final url = Uri.parse('$baseUrl/api/users');
     final response =
@@ -98,6 +100,7 @@ class ApiService {
     }
   }
 
+  // ------- Creating teachers ----------
   Future<User> createTeacher({
     required String firstname,
     String? middlename,
@@ -141,6 +144,7 @@ class ApiService {
     }
   }
 
+  // ------- Fetching teachers and admins for lists ----------
   Future<List<User>> fetchTeachersAndAdmins() async {
     final url =
         Uri.parse('$baseUrl/api/users/teachers'); // matches backend route
@@ -169,6 +173,7 @@ class ApiService {
     }
   }
 
+  // ------- Update school information ----------
   Future<void> updateSchool(School school) async {
     final url = Uri.parse('$baseUrl/api/schools/${school.id}');
     final response = await http.put(
@@ -182,10 +187,9 @@ class ApiService {
     }
   }
 
-  // ---------- KLASSEN LADEN ----------
+  // ---------- Load Classes ----------
   Future<List<SchoolClass>> getClasses() async {
-    final url =
-        Uri.parse('$baseUrl/api/classes'); // <– ENDPOINT später evtl. anpassen
+    final url = Uri.parse('$baseUrl/api/classes');
 
     final response = await _client.get(url);
 
@@ -206,10 +210,9 @@ class ApiService {
     }
   }
 
-  // ---------- KLASSE ERSTELLEN ----------
+  // ---------- Creatin Classes ----------
   Future<SchoolClass> createClass(String name) async {
-    final url =
-        Uri.parse('$baseUrl/api/classes'); // <– ENDPOINT später evtl. anpassen
+    final url = Uri.parse('$baseUrl/api/classes');
 
     final response = await _client.post(
       url,
@@ -227,19 +230,16 @@ class ApiService {
       }
 
       final Map<String, dynamic> data = jsonDecode(body);
-      // falls der Server das Objekt direkt zurückgibt:
       return SchoolClass.fromJson(data);
-      // falls er in einem Feld liegt, dann evtl:
-      // return SchoolClass.fromJson(data['class']);
     } else {
       throw Exception(
           'Server returned ${response.statusCode}: ${response.body}');
     }
   }
 
-  // ---------- KLASSE UMBENENNEN ----------
+  // ---------- Rename Classes ----------
   Future<void> renameClass(int id, String newName) async {
-    final url = Uri.parse('$baseUrl/api/classes/$id'); // evtl. anpassen
+    final url = Uri.parse('$baseUrl/api/classes/$id');
 
     final response = await _client.put(
       url,
@@ -256,7 +256,7 @@ class ApiService {
     }
   }
 
-  // ---------- KLASSE LÖSCHEN ----------
+  // ---------- Delete Classes ----------
   Future<void> deleteClass(int id) async {
     final url = Uri.parse('$baseUrl/api/classes/$id');
 
