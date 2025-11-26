@@ -45,6 +45,8 @@ class ApiService {
     required String lastname,
     required String email,
     required String password,
+    required int
+        schoolId, // The created teacher or admin inherits the school_id of the loggedin user
   }) async {
     final url = Uri.parse('$baseUrl/api/users');
 
@@ -58,6 +60,8 @@ class ApiService {
         'email': email,
         'password': password,
         'role': 'student',
+        'schoolId':
+            schoolId, // The created teacher or admin inherits the school_id of the loggedin user
       }),
     );
 
@@ -74,10 +78,8 @@ class ApiService {
         role: Role.student,
       );
     } else if (response.statusCode == 409) {
-      // Only show email duplicate message
       throw Exception('E-mail bestaat al');
     } else {
-      // Generic message for other errors
       throw Exception('Het is niet gelukt om de student aan te maken');
     }
   }
@@ -146,9 +148,9 @@ class ApiService {
 
     // Only send the password if it's being changed
     if (newPassword != null && newPassword.isNotEmpty) {
-      body['password'] = newPassword; // match database column
+      body['password'] = newPassword;
       if (oldPassword != null && oldPassword.isNotEmpty) {
-        body['old_password'] = oldPassword; // optional, if backend verifies
+        body['old_password'] = oldPassword;
       }
     }
 
@@ -170,7 +172,9 @@ class ApiService {
     required String lastname,
     required String email,
     required String password,
-    String role = 'teacher', // default role is teacher
+    String role = 'teacher',
+    required int
+        schoolId, // The created teacher or admin inherits the school_id of the loggedin user
   }) async {
     final url = Uri.parse('$baseUrl/api/users');
 
@@ -183,7 +187,9 @@ class ApiService {
         'lastname': lastname,
         'email': email,
         'password': password,
-        'role': role, // dynamically send role
+        'role': role,
+        'schoolId':
+            schoolId, // The created teacher or admin inherits the school_id of the loggedin user
       }),
     );
 

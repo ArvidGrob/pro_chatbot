@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pro_chatbot/admindashboard/admin_dashboard.dart';
 import 'package:pro_chatbot/api/api_services.dart';
 import 'addteacher.dart';
 import 'school_overview.dart';
@@ -290,7 +291,14 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                 right: 0,
                 child: Center(
                   child: GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AdminDashboard(),
+                        ),
+                      );
+                    },
                     child: Image.asset(
                       'assets/images/return.png',
                       width: 70,

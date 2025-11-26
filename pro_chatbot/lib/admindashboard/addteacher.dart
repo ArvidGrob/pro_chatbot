@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:pro_chatbot/admindashboard/admin_dashboard.dart';
+import 'package:pro_chatbot/admindashboard/teacher_overview.dart';
 import 'package:pro_chatbot/api/api_services.dart';
 import 'package:provider/provider.dart';
 import '/theme_manager.dart';
@@ -101,6 +103,15 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
     try {
       final api = ApiService();
 
+      // Get current admin's school ID
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      if (userProvider.currentUser?.school == null) {
+        _toast('Admin heeft geen school ingesteld.', success: false);
+        setState(() => _submitting = false);
+        return;
+      }
+      final schoolId = userProvider.currentUser!.school!.id;
+
       await api.createTeacherOrAdmin(
         firstname: firstName,
         middlename: middleName.isEmpty ? null : middleName,
@@ -108,6 +119,7 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
         email: email,
         password: pw,
         role: _selectedRole,
+        schoolId: schoolId,
       );
 
       String fullName = firstName;
@@ -307,15 +319,24 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
             const SizedBox(height: 32),
 
             Center(
-                child: _buildReturnButton(
-                    onTap: () => Navigator.of(context).maybePop())),
+              child: _buildReturnButton(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TeacherOverviewPage(),
+                    ),
+                  );
+                },
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _label(String text, {Color color = const Color(0xFF1A2B8F)}) {
+  Widget _label(String text, {Color color = const Color(0xFF100c08)}) {
     return Text(text,
         style:
             TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.w700));
