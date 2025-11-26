@@ -6,7 +6,40 @@ import '/models/school_class.dart';
 class ApiService {
   static const String baseUrl = 'https://chatbot.duonra.nl';
 
+  // Singleton pattern
+  static final ApiService _instance = ApiService._internal();
+  factory ApiService() => _instance;
+  ApiService._internal();
+
   final http.Client _client = http.Client();
+  String? _conversationId;
+
+  Future<String> sendChatMessage(String message) async {
+    final url = Uri.parse('$baseUrl/api/chat');
+
+    final response = await _client.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'user_id': 1,
+        'message': message,
+        if (_conversationId != null) 'conversation_id': _conversationId,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception(
+          'Server returned ${response.statusCode}: ${response.body}');
+    }
+
+    final data = jsonDecode(response.body);
+
+    if (data['conversation_id'] != null) {
+      _conversationId = data['conversation_id'];
+    }
+
+    return data['response'];
+  }
 
   // ---------- LOGIN (user) ----------
   Future<User> login(String email, String password) async {
@@ -189,7 +222,12 @@ class ApiService {
 
   // ---------- Load Classes ----------
   Future<List<SchoolClass>> getClasses() async {
+<<<<<<< HEAD
     final url = Uri.parse('$baseUrl/api/classes');
+=======
+    final url =
+        Uri.parse('$baseUrl/api/classes'); // <– ENDPOINT später evtl. anpassen
+>>>>>>> US32-Talking-to-chatbot
 
     final response = await _client.get(url);
 
@@ -212,7 +250,12 @@ class ApiService {
 
   // ---------- Creatin Classes ----------
   Future<SchoolClass> createClass(String name) async {
+<<<<<<< HEAD
     final url = Uri.parse('$baseUrl/api/classes');
+=======
+    final url =
+        Uri.parse('$baseUrl/api/classes'); // <– ENDPOINT später evtl. anpassen
+>>>>>>> US32-Talking-to-chatbot
 
     final response = await _client.post(
       url,

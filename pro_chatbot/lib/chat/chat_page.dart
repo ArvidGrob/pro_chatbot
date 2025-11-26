@@ -8,6 +8,7 @@ import 'speech_to_text_dialog.dart';
 import 'attachment_prompt_dialog.dart';
 import 'platform_helper.dart';
 import '../history/chat_history_page.dart';
+import '../api/api_services.dart';
 
 void main() {
   runApp(const MaterialApp(
@@ -67,20 +68,46 @@ class _ChatPageState extends State<ChatPage> {
     _messageController.clear();
     _scrollToBottom();
 
-    // Simulate AI response with delay
-    Future.delayed(const Duration(seconds: 2), () {
+    ApiService().sendChatMessage(userMessage).then((response) {
       if (!mounted) return;
       setState(() {
         _isTyping = false;
         _messages.add(ChatMessage(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
-          text: 'AI not yet implemented. Please try again later.',
+          text: response,
+          isUser: false,
+          timestamp: DateTime.now(),
+        ));
+      });
+      _scrollToBottom();
+    }).catchError((error) {
+      if (!mounted) return;
+      setState(() {
+        _isTyping = false;
+        _messages.add(ChatMessage(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          text: 'Error: ${error.toString()}',
           isUser: false,
           timestamp: DateTime.now(),
         ));
       });
       _scrollToBottom();
     });
+
+    // Simulate AI response with delay
+    // Future.delayed(const Duration(seconds: 2), () {
+    //   if (!mounted) return;
+    //   setState(() {
+    //     _isTyping = false;
+    //     _messages.add(ChatMessage(
+    //       id: DateTime.now().millisecondsSinceEpoch.toString(),
+    //       text: 'AI not yet implemented. Please try again later.',
+    //       isUser: false,
+    //       timestamp: DateTime.now(),
+    //     ));
+    //   });
+    //   _scrollToBottom();
+    // });
   }
 
   void _scrollToBottom() {
