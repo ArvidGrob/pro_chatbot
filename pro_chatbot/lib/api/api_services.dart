@@ -222,12 +222,7 @@ class ApiService {
 
   // ---------- Load Classes ----------
   Future<List<SchoolClass>> getClasses() async {
-<<<<<<< HEAD
     final url = Uri.parse('$baseUrl/api/classes');
-=======
-    final url =
-        Uri.parse('$baseUrl/api/classes'); // <– ENDPOINT später evtl. anpassen
->>>>>>> US32-Talking-to-chatbot
 
     final response = await _client.get(url);
 
@@ -250,12 +245,7 @@ class ApiService {
 
   // ---------- Creatin Classes ----------
   Future<SchoolClass> createClass(String name) async {
-<<<<<<< HEAD
     final url = Uri.parse('$baseUrl/api/classes');
-=======
-    final url =
-        Uri.parse('$baseUrl/api/classes'); // <– ENDPOINT später evtl. anpassen
->>>>>>> US32-Talking-to-chatbot
 
     final response = await _client.post(
       url,
