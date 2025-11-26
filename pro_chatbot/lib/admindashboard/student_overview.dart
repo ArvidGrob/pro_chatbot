@@ -62,6 +62,17 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
     super.dispose();
   }
 
+  // TOAST MESSAGE
+  void _toast(String msg, {bool success = true}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: success ? Colors.green : Colors.red,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeManager = Provider.of<ThemeManager>(context);
@@ -360,11 +371,49 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                   style: TextStyle(color: Colors.red)),
               onTap: () {
                 Navigator.pop(context);
-                // handle delete
+                _confirmDeleteStudent(s);
               },
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _confirmDeleteStudent(User student) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Weet je het zeker?'),
+        content: Text(
+            'Weet je zeker dat je ${student.firstname} ${student.lastname} wilt verwijderen?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Annuleren'),
+          ),
+          ElevatedButton(
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all(Colors.red),
+            ),
+            onPressed: () async {
+              Navigator.of(context).pop(); // sluit de dialoog
+              try {
+                await ApiService().deleteStudent(
+                    student.id!); // Voeg deleteStudent toe aan ApiService
+                _toast(
+                    'Student ${student.firstname} ${student.lastname} succesvol verwijderd');
+                setState(_fetchStudents);
+              } catch (e) {
+                _toast('Kon student niet verwijderen: $e', success: false);
+              }
+            },
+            child: const Text(
+              'Verwijderen',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -442,10 +491,23 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
 
                   setState(() => _fetchStudents());
                   Navigator.of(context).pop();
+
+                  // ----- TOAST AFTER POPUP -----
+                  String fullName =
+                      '${updatedStudent.firstname} ${updatedStudent.middlename ?? ''} ${updatedStudent.lastname}'
+                          .trim();
+                  if (newPasswordCtrl.text.isNotEmpty) {
+                    _toast(
+                        'wachtwoord van $fullName succesvol gewijzigd!'); // 'Wachtwoord van Alberto Geritsen succesvol gewijzigd'
+                  } else if (emailCtrl.text.trim() != student.email) {
+                    _toast(
+                        'E-mail van $fullName gewijzigd naar ${emailCtrl.text.trim()}!'); // 'E-mail van Alberto Geritsen gewijzigd naar Alberto@gmail.com'
+                  } else {
+                    _toast(
+                        'Student succesvol gewijzigd naar $fullName'); // ('Student succsesvol gewijzigd naar Alberto Geritsen')
+                  }
                 } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Kon student niet bijwerken: $e')),
-                  );
+                  _toast('Kon student niet bijwerken: $e', success: false);
                 }
               },
               child:

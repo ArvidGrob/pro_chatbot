@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pro_chatbot/admindashboard/class_overview.dart';
 import 'package:pro_chatbot/api/api_services.dart';
 import 'addteacher.dart';
 import 'school_overview.dart';
@@ -38,7 +37,7 @@ class TeacherOverviewPage extends StatefulWidget {
 class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
   final TextEditingController _searchCtrl = TextEditingController();
   late Future<List<User>> _usersFuture;
-  String _pressedTile = ''; // Track pressed tile for custom press effect
+  String _pressedTile = '';
 
   @override
   void initState() {
@@ -49,9 +48,8 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
   void _fetchUsers() {
     final api = ApiService();
     _usersFuture = api.fetchTeachersAndAdmins().then((users) {
-      users.sort((a, b) {
-        return a.firstname.toLowerCase().compareTo(b.firstname.toLowerCase());
-      });
+      users.sort((a, b) =>
+          a.firstname.toLowerCase().compareTo(b.firstname.toLowerCase()));
       return users;
     });
   }
@@ -60,6 +58,16 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
   void dispose() {
     _searchCtrl.dispose();
     super.dispose();
+  }
+
+  void _toast(String msg, {bool success = true}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: success ? Colors.green : Colors.red,
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   @override
@@ -85,7 +93,6 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 16),
-                        // Header
                         Center(
                           child: const Text(
                             'Management Overzicht',
@@ -191,11 +198,9 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                               ),
                               const SizedBox(height: 6),
                               const Divider(height: 0),
-
-                              // Dynamic height list
                               SizedBox(
-                                height: MediaQuery.of(context).size.height *
-                                    0.55, // 55% of screen
+                                height:
+                                    MediaQuery.of(context).size.height * 0.55,
                                 child: FutureBuilder<List<User>>(
                                   future: _usersFuture,
                                   builder: (context, snapshot) {
@@ -213,18 +218,15 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                                     }
 
                                     final list = snapshot.data ?? [];
-                                    final filtered =
-                                        _searchCtrl.text.trim().isEmpty
-                                            ? list
-                                            : list.where((u) {
-                                                final fullName =
-                                                    '${u.firstname} ${u.middlename ?? ''} ${u.lastname}';
-                                                return fullName
-                                                    .toLowerCase()
-                                                    .contains(_searchCtrl.text
-                                                        .trim()
-                                                        .toLowerCase());
-                                              }).toList();
+                                    final filtered = query.isEmpty
+                                        ? list
+                                        : list.where((u) {
+                                            final fullName =
+                                                '${u.firstname} ${u.middlename ?? ''} ${u.lastname}';
+                                            return fullName
+                                                .toLowerCase()
+                                                .contains(query);
+                                          }).toList();
 
                                     if (filtered.isEmpty) {
                                       return const Center(
@@ -274,8 +276,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                             ],
                           ),
                         ),
-                        const SizedBox(
-                            height: 100), // spacing for bottom button
+                        const SizedBox(height: 100),
                       ],
                     ),
                   ),
@@ -321,7 +322,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
               title: const Text('Naam wijzigen'),
               onTap: () {
                 Navigator.pop(context);
-                // TODO: implement rename API
+                _showEditUserDialog(user);
               },
             ),
             ListTile(
@@ -330,7 +331,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                   style: TextStyle(color: Colors.red)),
               onTap: () {
                 Navigator.pop(context);
-                // TODO: implement delete API
+                _confirmDeleteUser(user);
               },
             ),
           ],
@@ -339,7 +340,155 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
     );
   }
 
-  // Pressable tile with darken-on-press effect
+  void _confirmDeleteUser(User user) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Weet je het zeker?'),
+        content: Text(
+            'Weet je zeker dat je ${user.firstname} ${user.lastname} wilt verwijderen?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Annuleren'),
+          ),
+          ElevatedButton(
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all(Colors.red),
+            ),
+            onPressed: () async {
+              Navigator.of(context).pop();
+              try {
+                await ApiService().deleteTeacherOrAdmin(user.id);
+                _toast(
+                    'Gebruiker ${user.firstname} ${user.lastname} succesvol verwijderd');
+                setState(_fetchUsers);
+              } catch (e) {
+                _toast('Kon gebruiker niet verwijderen: $e', success: false);
+              }
+            },
+            child: const Text(
+              'Verwijderen',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditUserDialog(User user) {
+    final firstnameCtrl = TextEditingController(text: user.firstname);
+    final middlenameCtrl = TextEditingController(text: user.middlename ?? '');
+    final lastnameCtrl = TextEditingController(text: user.lastname);
+    final emailCtrl = TextEditingController(text: user.email);
+    final oldPasswordCtrl = TextEditingController();
+    final newPasswordCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setStateDialog) => AlertDialog(
+          title: const Text('Wijzig gebruiker'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                _dialogField('Voornaam', firstnameCtrl),
+                _dialogField('Tussenvoegsel', middlenameCtrl),
+                _dialogField('Achternaam', lastnameCtrl),
+                _dialogField('E-mail', emailCtrl),
+                const SizedBox(height: 10),
+                const Divider(),
+                const SizedBox(height: 10),
+                const Text('Wachtwoord wijzigen',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                _dialogField('Oud wachtwoord', oldPasswordCtrl,
+                    obscureText: true),
+                _dialogField('Nieuw wachtwoord', newPasswordCtrl,
+                    obscureText: true),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: ButtonStyle(
+                backgroundColor:
+                    MaterialStateProperty.all(const Color(0xFFFF4D4D)),
+              ),
+              child: const Text('Annuleren',
+                  style: TextStyle(color: Colors.white)),
+            ),
+            ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.resolveWith((states) =>
+                    states.contains(MaterialState.pressed)
+                        ? const Color(0xFF018F6F)
+                        : const Color(0xFF01BA8F)),
+              ),
+              onPressed: () async {
+                try {
+                  final updatedUser = User(
+                    id: user.id,
+                    firstname: firstnameCtrl.text.trim(),
+                    middlename: middlenameCtrl.text.trim(),
+                    lastname: lastnameCtrl.text.trim(),
+                    email: emailCtrl.text.trim(),
+                    role: user.role,
+                  );
+
+                  await ApiService().updateTeacherOrAdmin(
+                    user: updatedUser,
+                    oldPassword: oldPasswordCtrl.text.isEmpty
+                        ? null
+                        : oldPasswordCtrl.text,
+                    newPassword: newPasswordCtrl.text.isEmpty
+                        ? null
+                        : newPasswordCtrl.text,
+                  );
+
+                  setState(() => _fetchUsers());
+                  Navigator.of(context).pop();
+
+                  String fullName =
+                      '${updatedUser.firstname} ${updatedUser.middlename ?? ''} ${updatedUser.lastname}'
+                          .trim();
+                  if (newPasswordCtrl.text.isNotEmpty) {
+                    _toast('Wachtwoord van $fullName succesvol gewijzigd!');
+                  } else if (emailCtrl.text.trim() != user.email) {
+                    _toast(
+                        'E-mail van $fullName gewijzigd naar ${emailCtrl.text.trim()}!');
+                  } else {
+                    _toast('Gebruiker succesvol gewijzigd naar $fullName');
+                  }
+                } catch (e) {
+                  _toast('Kon gebruiker niet bijwerken: $e', success: false);
+                }
+              },
+              child:
+                  const Text('Opslaan', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _dialogField(String label, TextEditingController controller,
+      {bool obscureText = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: TextField(
+        controller: controller,
+        obscureText: obscureText,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+      ),
+    );
+  }
+
   Widget _pressableTile({
     required String tileId,
     required String label,

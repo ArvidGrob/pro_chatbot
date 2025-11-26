@@ -23,7 +23,7 @@ class AuthGuard extends StatelessWidget {
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
 
-    // 1️⃣ User not logged in → redirect to login page
+    // User not logged in → redirect to login page
     if (!userProvider.isLoggedIn) {
       // Ensure Navigator runs after the current frame
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -39,12 +39,12 @@ class AuthGuard extends StatelessWidget {
       );
     }
 
-    // 2️⃣ User logged in but role not allowed → show access denied page
+    // User logged in but role not allowed → show access denied page
     if (!userProvider.hasAnyRole(allowedRoles)) {
       return const AccessDeniedPage();
     }
 
-    // 3️⃣ User is allowed → show requested page
+    // User is allowed → show requested page
     return child;
   }
 }

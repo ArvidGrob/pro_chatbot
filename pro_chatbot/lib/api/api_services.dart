@@ -82,6 +82,36 @@ class ApiService {
     }
   }
 
+// ---------- Delete Student ----------
+  Future<void> deleteStudent(int id) async {
+    try {
+      final url = Uri.parse('$baseUrl/api/users/$id');
+
+      final response = await _client.delete(
+        url,
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      print('DELETE $url -> ${response.statusCode}');
+      print('BODY: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        // Successfully deleted
+        return;
+      } else if (response.statusCode == 404) {
+        throw Exception('Student niet gevonden');
+      } else if (response.statusCode == 403) {
+        throw Exception('Alleen studenten kunnen verwijderd worden');
+      } else {
+        throw Exception(
+            'Server fout (${response.statusCode}): ${response.body}');
+      }
+    } catch (e) {
+      if (e is Exception) rethrow;
+      throw Exception('Kan geen verbinding maken met de server');
+    }
+  }
+
   // ------- Fetching Students from database ----------
   Future<List<User>> fetchStudents() async {
     final url = Uri.parse('$baseUrl/api/users');
@@ -100,6 +130,7 @@ class ApiService {
     }
   }
 
+  // ------- Update Students from database ----------
   Future<void> updateStudent({
     required User student,
     String? oldPassword,
@@ -113,9 +144,12 @@ class ApiService {
       'email': student.email,
     };
 
-    if (oldPassword != null && newPassword != null) {
-      body['oldPassword'] = oldPassword;
-      body['newPassword'] = newPassword;
+    // Only send the password if it's being changed
+    if (newPassword != null && newPassword.isNotEmpty) {
+      body['password'] = newPassword; // match database column
+      if (oldPassword != null && oldPassword.isNotEmpty) {
+        body['old_password'] = oldPassword; // optional, if backend verifies
+      }
     }
 
     final response = await _client.put(
@@ -170,6 +204,69 @@ class ApiService {
     } else {
       // message for all other errors (if there are any)
       throw Exception('Het is niet gelukt om de docent aan te maken');
+    }
+  }
+
+  // ------- Delete Teacher/Admin ----------
+  Future<void> deleteTeacherOrAdmin(int id) async {
+    try {
+      final url = Uri.parse('$baseUrl/api/users/$id');
+
+      final response = await _client.delete(
+        url,
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      print('DELETE $url -> ${response.statusCode}');
+      print('BODY: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        // Successfully deleted
+        return;
+      } else if (response.statusCode == 404) {
+        throw Exception('Gebruiker niet gevonden');
+      } else if (response.statusCode == 403) {
+        throw Exception('Alleen docenten/admins kunnen verwijderd worden');
+      } else {
+        throw Exception(
+            'Server fout (${response.statusCode}): ${response.body}');
+      }
+    } catch (e) {
+      if (e is Exception) rethrow;
+      throw Exception('Kan geen verbinding maken met de server');
+    }
+  }
+
+  // ------- Update Teacher/Admin ----------
+  Future<void> updateTeacherOrAdmin({
+    required User user,
+    String? oldPassword,
+    String? newPassword,
+  }) async {
+    final url = Uri.parse('$baseUrl/api/users/${user.id}');
+    final body = {
+      'firstname': user.firstname,
+      'middlename': user.middlename,
+      'lastname': user.lastname,
+      'email': user.email,
+    };
+
+    // Only send the password if it's being changed
+    if (newPassword != null && newPassword.isNotEmpty) {
+      body['password'] = newPassword; // match database column
+      if (oldPassword != null && oldPassword.isNotEmpty) {
+        body['old_password'] = oldPassword; // optional, if backend verifies
+      }
+    }
+
+    final response = await _client.put(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Kon gebruiker niet bijwerken');
     }
   }
 
