@@ -6,6 +6,11 @@ import '/models/school_class.dart';
 class ApiService {
   static const String baseUrl = 'https://chatbot.duonra.nl';
 
+  // Singleton pattern
+  static final ApiService _instance = ApiService._internal();
+  factory ApiService() => _instance;
+  ApiService._internal();
+
   final http.Client _client = http.Client();
   String? _conversationId;
 
@@ -18,6 +23,7 @@ class ApiService {
       body: jsonEncode({
         'user_id': 1,
         'message': message,
+        if (_conversationId != null) 'conversation_id': _conversationId,
       }),
     );
 
