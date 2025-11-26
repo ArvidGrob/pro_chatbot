@@ -34,11 +34,9 @@ class AddTeacherPage extends StatefulWidget {
 }
 
 class _AddTeacherPageState extends State<AddTeacherPage> {
-  // Colors
   static const primaryBlue = Color(0xFF1A2B8F);
   static const accentPurple = Color(0xFF6F73FF);
 
-  // Controllers
   final TextEditingController _firstNameCtrl = TextEditingController();
   final TextEditingController _middleNameCtrl = TextEditingController();
   final TextEditingController _lastNameCtrl = TextEditingController();
@@ -47,6 +45,9 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
   final TextEditingController _pwRepeatCtrl = TextEditingController();
 
   bool _submitting = false;
+
+  // Default role is Teacher
+  String _selectedRole = 'teacher';
 
   @override
   void dispose() {
@@ -59,13 +60,11 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
     super.dispose();
   }
 
-  // Email validation
   bool _isValidEmail(String value) {
     final regex = RegExp(r"^[\w\.\-]+@[a-zA-Z0-9]+\.[a-zA-Z]+$");
     return regex.hasMatch(value);
   }
 
-  // Toast/snackbar with color
   void _toast(String msg, {bool success = true}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -76,7 +75,6 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
     );
   }
 
-  //---------  SAVE → API -------------
   Future<void> _save() async {
     if (_submitting) return;
 
@@ -103,42 +101,43 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
     try {
       final api = ApiService();
 
-      await api.createTeacher(
+      await api.createTeacherOrAdmin(
         firstname: firstName,
         middlename: middleName.isEmpty ? null : middleName,
         lastname: lastName,
         email: email,
         password: pw,
+        role: _selectedRole,
       );
 
-      // Success message
       String fullName = firstName;
       if (middleName.isNotEmpty) {
         fullName += ' $middleName';
       }
       fullName += ' $lastName';
 
-      _toast("Docent $fullName succesvol aangemaakt!", success: true);
+      _toast("Gebruiker $fullName succesvol aangemaakt!", success: true);
 
-      // Clear fields for next entry
       _firstNameCtrl.clear();
       _middleNameCtrl.clear();
       _lastNameCtrl.clear();
       _emailCtrl.clear();
       _pwCtrl.clear();
       _pwRepeatCtrl.clear();
+      setState(() => _selectedRole = 'teacher'); // reset role
     } catch (e) {
       if (e.toString().contains('E-mail bestaat al')) {
-        _toast('Er bestaat al een docent met dit e-mailadres.', success: false);
+        _toast('Er bestaat al een gebruiker met dit e-mailadres.',
+            success: false);
       } else {
-        _toast('Het is niet gelukt om de docent aan te maken.', success: false);
+        _toast('Het is niet gelukt om de gebruiker aan te maken.',
+            success: false);
       }
     } finally {
       setState(() => _submitting = false);
     }
   }
 
-  // --------------  UI  -----------------------
   @override
   Widget build(BuildContext context) {
     final themeManager = Provider.of<ThemeManager>(context);
@@ -150,7 +149,6 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Title
             Text(
               'Teacher Management',
               style: TextStyle(
@@ -161,7 +159,7 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
             ),
             const SizedBox(height: 24),
 
-            // Row: first + middle
+            // Row: First name + Middle name
             Row(
               children: [
                 Expanded(
@@ -171,10 +169,8 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
                     children: [
                       _label('Voornaam:'),
                       _inputField(
-                        controller: _firstNameCtrl,
-                        hint: 'Voornaam invoeren',
-                        keyboardType: TextInputType.name,
-                      ),
+                          controller: _firstNameCtrl,
+                          hint: 'Voornaam invoeren'),
                     ],
                   ),
                 ),
@@ -186,9 +182,67 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
                     children: [
                       _label('Tussenvoegsel:'),
                       _inputField(
-                        controller: _middleNameCtrl,
-                        hint: 'Tussenvoegsel (optioneel)',
-                        keyboardType: TextInputType.name,
+                          controller: _middleNameCtrl,
+                          hint: 'Tussenvoegsel (optioneel)'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            // Row: Last name + Role
+            Row(
+              children: [
+                Expanded(
+                  flex: 4,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _label('Achternaam:'),
+                      _inputField(
+                          controller: _lastNameCtrl,
+                          hint: 'Achternaam invoeren'),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 3,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _label('Rol:'),
+                      Container(
+                        margin: const EdgeInsets.only(top: 6),
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFD9D9D9),
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(.25),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: DropdownButton<String>(
+                          value: _selectedRole,
+                          isExpanded: true,
+                          underline: const SizedBox(),
+                          onChanged: (value) {
+                            if (value != null)
+                              setState(() => _selectedRole = value);
+                          },
+                          items: const [
+                            DropdownMenuItem(
+                                value: 'teacher', child: Text('Teacher')),
+                            DropdownMenuItem(
+                                value: 'admin', child: Text('Admin')),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -198,43 +252,30 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
 
             const SizedBox(height: 16),
 
-            _label('Achternaam:'),
-            _inputField(
-              controller: _lastNameCtrl,
-              hint: 'Achternaam invoeren',
-              keyboardType: TextInputType.name,
-            ),
-
-            const SizedBox(height: 16),
-
             _label('Email:'),
             _inputField(
-              controller: _emailCtrl,
-              hint: 'Geldig email invoeren',
-              keyboardType: TextInputType.emailAddress,
-            ),
+                controller: _emailCtrl,
+                hint: 'Geldig email invoeren',
+                keyboardType: TextInputType.emailAddress),
 
             const SizedBox(height: 16),
 
             _label('Wachtwoord:'),
             _inputField(
-              controller: _pwCtrl,
-              hint: 'Wachtwoord invoeren',
-              obscure: true,
-            ),
+                controller: _pwCtrl,
+                hint: 'Wachtwoord invoeren',
+                obscure: true),
 
             const SizedBox(height: 16),
 
             _label('Wachtwoord herhalen:'),
             _inputField(
-              controller: _pwRepeatCtrl,
-              hint: 'Wachtwoord herhalen',
-              obscure: true,
-            ),
+                controller: _pwRepeatCtrl,
+                hint: 'Wachtwoord herhalen',
+                obscure: true),
 
             const SizedBox(height: 28),
 
-            // CREATE button
             Center(
               child: SizedBox(
                 width: 180,
@@ -249,18 +290,14 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14)),
                     textStyle: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                    ),
+                        fontSize: 18, fontWeight: FontWeight.w700),
                   ),
                   child: _submitting
                       ? const SizedBox(
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            color: Colors.white,
-                          ),
+                              strokeWidth: 2.5, color: Colors.white),
                         )
                       : const Text('Create'),
                 ),
@@ -270,29 +307,20 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
             const SizedBox(height: 32),
 
             Center(
-              child: _buildReturnButton(
-                onTap: () => Navigator.of(context).maybePop(),
-              ),
-            ),
+                child: _buildReturnButton(
+                    onTap: () => Navigator.of(context).maybePop())),
           ],
         ),
       ),
     );
   }
 
-  // Label
   Widget _label(String text, {Color color = const Color(0xFF1A2B8F)}) {
-    return Text(
-      text,
-      style: TextStyle(
-        color: color,
-        fontSize: 14,
-        fontWeight: FontWeight.w700,
-      ),
-    );
+    return Text(text,
+        style:
+            TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.w700));
   }
 
-  // Input field
   Widget _inputField({
     required TextEditingController controller,
     required String hint,
@@ -306,10 +334,9 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.25),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
+              color: Colors.black.withOpacity(.25),
+              blurRadius: 8,
+              offset: const Offset(0, 4))
         ],
       ),
       child: TextField(
@@ -322,33 +349,22 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
               const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
           hintText: hint,
           hintStyle: const TextStyle(
-            color: Colors.black54,
-            fontSize: 15,
-            fontWeight: FontWeight.w500,
-          ),
+              color: Colors.black54, fontSize: 15, fontWeight: FontWeight.w500),
         ),
         style: const TextStyle(
-          color: Colors.black,
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
-        ),
+            color: Colors.black, fontSize: 15, fontWeight: FontWeight.w600),
       ),
     );
   }
 
-  // Return button
   Widget _buildReturnButton({required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: SizedBox(
         width: 70,
         height: 70,
-        child: Image.asset(
-          'assets/images/return.png',
-          width: 70,
-          height: 70,
-          fit: BoxFit.contain,
-        ),
+        child: Image.asset('assets/images/return.png',
+            width: 70, height: 70, fit: BoxFit.contain),
       ),
     );
   }

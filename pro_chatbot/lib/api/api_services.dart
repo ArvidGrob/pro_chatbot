@@ -163,13 +163,14 @@ class ApiService {
     }
   }
 
-  // ------- Creating teachers ----------
-  Future<User> createTeacher({
+// ------- Create Teacher/Admin ----------
+  Future<User> createTeacherOrAdmin({
     required String firstname,
     String? middlename,
     required String lastname,
     required String email,
     required String password,
+    String role = 'teacher', // default role is teacher
   }) async {
     final url = Uri.parse('$baseUrl/api/users');
 
@@ -182,7 +183,7 @@ class ApiService {
         'lastname': lastname,
         'email': email,
         'password': password,
-        'role': 'teacher',
+        'role': role, // dynamically send role
       }),
     );
 
@@ -196,14 +197,12 @@ class ApiService {
         middlename: middlename,
         lastname: lastname,
         email: email,
-        role: Role.teacher,
+        role: role == 'admin' ? Role.admin : Role.teacher,
       );
     } else if (response.statusCode == 409) {
-      // Only show email duplicate message
       throw Exception('E-mail bestaat al');
     } else {
-      // message for all other errors (if there are any)
-      throw Exception('Het is niet gelukt om de docent aan te maken');
+      throw Exception('Het is niet gelukt om de gebruiker aan te maken');
     }
   }
 
