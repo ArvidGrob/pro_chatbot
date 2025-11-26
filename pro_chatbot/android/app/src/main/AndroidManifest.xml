@@ -13,7 +13,7 @@
     <uses-feature android:name="android.hardware.microphone" android:required="false"/>
     
     <application
-        android:label="pro_chatbot"
+        android:label="Luminara AI"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
