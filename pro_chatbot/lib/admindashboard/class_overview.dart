@@ -7,7 +7,6 @@ import '../models/user.dart';
 import '../api/user_provider.dart';
 import '/api/auth_guard.dart';
 import '../api/api_services.dart';
-import '../models/school_class.dart';
 
 void main() {
   runApp(
@@ -52,6 +51,10 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
   Future<void> _loadClasses() async {
     try {
       final classes = await _api.getClasses();
+
+      classes
+          .sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+
       setState(() {
         _classes = classes;
         _loading = false;

@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '/models/user.dart';
-import '/models/school_class.dart';
 
 class ApiService {
   static const String baseUrl = 'https://chatbot.duonra.nl';
@@ -366,7 +365,7 @@ class ApiService {
     }
   }
 
-  // ---------- Load Classes ----------
+// ---------- Load Classes ----------
   Future<List<SchoolClass>> getClasses() async {
     final url = Uri.parse('$baseUrl/api/classes');
 
@@ -377,19 +376,16 @@ class ApiService {
 
     if (response.statusCode == 200) {
       final body = response.body.trim();
-      if (body.isEmpty) {
-        throw Exception('Leere Antwort vom Server.');
-      }
+      if (body.isEmpty) throw Exception("Empty response");
 
       final List<dynamic> jsonList = jsonDecode(body);
-      return jsonList.map((e) => SchoolClass.fromJson(e)).toList();
-    } else {
-      throw Exception(
-          'Server returned ${response.statusCode}: ${response.body}');
+      return jsonList.map((item) => SchoolClass.fromJson(item)).toList();
     }
+
+    throw Exception('Server returned ${response.statusCode}: ${response.body}');
   }
 
-  // ---------- Creatin Classes ----------
+// ---------- Create Class ----------
   Future<SchoolClass> createClass(String name) async {
     final url = Uri.parse('$baseUrl/api/classes');
 
@@ -404,19 +400,15 @@ class ApiService {
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       final body = response.body.trim();
-      if (body.isEmpty) {
-        throw Exception('Leere Antwort beim Erstellen der Klasse.');
-      }
+      if (body.isEmpty) throw Exception("Empty response on create");
 
-      final Map<String, dynamic> data = jsonDecode(body);
-      return SchoolClass.fromJson(data);
-    } else {
-      throw Exception(
-          'Server returned ${response.statusCode}: ${response.body}');
+      return SchoolClass.fromJson(jsonDecode(body));
     }
+
+    throw Exception('Server error ${response.statusCode}: ${response.body}');
   }
 
-  // ---------- Rename Classes ----------
+// ---------- Rename Class ----------
   Future<void> renameClass(int id, String newName) async {
     final url = Uri.parse('$baseUrl/api/classes/$id');
 
@@ -430,12 +422,11 @@ class ApiService {
     print('BODY: ${response.body}');
 
     if (response.statusCode != 200) {
-      throw Exception(
-          'Server returned ${response.statusCode}: ${response.body}');
+      throw Exception('Error renaming: ${response.statusCode}');
     }
   }
 
-  // ---------- Delete Classes ----------
+// ---------- Delete Class ----------
   Future<void> deleteClass(int id) async {
     final url = Uri.parse('$baseUrl/api/classes/$id');
 
@@ -445,8 +436,7 @@ class ApiService {
     print('BODY: ${response.body}');
 
     if (response.statusCode != 200 && response.statusCode != 204) {
-      throw Exception(
-          'Server returned ${response.statusCode}: ${response.body}');
+      throw Exception('Delete failed: ${response.statusCode}');
     }
   }
 }

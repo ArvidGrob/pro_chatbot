@@ -57,6 +57,30 @@ class School {
   }
 }
 
+class SchoolClass {
+  int id;
+  String name;
+
+  SchoolClass({
+    required this.id,
+    required this.name,
+  });
+
+  factory SchoolClass.fromJson(Map<String, dynamic> json) {
+    return SchoolClass(
+      id: json['id'],
+      name: json['name'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+    };
+  }
+}
+
 class User {
   final int id;
   final String email;
@@ -64,11 +88,11 @@ class User {
   final String lastname;
   final String? middlename;
   final Role role;
-  final String? klass;
 
   bool online = false;
 
-  School? school; // WE NEED THIS FOR ALL USERS!
+  SchoolClass? schoolClass;
+  School? school;
 
   User({
     required this.id,
@@ -78,7 +102,7 @@ class User {
     this.middlename,
     required this.role,
     this.school,
-    this.klass,
+    this.schoolClass,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -88,13 +112,32 @@ class User {
       lastname: json['lastname'],
       middlename: json['middlename'],
       email: json['email'],
-      role:
-          Role.values.firstWhere((r) => r.toString() == 'Role.${json['role']}'),
-      school: json['school'] != null
-          ? School.fromJson(json['school'])
-          : null, // parse school
+      role: Role.values.firstWhere(
+        (r) => r.toString() == 'Role.${json['role']}',
+      ),
+
+      // Parse school only if object is returned
+      school: json['school'] != null ? School.fromJson(json['school']) : null,
+
+      // Parse class
+      schoolClass:
+          json['class'] != null ? SchoolClass.fromJson(json['class']) : null,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'email': email,
+      'firstname': firstname,
+      'lastname': lastname,
+      'middlename': middlename,
+      'role': role.toString().split('.').last,
+      'school': school?.toJson(),
+      'class': schoolClass?.toJson(),
+    };
+  }
+
   User copyWith({
     int? id,
     String? email,
@@ -102,6 +145,8 @@ class User {
     String? lastname,
     String? middlename,
     Role? role,
+    School? school,
+    SchoolClass? schoolClass,
   }) {
     return User(
       id: id ?? this.id,
@@ -110,6 +155,8 @@ class User {
       lastname: lastname ?? this.lastname,
       middlename: middlename ?? this.middlename,
       role: role ?? this.role,
+      school: school ?? this.school,
+      schoolClass: schoolClass ?? this.schoolClass,
     );
   }
 }
