@@ -109,8 +109,9 @@ class _SpeechToTextDialogState extends State<_SpeechToTextDialog> {
       partialResults: true,
       cancelOnError: true,
       listenMode: stt.ListenMode.confirmation,
-      localeId: 'nl-NL',  // Néerlandais par défaut
-      onDevice: false,  // Utiliser le service cloud pour meilleur support multilingue
+      localeId: 'nl-NL', // Néerlandais par défaut
+      onDevice:
+          false, // Utiliser le service cloud pour meilleur support multilingue
     );
   }
 
