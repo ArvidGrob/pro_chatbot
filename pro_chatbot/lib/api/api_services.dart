@@ -78,6 +78,8 @@ class ApiService {
     required String lastname,
     required String email,
     required String password,
+    required int
+        schoolId, // The created teacher or admin inherits the school_id of the loggedin user
   }) async {
     final url = Uri.parse('$baseUrl/api/users');
 
@@ -91,6 +93,8 @@ class ApiService {
         'email': email,
         'password': password,
         'role': 'student',
+        'schoolId':
+            schoolId, // The created teacher or admin inherits the school_id of the loggedin user
       }),
     );
 
@@ -107,11 +111,39 @@ class ApiService {
         role: Role.student,
       );
     } else if (response.statusCode == 409) {
-      // Only show email duplicate message
       throw Exception('E-mail bestaat al');
     } else {
-      // Generic message for other errors
       throw Exception('Het is niet gelukt om de student aan te maken');
+    }
+  }
+
+// ---------- Delete Student ----------
+  Future<void> deleteStudent(int id) async {
+    try {
+      final url = Uri.parse('$baseUrl/api/users/$id');
+
+      final response = await _client.delete(
+        url,
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      print('DELETE $url -> ${response.statusCode}');
+      print('BODY: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        // Successfully deleted
+        return;
+      } else if (response.statusCode == 404) {
+        throw Exception('Student niet gevonden');
+      } else if (response.statusCode == 403) {
+        throw Exception('Alleen studenten kunnen verwijderd worden');
+      } else {
+        throw Exception(
+            'Server fout (${response.statusCode}): ${response.body}');
+      }
+    } catch (e) {
+      if (e is Exception) rethrow;
+      throw Exception('Kan geen verbinding maken met de server');
     }
   }
 
@@ -133,13 +165,49 @@ class ApiService {
     }
   }
 
-  // ------- Creating teachers ----------
-  Future<User> createTeacher({
+  // ------- Update Students from database ----------
+  Future<void> updateStudent({
+    required User student,
+    String? oldPassword,
+    String? newPassword,
+  }) async {
+    final url = Uri.parse('$baseUrl/api/users/${student.id}');
+    final body = {
+      'firstname': student.firstname,
+      'middlename': student.middlename,
+      'lastname': student.lastname,
+      'email': student.email,
+    };
+
+    // Only send the password if it's being changed
+    if (newPassword != null && newPassword.isNotEmpty) {
+      body['password'] = newPassword;
+      if (oldPassword != null && oldPassword.isNotEmpty) {
+        body['old_password'] = oldPassword;
+      }
+    }
+
+    final response = await _client.put(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Kon student niet bijwerken');
+    }
+  }
+
+// ------- Create Teacher/Admin ----------
+  Future<User> createTeacherOrAdmin({
     required String firstname,
     String? middlename,
     required String lastname,
     required String email,
     required String password,
+    String role = 'teacher',
+    required int
+        schoolId, // The created teacher or admin inherits the school_id of the loggedin user
   }) async {
     final url = Uri.parse('$baseUrl/api/users');
 
@@ -152,7 +220,9 @@ class ApiService {
         'lastname': lastname,
         'email': email,
         'password': password,
-        'role': 'teacher',
+        'role': role,
+        'schoolId':
+            schoolId, // The created teacher or admin inherits the school_id of the loggedin user
       }),
     );
 
@@ -166,14 +236,75 @@ class ApiService {
         middlename: middlename,
         lastname: lastname,
         email: email,
-        role: Role.teacher,
+        role: role == 'admin' ? Role.admin : Role.teacher,
       );
     } else if (response.statusCode == 409) {
-      // Only show email duplicate message
       throw Exception('E-mail bestaat al');
     } else {
-      // message for all other errors (if there are any)
-      throw Exception('Het is niet gelukt om de docent aan te maken');
+      throw Exception('Het is niet gelukt om de gebruiker aan te maken');
+    }
+  }
+
+  // ------- Delete Teacher/Admin ----------
+  Future<void> deleteTeacherOrAdmin(int id) async {
+    try {
+      final url = Uri.parse('$baseUrl/api/users/$id');
+
+      final response = await _client.delete(
+        url,
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      print('DELETE $url -> ${response.statusCode}');
+      print('BODY: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        // Successfully deleted
+        return;
+      } else if (response.statusCode == 404) {
+        throw Exception('Gebruiker niet gevonden');
+      } else if (response.statusCode == 403) {
+        throw Exception('Alleen docenten/admins kunnen verwijderd worden');
+      } else {
+        throw Exception(
+            'Server fout (${response.statusCode}): ${response.body}');
+      }
+    } catch (e) {
+      if (e is Exception) rethrow;
+      throw Exception('Kan geen verbinding maken met de server');
+    }
+  }
+
+  // ------- Update Teacher/Admin ----------
+  Future<void> updateTeacherOrAdmin({
+    required User user,
+    String? oldPassword,
+    String? newPassword,
+  }) async {
+    final url = Uri.parse('$baseUrl/api/users/${user.id}');
+    final body = {
+      'firstname': user.firstname,
+      'middlename': user.middlename,
+      'lastname': user.lastname,
+      'email': user.email,
+    };
+
+    // Only send the password if it's being changed
+    if (newPassword != null && newPassword.isNotEmpty) {
+      body['password'] = newPassword; // match database column
+      if (oldPassword != null && oldPassword.isNotEmpty) {
+        body['old_password'] = oldPassword; // optional, if backend verifies
+      }
+    }
+
+    final response = await _client.put(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Kon gebruiker niet bijwerken');
     }
   }
 

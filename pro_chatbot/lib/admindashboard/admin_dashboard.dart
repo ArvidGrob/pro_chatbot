@@ -8,6 +8,7 @@ import 'class_overview.dart';
 import '../models/user.dart';
 import '/api/auth_guard.dart';
 import '../api/user_provider.dart';
+import '../navigation/navigation_page.dart';
 
 void main() {
   runApp(
@@ -45,136 +46,163 @@ class _AdminDashboardState extends State<AdminDashboard> {
     return WaveBackgroundLayout(
       backgroundColor: themeManager.backgroundColor,
       child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            children: [
-              // Title + Welcome Message for user
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child: SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
                 children: [
-                  const Text(
-                    'Admin dashboard',
-                    maxLines: 1,
-                    style: TextStyle(
-                      color: Color(0xFF4242BD),
-                      fontSize: 36,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  if (currentUser != null)
-                    Text(
-                      'Hallo ${currentUser.firstname} ${currentUser.middlename} ${currentUser.lastname}, youw rol is ${currentUser.role.name}',
-                      style: const TextStyle(
-                        color: Color(0xFF4242BD),
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
+                  // Title + Welcome Message
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'Admin dashboard',
+                        maxLines: 1,
+                        style: TextStyle(
+                          color: Color(0xFF4242BD),
+                          fontSize: 36,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 40),
-
-              // Docent button
-              _buildDashboardButton(
-                buttonId: 'docent',
-                label: 'Docent',
-                iconPath: 'assets/images/docent.png',
-                primaryColor: themeManager.getOptionBrightPink(),
-                secondaryColor: themeManager.getSecondaryColor(
-                    themeManager.getOptionBrightPink(),
-                    lightenAmount: 0.2),
-                onTap: () {
-                  final userProvider =
-                      Provider.of<UserProvider>(context, listen: false);
-
-                  if (userProvider.hasRole(Role.admin)) {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const TeacherOverviewPage(),
-                      ),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: RichText(
-                          text: const TextSpan(
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
+                      const SizedBox(height: 10),
+                      if (currentUser != null)
+                        RichText(
+                          textAlign: TextAlign.center,
+                          text: TextSpan(
+                            style: const TextStyle(
+                              color: Color(0xFF4242BD),
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
                             ),
                             children: [
                               TextSpan(
                                 text:
-                                    "Toegang geweigerd. Deze pagina vereist de rol ",
+                                    'Hallo ${currentUser.firstname} ${currentUser.middlename} ${currentUser.lastname}, jouw rol is ',
                               ),
                               TextSpan(
-                                text: "admin",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
+                                text: currentUser.role.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold, // Role name bold
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        backgroundColor: Colors.red,
-                        duration: const Duration(seconds: 3),
-                      ),
-                    );
-                  }
-                },
-              ),
-              const SizedBox(height: 25),
+                    ],
+                  ),
+                  const SizedBox(height: 40),
 
-              // Student button
-              _buildDashboardButton(
-                buttonId: 'student',
-                label: 'Student',
-                iconPath: 'assets/images/student.png',
-                primaryColor: themeManager.getOptionSoftBlue(),
-                secondaryColor: themeManager.getSecondaryColor(
-                    themeManager.getOptionSoftBlue(),
-                    lightenAmount: 0.2),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const StudentOverviewPage(),
+                  // Docent button
+                  _buildDashboardButton(
+                    buttonId: 'docent',
+                    label: 'Docent',
+                    iconPath: 'assets/images/docent.png',
+                    primaryColor: themeManager.getOptionBrightPink(),
+                    secondaryColor: themeManager.getSecondaryColor(
+                        themeManager.getOptionBrightPink(),
+                        lightenAmount: 0.2),
+                    onTap: () {
+                      final userProvider =
+                          Provider.of<UserProvider>(context, listen: false);
+
+                      if (userProvider.hasRole(Role.admin)) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const TeacherOverviewPage(),
+                          ),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: RichText(
+                              text: const TextSpan(
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                                children: [
+                                  TextSpan(
+                                      text:
+                                          "Toegang geweigerd. Deze pagina vereist de rol "),
+                                  TextSpan(
+                                    text: "admin",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            backgroundColor: Colors.red,
+                            duration: Duration(seconds: 3),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 25),
+
+                  // Student button
+                  _buildDashboardButton(
+                    buttonId: 'student',
+                    label: 'Student',
+                    iconPath: 'assets/images/student.png',
+                    primaryColor: themeManager.getOptionSoftBlue(),
+                    secondaryColor: themeManager.getSecondaryColor(
+                        themeManager.getOptionSoftBlue(),
+                        lightenAmount: 0.2),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const StudentOverviewPage(),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 25),
+
+                  // Beheer button
+                  _buildDashboardButton(
+                    buttonId: 'klas',
+                    label: 'Klas',
+                    iconPath: 'assets/images/beheer.png',
+                    primaryColor: themeManager.getOptionBlazeOrange(),
+                    secondaryColor: themeManager.getSecondaryColor(
+                        themeManager.getOptionBlazeOrange(),
+                        lightenAmount: 0.2),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const ClassOverviewPage(),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 25),
+
+                  // Return button
+                  Center(
+                    child: _buildReturnButton(
+                      buttonId: 'return',
+                      iconPath: 'assets/images/return.png',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const NavigationPage(),
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
+                  ),
+                  const SizedBox(height: 20),
+                ],
               ),
-              const SizedBox(height: 25),
-
-              // Beheer button
-              _buildDashboardButton(
-                buttonId: 'klas',
-                label: 'Klas',
-                iconPath: 'assets/images/beheer.png',
-                primaryColor: themeManager.getOptionBlazeOrange(),
-                secondaryColor: themeManager.getSecondaryColor(
-                    themeManager.getOptionBlazeOrange(),
-                    lightenAmount: 0.2),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const ClassOverviewPage(),
-                    ),
-                  );
-                },
-              ),
-              const Spacer(),
-
-              // Return button
-              Center(
-                child: _buildReturnButton(
-                  buttonId: 'return',
-                  iconPath: 'assets/images/return.png',
-                  onTap: () => Navigator.pop(context),
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
+            ),
           ),
         ),
       ),
@@ -207,6 +235,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       child: Container(
         height: 120,
         width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 20),
         decoration: BoxDecoration(
           color: displayPrimary,
           borderRadius: BorderRadius.circular(20),

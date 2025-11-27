@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pro_chatbot/admindashboard/student_overview.dart';
 import 'package:pro_chatbot/api/api_services.dart';
 import 'package:provider/provider.dart';
 import '/theme_manager.dart';
@@ -102,19 +103,28 @@ class _AddStudentPageState extends State<AddStudentPage> {
     try {
       final api = ApiService();
 
+      // Get current admin's school ID
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      if (userProvider.currentUser?.school == null) {
+        _toast('Admin heeft geen school ingesteld.', success: false);
+        setState(() => _submitting = false);
+        return;
+      }
+      final schoolId = userProvider.currentUser!.school!.id;
+
+      // Create student with school_id
       await api.createStudent(
         firstname: firstName,
         middlename: middleName.isEmpty ? null : middleName,
         lastname: lastName,
         email: email,
         password: pw,
+        schoolId: schoolId,
       );
 
       // Success message
       String fullName = firstName;
-      if (middleName.isNotEmpty) {
-        fullName += ' $middleName';
-      }
+      if (middleName.isNotEmpty) fullName += ' $middleName';
       fullName += ' $lastName';
 
       _toast("Student $fullName succesvol aangemaakt!", success: true);
@@ -127,7 +137,6 @@ class _AddStudentPageState extends State<AddStudentPage> {
       _pwCtrl.clear();
       _pwRepeatCtrl.clear();
     } catch (e) {
-      // Only show clean message for duplicate email
       if (e.toString().contains('E-mail bestaat al')) {
         _toast('Er bestaat al een student met dit e-mailadres.',
             success: false);
@@ -218,7 +227,7 @@ class _AddStudentPageState extends State<AddStudentPage> {
 
             const SizedBox(height: 16),
 
-            _label('Wachtwoord:', color: Colors.white),
+            _label('Wachtwoord:'),
             _inputField(
               controller: _pwCtrl,
               hint: 'Wachtwoord invoeren',
@@ -227,7 +236,7 @@ class _AddStudentPageState extends State<AddStudentPage> {
 
             const SizedBox(height: 16),
 
-            _label('Wachtwoord herhalen:', color: Colors.white),
+            _label('Wachtwoord herhalen:'),
             _inputField(
               controller: _pwRepeatCtrl,
               hint: 'Wachtwoord herhalen',
@@ -273,7 +282,14 @@ class _AddStudentPageState extends State<AddStudentPage> {
 
             Center(
               child: _buildReturnButton(
-                onTap: () => Navigator.of(context).maybePop(),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const StudentOverviewPage(),
+                    ),
+                  );
+                },
               ),
             ),
           ],
@@ -283,7 +299,7 @@ class _AddStudentPageState extends State<AddStudentPage> {
   }
 
   // Label
-  Widget _label(String text, {Color color = const Color(0xFF1A2B8F)}) {
+  Widget _label(String text, {Color color = const Color(0xFF100c08)}) {
     return Text(
       text,
       style: TextStyle(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pro_chatbot/login/login_page.dart';
 import 'package:provider/provider.dart';
 import '/theme_manager.dart';
 import '/wave_background_layout.dart';
@@ -6,6 +7,7 @@ import 'settings_page.dart';
 import 'settings_page_account_2_1.dart';
 import 'settings_page_account_2_2.dart';
 import 'package:pro_chatbot/api/user_provider.dart';
+import '../models/user.dart';
 
 void main() {
   runApp(const TestSettingsAccountApp());
@@ -40,6 +42,9 @@ class SettingsPageAccount extends StatefulWidget {
 
 class _SettingsPageAccountState extends State<SettingsPageAccount> {
   String _pressedButton = '';
+
+  String capitalize(String text) =>
+      "${text[0].toUpperCase()}${text.substring(1)}";
 
   @override
   Widget build(BuildContext context) {
@@ -78,18 +83,18 @@ class _SettingsPageAccountState extends State<SettingsPageAccount> {
 
               const SizedBox(height: 40),
 
-              // Informative grey bubble
+              // Informative grey bubble with dynamic info
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(25.0),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF9E9E9E),
+                  color: themeManager.getOptionSoftBlue(),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Column(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Informatie',
                       style: TextStyle(
                         color: Colors.white,
@@ -97,13 +102,65 @@ class _SettingsPageAccountState extends State<SettingsPageAccount> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 15),
-                    Text(
-                      'Rol:\nKlas:\nSchool:',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                      ),
+                    const SizedBox(height: 15),
+                    Builder(
+                      builder: (context) {
+                        // Determine displayed class and styling
+                        final bool isMissingClass = user != null &&
+                            user.role != Role.admin &&
+                            user.role != Role.teacher &&
+                            user.klass == null;
+
+                        final String displayedClass = (() {
+                          if (user != null) {
+                            if (user.role == Role.admin ||
+                                user.role == Role.teacher) {
+                              return "-";
+                            } else {
+                              return user.klass ??
+                                  "Nog niet gekoppeld aan een klas";
+                            }
+                          }
+                          return "Nog niet gekoppeld aan een klas";
+                        })();
+
+                        return RichText(
+                          text: TextSpan(
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                            ),
+                            children: [
+                              // Role
+                              TextSpan(
+                                text:
+                                    'Rol: ${user != null ? user.role.displayName : "Onbekend"}\n',
+                              ),
+                              // Class
+                              TextSpan(
+                                text: 'Klas: ',
+                              ),
+                              TextSpan(
+                                text: displayedClass,
+                                style: TextStyle(
+                                  color: isMissingClass
+                                      ? Colors.red
+                                      : Colors.white,
+                                  fontWeight: isMissingClass
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                              const TextSpan(text: '\n'),
+                              // School
+                              TextSpan(
+                                text:
+                                    'School: ${user?.school?.name ?? "Geen school gekoppeld"}',
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -129,7 +186,6 @@ class _SettingsPageAccountState extends State<SettingsPageAccount> {
                         fontSize: 18,
                       ),
                     ),
-                    
                     const SizedBox(height: 20),
                     Align(
                       alignment: Alignment.bottomRight,
@@ -177,14 +233,14 @@ class _SettingsPageAccountState extends State<SettingsPageAccount> {
 
               const SizedBox(height: 25),
 
-              // Uitloggen button -> Red
+              // Logout button
               _buildButton(
                 themeManager: themeManager,
                 buttonId: 'uitloggen',
                 label: 'Uitloggen',
                 baseColor: const Color(0xFFFE445A),
                 onTap: () {
-                  print('Uitloggen tapped');
+                  _showLogoutConfirmationDialog(context);
                 },
                 isLogout: true,
               ),
@@ -214,6 +270,64 @@ class _SettingsPageAccountState extends State<SettingsPageAccount> {
           ),
         ),
       ),
+    );
+  }
+
+  /// Logout confirmation popup
+  void _showLogoutConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: const Text(
+            "Uitloggen",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+          ),
+          content: const Text(
+            "Weet je zeker dat je wilt uitloggen?",
+            style: TextStyle(fontSize: 18),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Cancel
+              },
+              child: const Text(
+                "Annuleren",
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                final userProvider =
+                    Provider.of<UserProvider>(context, listen: false);
+
+                userProvider.logout();
+                Navigator.of(context).pop(); // close popup
+
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const LoginPage(),
+                  ),
+                  (route) => false,
+                );
+              },
+              child: const Text(
+                "Uitloggen",
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

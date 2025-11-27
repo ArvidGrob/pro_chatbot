@@ -36,85 +36,98 @@ class _SettingsPageState extends State<SettingsPage> {
 
     return WaveBackgroundLayout(
       backgroundColor: themeManager.backgroundColor,
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            const Text(
-              'Instellingen',
-              style: TextStyle(
-                color: Color(0xFF4242BD),
-                fontSize: 40,
-                fontWeight: FontWeight.bold,
-              ),
+      child: SafeArea(
+        child: SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height,
             ),
-            const SizedBox(height: 40),
-
-            // Account
-            _buildSettingsButton(
-              id: 'account',
-              title: 'Account',
-              iconPath: 'assets/images/account.png',
-              color: themeManager.getOptionSoftBlue(),
-              themeManager: themeManager,
-              onTap: () => _navigateTo(context, const SettingsPageAccount()),
-            ),
-            const SizedBox(height: 30),
-
-            // Spraak
-            _buildSettingsButton(
-              id: 'spraak',
-              title: 'Spraak',
-              iconPath: 'assets/images/spraak.png',
-              color: themeManager.getOptionBrightPink(),
-              themeManager: themeManager,
-              onTap: () => _navigateTo(context, const SettingsPageSpraak()),
-            ),
-            const SizedBox(height: 30),
-
-            // Thema
-            _buildSettingsButton(
-              id: 'thema',
-              title: 'Thema',
-              iconPath: 'assets/images/thema.png',
-              color: themeManager.getOptionBlazeOrange(),
-              themeManager: themeManager,
-              onTap: () => _navigateTo(context, const SettingsPageThema()),
-            ),
-            const SizedBox(height: 30),
-
-            // Hulp
-            _buildSettingsButton(
-              id: 'hulp',
-              title: 'Hulp',
-              iconPath: 'assets/images/hulp.png',
-              color: themeManager.getOptionYellowSea(),
-              themeManager: themeManager,
-              onTap: () => _navigateTo(context, const SettingsPageHulp()),
-            ),
-
-            const Spacer(),
-            // Return button (to SettingsPage - Custom made image)
-            Center(
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const NavigationPage(),
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                children: [
+                  const Text(
+                    'Instellingen',
+                    style: TextStyle(
+                      color: Color(0xFF4242BD),
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
                     ),
-                  );
-                },
-                child: Image.asset(
-                  'assets/images/return.png',
-                  width: 70,
-                  height: 70,
-                  fit: BoxFit.contain,
-                ),
+                  ),
+                  const SizedBox(height: 40),
+
+                  // Account
+                  _buildSettingsButton(
+                    id: 'account',
+                    title: 'Account',
+                    iconPath: 'assets/images/account.png',
+                    color: themeManager.getOptionSoftBlue(),
+                    themeManager: themeManager,
+                    onTap: () =>
+                        _navigateTo(context, const SettingsPageAccount()),
+                  ),
+                  const SizedBox(height: 30),
+
+                  // Spraak
+                  _buildSettingsButton(
+                    id: 'spraak',
+                    title: 'Spraak',
+                    iconPath: 'assets/images/spraak.png',
+                    color: themeManager.getOptionBrightPink(),
+                    themeManager: themeManager,
+                    onTap: () =>
+                        _navigateTo(context, const SettingsPageSpraak()),
+                  ),
+                  const SizedBox(height: 30),
+
+                  // Thema
+                  _buildSettingsButton(
+                    id: 'thema',
+                    title: 'Thema',
+                    iconPath: 'assets/images/thema.png',
+                    color: themeManager.getOptionBlazeOrange(),
+                    themeManager: themeManager,
+                    onTap: () =>
+                        _navigateTo(context, const SettingsPageThema()),
+                  ),
+                  const SizedBox(height: 30),
+
+                  // Hulp
+                  _buildSettingsButton(
+                    id: 'hulp',
+                    title: 'Hulp',
+                    iconPath: 'assets/images/hulp.png',
+                    color: themeManager.getOptionYellowSea(),
+                    themeManager: themeManager,
+                    onTap: () => _navigateTo(context, const SettingsPageHulp()),
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  // Return button
+                  Center(
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const NavigationPage(),
+                          ),
+                        );
+                      },
+                      child: Image.asset(
+                        'assets/images/return.png',
+                        width: 70,
+                        height: 70,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
               ),
             ),
-            const SizedBox(height: 20),
-          ],
+          ),
         ),
       ),
     );
