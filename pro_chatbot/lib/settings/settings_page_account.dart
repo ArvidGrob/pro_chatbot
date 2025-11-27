@@ -7,6 +7,7 @@ import 'settings_page.dart';
 import 'settings_page_account_2_1.dart';
 import 'settings_page_account_2_2.dart';
 import 'package:pro_chatbot/api/user_provider.dart';
+import '../models/user.dart';
 
 void main() {
   runApp(const TestSettingsAccountApp());
@@ -41,6 +42,9 @@ class SettingsPageAccount extends StatefulWidget {
 
 class _SettingsPageAccountState extends State<SettingsPageAccount> {
   String _pressedButton = '';
+
+  String capitalize(String text) =>
+      "${text[0].toUpperCase()}${text.substring(1)}";
 
   @override
   Widget build(BuildContext context) {
@@ -79,18 +83,18 @@ class _SettingsPageAccountState extends State<SettingsPageAccount> {
 
               const SizedBox(height: 40),
 
-              // Informative grey bubble
+              // Informative grey bubble with dynamic info
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(25.0),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF9E9E9E),
+                  color: themeManager.getOptionSoftBlue(),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Column(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Informatie',
                       style: TextStyle(
                         color: Colors.white,
@@ -98,13 +102,65 @@ class _SettingsPageAccountState extends State<SettingsPageAccount> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 15),
-                    Text(
-                      'Rol:\nKlas:\nSchool:',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                      ),
+                    const SizedBox(height: 15),
+                    Builder(
+                      builder: (context) {
+                        // Determine displayed class and styling
+                        final bool isMissingClass = user != null &&
+                            user.role != Role.admin &&
+                            user.role != Role.teacher &&
+                            user.klass == null;
+
+                        final String displayedClass = (() {
+                          if (user != null) {
+                            if (user.role == Role.admin ||
+                                user.role == Role.teacher) {
+                              return "-";
+                            } else {
+                              return user.klass ??
+                                  "Nog niet gekoppeld aan een klas";
+                            }
+                          }
+                          return "Nog niet gekoppeld aan een klas";
+                        })();
+
+                        return RichText(
+                          text: TextSpan(
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                            ),
+                            children: [
+                              // Role
+                              TextSpan(
+                                text:
+                                    'Rol: ${user != null ? user.role.displayName : "Onbekend"}\n',
+                              ),
+                              // Class
+                              TextSpan(
+                                text: 'Klas: ',
+                              ),
+                              TextSpan(
+                                text: displayedClass,
+                                style: TextStyle(
+                                  color: isMissingClass
+                                      ? Colors.red
+                                      : Colors.white,
+                                  fontWeight: isMissingClass
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                              const TextSpan(text: '\n'),
+                              // School
+                              TextSpan(
+                                text:
+                                    'School: ${user?.school?.name ?? "Geen school gekoppeld"}',
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -177,14 +233,14 @@ class _SettingsPageAccountState extends State<SettingsPageAccount> {
 
               const SizedBox(height: 25),
 
-// Logout button
+              // Logout button
               _buildButton(
                 themeManager: themeManager,
                 buttonId: 'uitloggen',
                 label: 'Uitloggen',
                 baseColor: const Color(0xFFFE445A),
                 onTap: () {
-                  _showLogoutConfirmationDialog(context); // builder context
+                  _showLogoutConfirmationDialog(context);
                 },
                 isLogout: true,
               ),

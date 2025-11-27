@@ -4,6 +4,19 @@ enum Role {
   student,
 }
 
+extension RoleExtension on Role {
+  String get displayName {
+    switch (this) {
+      case Role.admin:
+        return "Admin";
+      case Role.teacher:
+        return "Docent";
+      case Role.student:
+        return "Student";
+    }
+  }
+}
+
 class School {
   int id;
   String name;
@@ -51,6 +64,7 @@ class User {
   final String lastname;
   final String? middlename;
   final Role role;
+  final String? klass;
 
   bool online = false;
 
@@ -64,6 +78,7 @@ class User {
     this.middlename,
     required this.role,
     this.school,
+    this.klass,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {

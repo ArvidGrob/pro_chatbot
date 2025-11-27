@@ -8,6 +8,7 @@ import 'class_overview.dart';
 import '../models/user.dart';
 import '/api/auth_guard.dart';
 import '../api/user_provider.dart';
+import '../navigation/navigation_page.dart';
 
 void main() {
   runApp(
@@ -56,7 +57,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 children: [
                   // Title + Welcome Message
                   Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       const Text(
                         'Admin dashboard',
@@ -69,12 +70,26 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       ),
                       const SizedBox(height: 10),
                       if (currentUser != null)
-                        Text(
-                          'Hallo ${currentUser.firstname} ${currentUser.middlename} ${currentUser.lastname}, your rol is ${currentUser.role.name}',
-                          style: const TextStyle(
-                            color: Color(0xFF4242BD),
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
+                        RichText(
+                          textAlign: TextAlign.center,
+                          text: TextSpan(
+                            style: const TextStyle(
+                              color: Color(0xFF4242BD),
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            children: [
+                              TextSpan(
+                                text:
+                                    'Hallo ${currentUser.firstname} ${currentUser.middlename} ${currentUser.lastname}, jouw rol is ',
+                              ),
+                              TextSpan(
+                                text: currentUser.role.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold, // Role name bold
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                     ],
@@ -174,7 +189,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     child: _buildReturnButton(
                       buttonId: 'return',
                       iconPath: 'assets/images/return.png',
-                      onTap: () => Navigator.pop(context),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const NavigationPage(),
+                          ),
+                        );
+                      },
                     ),
                   ),
                   const SizedBox(height: 20),
