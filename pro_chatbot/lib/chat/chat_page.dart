@@ -654,124 +654,136 @@ class _ChatPageState extends State<ChatPage> {
   Widget _buildHeader() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
-      child: Row(
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          // Back button
-          GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: Image.asset(
-              'assets/images/return_2.png',
-              width: 50,
-              height: 50,
-              fit: BoxFit.contain,
+          // Title (absolutely centered)
+          const Center(
+            child: Text(
+              'Chat',
+              style: TextStyle(
+                color: Color(0xFF2323AD),
+                fontSize: 38,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
 
-          // Title (centered with more space)
-          Expanded(
-            flex: 8,
-            child: Transform.translate(
-              offset: const Offset(20, 0),
-              child: const Text(
-                'Chat',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Color(0xFF2323AD),
-                  fontSize: 38,
-                  fontWeight: FontWeight.bold,
+          // Row with back button and action buttons
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Back button
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: Image.asset(
+                  'assets/images/return_2.png',
+                  width: 50,
+                  height: 50,
+                  fit: BoxFit.contain,
                 ),
               ),
-            ),
-          ),
 
-          // New Chat button
-          GestureDetector(
-            onTapDown: (_) {
-              setState(() => _newChatPressed = true);
-            },
-            onTapUp: (_) {
-              setState(() => _newChatPressed = false);
-              _startNewConversation();
-            },
-            onTapCancel: () {
-              setState(() => _newChatPressed = false);
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              decoration: BoxDecoration(
-                color: _newChatPressed
-                    ? const Color(0xFF4CAF50)
-                    : const Color(0xFF66BB6A),
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: const Row(
+              // Right side buttons (stacked vertically)
+              Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Icon(Icons.add, color: Colors.white, size: 14),
-                  SizedBox(width: 4),
-                  Text(
-                    'Nieuw',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
+                  // View History button
+                  GestureDetector(
+                    onTapDown: (_) {
+                      setState(() => _viewHistoryPressed = true);
+                    },
+                    onTapUp: (_) async {
+                      setState(() => _viewHistoryPressed = false);
+                      // Navigate to chat history page
+                      final selectedConversation =
+                          await Navigator.push<Conversation>(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ChatHistoryPage(),
+                        ),
+                      );
+
+                      // If a conversation was selected, load it
+                      if (selectedConversation != null) {
+                        _loadConversation(selectedConversation);
+                      }
+                    },
+                    onTapCancel: () {
+                      setState(() => _viewHistoryPressed = false);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: _viewHistoryPressed
+                            ? const Color(0xFF4545BD)
+                            : const Color(0xFF6464FF),
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.history, color: Colors.white, size: 14),
+                          SizedBox(width: 4),
+                          Text(
+                            'Geschiedenis',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+
+                  // New Chat button
+                  GestureDetector(
+                    onTapDown: (_) {
+                      setState(() => _newChatPressed = true);
+                    },
+                    onTapUp: (_) {
+                      setState(() => _newChatPressed = false);
+                      _startNewConversation();
+                    },
+                    onTapCancel: () {
+                      setState(() => _newChatPressed = false);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: _newChatPressed
+                            ? const Color(0xFF4CAF50)
+                            : const Color(0xFF66BB6A),
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.add, color: Colors.white, size: 14),
+                          SizedBox(width: 4),
+                          Text(
+                            'Nieuw',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
               ),
-            ),
-          ),
-          const SizedBox(width: 8),
-
-          // View History button
-          GestureDetector(
-            onTapDown: (_) {
-              setState(() => _viewHistoryPressed = true);
-            },
-            onTapUp: (_) async {
-              setState(() => _viewHistoryPressed = false);
-              // Navigate to chat history page
-              final selectedConversation = await Navigator.push<Conversation>(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ChatHistoryPage(),
-                ),
-              );
-
-              // If a conversation was selected, load it
-              if (selectedConversation != null) {
-                _loadConversation(selectedConversation);
-              }
-            },
-            onTapCancel: () {
-              setState(() => _viewHistoryPressed = false);
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              decoration: BoxDecoration(
-                color: _viewHistoryPressed
-                    ? const Color(0xFF4545BD)
-                    : const Color(0xFF6464FF),
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.history, color: Colors.white, size: 14),
-                  SizedBox(width: 4),
-                  Text(
-                    'Geschiedenis',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            ],
           ),
         ],
       ),
