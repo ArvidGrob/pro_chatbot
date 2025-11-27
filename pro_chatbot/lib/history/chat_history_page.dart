@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '/models/conversation.dart';
+import '/api/conversation_service.dart';
+import '/api/user_provider.dart';
 
 /// Temporary main so this file can be run directly during debugging.
 /// Remove or comment out this main when integrating into the full app.
@@ -53,23 +57,17 @@ class ChatHistoryPage extends StatefulWidget {
 class _ChatHistoryPageState extends State<ChatHistoryPage> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
+  final ConversationService _conversationService = ConversationService();
 
-  // Chat history data matching the mockup
-  final List<Map<String, String>> _allChats = [
-    {'title': 'Gerecyclede kunst', 'date': 'Vandaag'},
-    {'title': 'Webstrip maken', 'date': 'Gisteren'},
-    {'title': 'Spel programmeren', 'date': 'Dinsdag'},
-    {'title': 'Groepsproject samenwerken', 'date': '14/09'},
-    {'title': 'Gereedschap leren', 'date': '12/09'},
-  ];
-
-  List<Map<String, String>> _filteredChats = [];
+  List<Conversation> _allConversations = [];
+  List<Conversation> _filteredConversations = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _filteredChats = List.from(_allChats);
     _searchController.addListener(_filterChats);
+    _loadConversations();
   }
 
   @override
@@ -80,16 +78,51 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
     super.dispose();
   }
 
+  Future<void> _loadConversations() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final currentUser = userProvider.currentUser;
+
+      if (currentUser == null) {
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      final conversations =
+          await _conversationService.getUserConversations(currentUser.id);
+
+      setState(() {
+        _allConversations = conversations;
+        _filteredConversations = conversations;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading conversations: $e');
+      setState(() => _isLoading = false);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Fout bij laden van gesprekken: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   void _filterChats() {
     final query = _searchController.text.toLowerCase().trim();
     setState(() {
       if (query.isEmpty) {
-        _filteredChats = List.from(_allChats);
+        _filteredConversations = List.from(_allConversations);
       } else {
-        _filteredChats = _allChats
-            .where((chat) =>
-                chat['title']!.toLowerCase().contains(query) ||
-                chat['date']!.toLowerCase().contains(query))
+        _filteredConversations = _allConversations
+            .where((conv) =>
+                conv.title.toLowerCase().contains(query) ||
+                _formatDate(conv.createdAt).toLowerCase().contains(query))
             .toList();
       }
     });
@@ -99,21 +132,80 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
     _searchFocusNode.requestFocus();
   }
 
-  void _deleteChat(int index) {
-    setState(() {
-      final chatToRemove = _filteredChats[index];
-      _allChats.removeWhere((chat) =>
-          chat['title'] == chatToRemove['title'] &&
-          chat['date'] == chatToRemove['date']);
-      _filteredChats.removeAt(index);
-    });
+  Future<void> _openConversation(int index) async {
+    if (index < 0 || index >= _filteredConversations.length) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Chat verwijderd'),
-        duration: Duration(seconds: 2),
-      ),
-    );
+    final conversation = _filteredConversations[index];
+
+    // Navigate back to chat with this conversation loaded
+    Navigator.pop(context, conversation);
+  }
+
+  Future<void> _deleteChat(int index) async {
+    // Check bounds before accessing
+    if (index < 0 || index >= _filteredConversations.length) {
+      print(
+          'Error: Invalid index $index for list of length ${_filteredConversations.length}');
+      return;
+    }
+
+    final conversation = _filteredConversations[index];
+
+    try {
+      await _conversationService.deleteConversation(conversation.id);
+
+      setState(() {
+        _allConversations.removeWhere((conv) => conv.id == conversation.id);
+        _filteredConversations
+            .removeWhere((conv) => conv.id == conversation.id);
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Chat verwijderd'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error deleting conversation: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Fout bij verwijderen: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays == 0) {
+      return 'Vandaag';
+    } else if (difference.inDays == 1) {
+      return 'Gisteren';
+    } else if (difference.inDays < 7) {
+      // Return day of week in Dutch
+      const days = [
+        'Maandag',
+        'Dinsdag',
+        'Woensdag',
+        'Donderdag',
+        'Vrijdag',
+        'Zaterdag',
+        'Zondag'
+      ];
+      return days[date.weekday - 1];
+    } else {
+      final day = date.day.toString().padLeft(2, '0');
+      final month = date.month.toString().padLeft(2, '0');
+      return '$day/$month';
+    }
   }
 
   void _showDeleteMenu(BuildContext context, int index, Offset buttonPosition) {
@@ -182,51 +274,60 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
             children: [
               // Chat history list scrollable (starts from top, goes under title)
               Positioned.fill(
-                child: _filteredChats.isEmpty
-                    ? Align(
-                        alignment: Alignment.topCenter,
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                              top: 140.0, left: 40.0, right: 40.0),
-                          child: Text(
-                            'Geen chats gevonden',
-                            style: TextStyle(
-                              color: deepBlue.withOpacity(0.7),
-                              fontSize: 22,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
+                child: _isLoading
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                          color: deepBlue,
                         ),
                       )
-                    : ScrollConfiguration(
-                        behavior: ScrollConfiguration.of(context).copyWith(
-                          scrollbars: false,
-                        ),
-                        child: ListView.builder(
-                          padding: const EdgeInsets.only(
-                            left: 18.0,
-                            right: 18.0,
-                            top: 120.0, // Space for title at top
-                            bottom:
-                                200.0, // Space for search bar + return button
-                          ),
-                          itemCount: _filteredChats.length,
-                          itemBuilder: (context, index) {
-                            final chat = _filteredChats[index];
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 12.0),
-                              child: _buildChatCard(
-                                index,
-                                chat['title']!,
-                                chat['date']!,
-                                cardGrey,
-                                deepBlue,
+                    : _filteredConversations.isEmpty
+                        ? Align(
+                            alignment: Alignment.topCenter,
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                  top: 140.0, left: 40.0, right: 40.0),
+                              child: Text(
+                                _allConversations.isEmpty
+                                    ? 'Geen gesprekken\nStart een chat om te beginnen!'
+                                    : 'Geen chats gevonden',
+                                style: TextStyle(
+                                  color: deepBlue.withOpacity(0.7),
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                textAlign: TextAlign.center,
                               ),
-                            );
-                          },
-                        ),
-                      ),
+                            ),
+                          )
+                        : ScrollConfiguration(
+                            behavior: ScrollConfiguration.of(context).copyWith(
+                              scrollbars: false,
+                            ),
+                            child: ListView.builder(
+                              padding: const EdgeInsets.only(
+                                left: 18.0,
+                                right: 18.0,
+                                top: 120.0, // Space for title at top
+                                bottom:
+                                    200.0, // Space for search bar + return button
+                              ),
+                              itemCount: _filteredConversations.length,
+                              itemBuilder: (context, index) {
+                                final conversation =
+                                    _filteredConversations[index];
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 12.0),
+                                  child: _buildChatCard(
+                                    index,
+                                    conversation.title,
+                                    _formatDate(conversation.createdAt),
+                                    cardGrey,
+                                    deepBlue,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
               ),
 
               // Title positioned at top (fixed, list scrolls behind it)
@@ -351,71 +452,78 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
 
   Widget _buildChatCard(
       int index, String title, String date, Color cardGrey, Color deepBlue) {
-    return Container(
-      height: 68,
-      decoration: BoxDecoration(
-        color: cardGrey,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 6,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 18.0),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: deepBlue,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    date,
-                    style: const TextStyle(
-                      color: Colors.black54,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            Builder(
-              builder: (BuildContext buttonContext) {
-                return GestureDetector(
-                  onTap: () {
-                    final RenderBox button =
-                        buttonContext.findRenderObject() as RenderBox;
-                    final Offset buttonPosition =
-                        button.localToGlobal(Offset.zero);
-                    _showDeleteMenu(context, index, buttonPosition);
-                  },
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(Icons.more_vert, color: deepBlue, size: 24),
-                  ),
-                );
-              },
+    return GestureDetector(
+      onTap: () => _openConversation(index),
+      child: Container(
+        height: 68,
+        decoration: BoxDecoration(
+          color: cardGrey,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 6,
+              offset: const Offset(0, 3),
             ),
           ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: deepBlue,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      date,
+                      style: const TextStyle(
+                        color: Colors.black54,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Builder(
+                builder: (BuildContext buttonContext) {
+                  return GestureDetector(
+                    onTap: () {
+                      final RenderBox? button =
+                          buttonContext.findRenderObject() as RenderBox?;
+                      if (button != null) {
+                        final Offset buttonPosition =
+                            button.localToGlobal(Offset.zero);
+                        _showDeleteMenu(context, index, buttonPosition);
+                      }
+                    },
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(Icons.more_vert, color: deepBlue, size: 24),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
