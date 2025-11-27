@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'chat_message_model.dart';
 import 'attachment_service.dart';
 import 'attachment_widget.dart';
@@ -9,6 +10,8 @@ import 'attachment_prompt_dialog.dart';
 import 'platform_helper.dart';
 import '../history/chat_history_page.dart';
 import '../api/api_services.dart';
+import '../api/user_provider.dart';
+import '../models/conversation.dart';
 
 void main() {
   runApp(const MaterialApp(
@@ -18,7 +21,9 @@ void main() {
 }
 
 class ChatPage extends StatefulWidget {
-  const ChatPage({super.key});
+  final Conversation? conversation;
+
+  const ChatPage({super.key, this.conversation});
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -31,17 +36,34 @@ class _ChatPageState extends State<ChatPage> {
   bool _isTyping = false;
   bool _viewHistoryPressed = false;
   bool _showPlusMenu = false;
+  bool _newChatPressed = false;
 
   @override
   void initState() {
     super.initState();
-    // Add initial message
-    _messages.add(ChatMessage(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      text: 'Hallo! Hoe kan ik u helpen?',
-      isUser: false,
-      timestamp: DateTime.now(),
-    ));
+
+    // Set user ID for API service
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      if (userProvider.currentUser != null) {
+        ApiService().setUserId(userProvider.currentUser!.id);
+      }
+
+      // Load existing conversation if provided
+      if (widget.conversation != null) {
+        _loadConversation(widget.conversation!);
+      }
+    });
+
+    // Add initial message only if no conversation provided
+    if (widget.conversation == null) {
+      _messages.add(ChatMessage(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        text: 'Hallo! Hoe kan ik u helpen?',
+        isUser: false,
+        timestamp: DateTime.now(),
+      ));
+    }
   }
 
   @override
@@ -49,6 +71,79 @@ class _ChatPageState extends State<ChatPage> {
     _messageController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _loadConversation(Conversation conversation) {
+    setState(() {
+      _messages.clear();
+
+      // Convert conversation messages to ChatMessage format
+      for (var msg in conversation.messages) {
+        _messages.add(ChatMessage(
+          id: msg.timestamp.millisecondsSinceEpoch.toString(),
+          text: msg.content,
+          isUser: msg.role == 'user',
+          timestamp: msg.timestamp,
+        ));
+      }
+    });
+
+    // Set the conversation ID in API service to continue this conversation
+    // Note: The conversation ID will be set automatically when sending next message
+
+    // Scroll to bottom after loading
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToBottom();
+    });
+  }
+
+  void _retryMessage(String message) {
+    ApiService().sendChatMessage(message).then((response) {
+      if (!mounted) return;
+      setState(() {
+        _isTyping = false;
+        _messages.add(ChatMessage(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          text: response,
+          isUser: false,
+          timestamp: DateTime.now(),
+        ));
+      });
+      _scrollToBottom();
+    }).catchError((error) {
+      if (!mounted) return;
+      setState(() {
+        _isTyping = false;
+        _messages.add(ChatMessage(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          text: 'Erreur de connexion: ${error.toString()}',
+          isUser: false,
+          timestamp: DateTime.now(),
+        ));
+      });
+      _scrollToBottom();
+    });
+  }
+
+  void _startNewConversation() {
+    setState(() {
+      _messages.clear();
+      _messages.add(ChatMessage(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        text: 'Hallo! Hoe kan ik u helpen?',
+        isUser: false,
+        timestamp: DateTime.now(),
+      ));
+    });
+    ApiService().resetConversation();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Nieuwe conversatie gestart'),
+        duration: Duration(seconds: 2),
+        backgroundColor: Color(0xFF4CAF50),
+      ),
+    );
   }
 
   void _sendMessage() {
@@ -82,11 +177,19 @@ class _ChatPageState extends State<ChatPage> {
       _scrollToBottom();
     }).catchError((error) {
       if (!mounted) return;
+
+      // If error 500, reset conversation and retry
+      if (error.toString().contains('500')) {
+        ApiService().resetConversation();
+        _retryMessage(userMessage);
+        return;
+      }
+
       setState(() {
         _isTyping = false;
         _messages.add(ChatMessage(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
-          text: 'Error: ${error.toString()}',
+          text: 'Erreur: ${error.toString()}',
           isUser: false,
           timestamp: DateTime.now(),
         ));
@@ -583,6 +686,45 @@ class _ChatPageState extends State<ChatPage> {
             ),
           ),
 
+          // New Chat button
+          GestureDetector(
+            onTapDown: (_) {
+              setState(() => _newChatPressed = true);
+            },
+            onTapUp: (_) {
+              setState(() => _newChatPressed = false);
+              _startNewConversation();
+            },
+            onTapCancel: () {
+              setState(() => _newChatPressed = false);
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: BoxDecoration(
+                color: _newChatPressed
+                    ? const Color(0xFF4CAF50)
+                    : const Color(0xFF66BB6A),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.add, color: Colors.white, size: 14),
+                  SizedBox(width: 4),
+                  Text(
+                    'Nieuw',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+
           // View History button
           GestureDetector(
             onTapDown: (_) {
@@ -591,12 +733,17 @@ class _ChatPageState extends State<ChatPage> {
             onTapUp: (_) async {
               setState(() => _viewHistoryPressed = false);
               // Navigate to chat history page
-              await Navigator.push(
+              final selectedConversation = await Navigator.push<Conversation>(
                 context,
                 MaterialPageRoute(
                   builder: (context) => const ChatHistoryPage(),
                 ),
               );
+
+              // If a conversation was selected, load it
+              if (selectedConversation != null) {
+                _loadConversation(selectedConversation);
+              }
             },
             onTapCancel: () {
               setState(() => _viewHistoryPressed = false);
@@ -609,15 +756,20 @@ class _ChatPageState extends State<ChatPage> {
                     : const Color(0xFF6464FF),
                 borderRadius: BorderRadius.circular(18),
               ),
-              child: const Text(
-                'View History',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.visible,
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.history, color: Colors.white, size: 14),
+                  SizedBox(width: 4),
+                  Text(
+                    'Geschiedenis',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
