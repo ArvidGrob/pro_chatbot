@@ -13,15 +13,30 @@ class ApiService {
 
   final http.Client _client = http.Client();
   String? _conversationId;
+  int? _currentUserId;
+
+  /// Set the current user ID for chat messages
+  void setUserId(int userId) {
+    _currentUserId = userId;
+  }
+
+  /// Reset conversation (for starting a new chat)
+  void resetConversation() {
+    _conversationId = null;
+  }
 
   Future<String> sendChatMessage(String message) async {
     final url = Uri.parse('$baseUrl/api/chat');
+
+    if (_currentUserId == null) {
+      throw Exception('User ID not set. Please login first.');
+    }
 
     final response = await _client.post(
       url,
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
-        'user_id': 1,
+        'user_id': _currentUserId,
         'message': message,
         if (_conversationId != null) 'conversation_id': _conversationId,
       }),
