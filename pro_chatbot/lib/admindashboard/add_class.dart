@@ -5,6 +5,7 @@ import '/wave_background_layout.dart';
 import '../models/user.dart';
 import '../api/user_provider.dart';
 import '/api/auth_guard.dart';
+import '../api/api_services.dart'; // NEU: für Schüler-API
 
 void main() {
   runApp(
@@ -35,22 +36,57 @@ class _AddClassPageState extends State<AddClassPage> {
   static const Color primary = Color(0xFF4A4AFF);
 
   final TextEditingController _classNameCtrl = TextEditingController();
-  final List<String> _allStudents = [
-    'Emma de Vries',
-    'Liam Bakker',
-    'Sofie Jansen',
-    'Noah Visser',
-    'Mila de Boer',
-    'Daan Willems',
-  ];
 
-  final List<String> _selectedStudents = [];
-  String? _selectedStudent;
+  final ApiService _api = ApiService();
+
+
+  List<User> _allStudents = [];
+  final List<User> _selectedStudents = [];
+  User? _selectedStudent;
+
+  bool _isLoadingStudents = true;
+  String? _loadError;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStudents();
+  }
+
+  Future<void> _loadStudents() async {
+    setState(() {
+      _isLoadingStudents = true;
+      _loadError = null;
+    });
+
+    try {
+
+      final users = await _api.getUsers();
+
+      setState(() {
+        _allStudents =
+            users.where((u) => u.role == Role.student).toList();
+        _isLoadingStudents = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoadingStudents = false;
+        _loadError = 'Kon studenten niet laden: $e';
+      });
+    }
+  }
 
   @override
   void dispose() {
     _classNameCtrl.dispose();
     super.dispose();
+  }
+
+  String _fullName(User u) {
+    if (u.middlename != null && u.middlename!.trim().isNotEmpty) {
+      return '${u.firstname} ${u.middlename} ${u.lastname}';
+    }
+    return '${u.firstname} ${u.lastname}';
   }
 
   @override
@@ -129,30 +165,7 @@ class _AddClassPageState extends State<AddClassPage> {
                                 ),
                               ],
                             ),
-                            child: DropdownButton<String>(
-                              value: _selectedStudent,
-                              isExpanded: true,
-                              underline: const SizedBox(),
-                              hint: const Text('Selecteer een student'),
-                              items: _allStudents
-                                  .where((s) => !_selectedStudents.contains(s))
-                                  .map(
-                                    (student) => DropdownMenuItem(
-                                      value: student,
-                                      child: Text(student),
-                                    ),
-                                  )
-                                  .toList(),
-                              onChanged: (value) {
-                                if (value != null &&
-                                    !_selectedStudents.contains(value)) {
-                                  setState(() {
-                                    _selectedStudents.add(value);
-                                    _selectedStudent = null;
-                                  });
-                                }
-                              },
-                            ),
+                            child: _buildStudentDropdown(),
                           ),
 
                           const SizedBox(height: 16),
@@ -186,13 +199,15 @@ class _AddClassPageState extends State<AddClassPage> {
                                   Wrap(
                                     spacing: 8,
                                     runSpacing: 6,
-                                    children: _selectedStudents.map((student) {
+                                    children:
+                                    _selectedStudents.map((student) {
                                       return Chip(
-                                        label: Text(student),
+                                        label: Text(_fullName(student)),
                                         deleteIcon: const Icon(Icons.close),
                                         onDeleted: () {
                                           setState(() {
-                                            _selectedStudents.remove(student);
+                                            _selectedStudents.removeWhere(
+                                                    (u) => u.id == student.id);
                                           });
                                         },
                                       );
@@ -228,8 +243,7 @@ class _AddClassPageState extends State<AddClassPage> {
                             ),
                           ),
 
-                          const SizedBox(
-                              height: 100), // Espace pour le bouton return
+                          const SizedBox(height: 100),
                         ],
                       ),
                     ),
@@ -237,7 +251,7 @@ class _AddClassPageState extends State<AddClassPage> {
                 ],
               ),
 
-              // Bouton retour en bas centré
+              // Retour-knop
               Positioned(
                 bottom: 20,
                 left: 0,
@@ -258,6 +272,66 @@ class _AddClassPageState extends State<AddClassPage> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildStudentDropdown() {
+    if (_isLoadingStudents) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 12),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_loadError != null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(child: Text(_loadError!)),
+            TextButton(
+              onPressed: _loadStudents,
+              child: const Text('Opnieuw'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_allStudents.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 12),
+        child: Text('Geen studenten gevonden'),
+      );
+    }
+
+    final availableStudents = _allStudents
+        .where((s) => !_selectedStudents.any((sel) => sel.id == s.id))
+        .toList();
+
+    return DropdownButton<User>(
+      value: _selectedStudent,
+      isExpanded: true,
+      underline: const SizedBox(),
+      hint: const Text('Selecteer een student'),
+      items: availableStudents
+          .map(
+            (student) => DropdownMenuItem<User>(
+          value: student,
+          child: Text(_fullName(student)),
+        ),
+      )
+          .toList(),
+      onChanged: (value) {
+        if (value != null &&
+            !_selectedStudents.any((u) => u.id == value.id)) {
+          setState(() {
+            _selectedStudents.add(value);
+            _selectedStudent = null;
+          });
+        }
+      },
     );
   }
 
@@ -283,7 +357,7 @@ class _AddClassPageState extends State<AddClassPage> {
           hintText: hint,
           border: InputBorder.none,
           contentPadding:
-              const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         ),
       ),
     );
@@ -305,7 +379,7 @@ class _AddClassPageState extends State<AddClassPage> {
       return;
     }
 
-    // hier geben wir den Namen an die aufrufende Seite zurück
+
     Navigator.pop<String>(context, name);
   }
 }
