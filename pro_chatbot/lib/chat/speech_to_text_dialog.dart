@@ -88,31 +88,40 @@ class _SpeechToTextDialogState extends State<_SpeechToTextDialog> {
   }
 
   Future<void> _startListening() async {
-    setState(() {
-      _transcribedText = '';
-      _isListening = true;
-    });
+    if (mounted) {
+      setState(() {
+        _transcribedText = '';
+        _isListening = true;
+      });
+    }
 
     await widget.speech.listen(
       onResult: (result) {
-        setState(() {
-          _transcribedText = result.recognizedWords;
-          _confidence = result.confidence;
-        });
+        if (mounted) {
+          setState(() {
+            _transcribedText = result.recognizedWords;
+            _confidence = result.confidence;
+          });
+        }
       },
       listenFor: const Duration(seconds: 30),
       pauseFor: const Duration(seconds: 5),
       partialResults: true,
       cancelOnError: true,
       listenMode: stt.ListenMode.confirmation,
+      localeId: 'nl-NL', // Néerlandais par défaut
+      onDevice:
+          false, // Utiliser le service cloud pour meilleur support multilingue
     );
   }
 
   Future<void> _stopListening() async {
     await widget.speech.stop();
-    setState(() {
-      _isListening = false;
-    });
+    if (mounted) {
+      setState(() {
+        _isListening = false;
+      });
+    }
   }
 
   void _confirm() {
