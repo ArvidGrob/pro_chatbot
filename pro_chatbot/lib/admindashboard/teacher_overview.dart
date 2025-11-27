@@ -182,7 +182,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                                   controller: _searchCtrl,
                                   onChanged: (_) => setState(() {}),
                                   decoration: InputDecoration(
-                                    hintText: 'Een docent zoeken',
+                                    hintText: 'Een docent zoeken...',
                                     prefixIcon: const Icon(Icons.search),
                                     filled: true,
                                     fillColor: const Color(0xFFEFEFEF),

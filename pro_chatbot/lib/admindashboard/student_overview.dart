@@ -180,7 +180,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                             controller: _searchCtrl,
                             onChanged: (_) => setState(() {}),
                             decoration: InputDecoration(
-                              hintText: 'Zoek student',
+                              hintText: 'Een student zoeken...',
                               prefixIcon: const Icon(Icons.search),
                               suffixIcon: (_searchCtrl.text.isEmpty)
                                   ? null
