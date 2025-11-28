@@ -53,6 +53,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
       final classes = await _api.getClasses();
       classes
           .sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+
       setState(() {
         _classes = classes;
         _loading = false;
@@ -83,6 +84,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
   Widget build(BuildContext context) {
     final themeManager = Provider.of<ThemeManager>(context);
     final query = _searchCtrl.text.trim().toLowerCase();
+
     final filtered = query.isEmpty
         ? _classes
         : _classes.where((c) => c.name.toLowerCase().contains(query)).toList();
@@ -95,8 +97,6 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
           child: Column(
             children: [
               const SizedBox(height: 16),
-
-              // Header
               Center(
                 child: Text(
                   'Klas overzicht',
@@ -108,8 +108,6 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                 ),
               ),
               const SizedBox(height: 18),
-
-              // Add class button
               SizedBox(
                 width: double.infinity,
                 height: 42,
@@ -128,8 +126,6 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                 ),
               ),
               const SizedBox(height: 14),
-
-              // Container with title + search + list
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
@@ -147,8 +143,6 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 16),
-
-                      // Title
                       const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 16.0),
                         child: Text(
@@ -161,8 +155,6 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                         ),
                       ),
                       const SizedBox(height: 10),
-
-                      // Search field
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12.0),
                         child: TextField(
@@ -196,8 +188,6 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                       ),
                       const SizedBox(height: 6),
                       const Divider(height: 0),
-
-                      // Class list
                       Expanded(
                         child: _loading
                             ? const Center(child: CircularProgressIndicator())
@@ -233,8 +223,6 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                 ),
               ),
               const SizedBox(height: 20),
-
-              // Return button
               GestureDetector(
                 onTap: () => Navigator.of(context).maybePop(),
                 child: SizedBox(
@@ -253,8 +241,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
     );
   }
 
-  // ===== Actions =====
-
+  // ADD CLASS
   Future<void> _onAddClass() async {
     final result = await Navigator.of(context).push<Map<String, dynamic>>(
       MaterialPageRoute(
@@ -264,21 +251,20 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
 
     if (result == null) return;
 
-    final newClassName = result['className'] as String;
-    final studentsJson = result['students'] as List<dynamic>; // optional
+    // The class is ALREADY created in AddClassPage (add_class.dart)
+    setState(() {
+      _classes.add(
+        SchoolClass(
+          id: result['id'],
+          name: result['className'],
+        ),
+      );
+    });
 
-    try {
-      final created = await _api.createClass(newClassName.trim());
-
-      setState(() {
-        _classes.add(created);
-      });
-
-      _toast('Klas "${created.name}" aangemaakt');
-    } catch (e) {
-      _toast('Kon klas niet aanmaken: $e', success: false);
-    }
+    _toast("Klas '${result['className']}' toegevoegd!");
   }
+
+  // EDIT / DELETE
 
   void _openClassActions(SchoolClass cls) {
     showModalBottomSheet(

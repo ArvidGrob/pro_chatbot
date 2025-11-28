@@ -386,26 +386,23 @@ class ApiService {
   }
 
 // ---------- Create Class ----------
-  Future<SchoolClass> createClass(String name) async {
-    final url = Uri.parse('$baseUrl/api/classes');
-
-    final response = await _client.post(
-      url,
+  Future<SchoolClass> createClass(
+      String name, List<Map<String, dynamic>> students) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/classes'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'name': name}),
+      body: jsonEncode({
+        'name': name,
+        'students': students, // this is a list of maps
+      }),
     );
 
-    print('POST $url -> ${response.statusCode}');
-    print('BODY: ${response.body}');
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      final body = response.body.trim();
-      if (body.isEmpty) throw Exception("Empty response on create");
-
-      return SchoolClass.fromJson(jsonDecode(body));
+    if (response.statusCode == 201) {
+      final data = jsonDecode(response.body);
+      return SchoolClass.fromJson(data); // convert JSON back to object
+    } else {
+      throw Exception('Kon klas niet aanmaken: ${response.body}');
     }
-
-    throw Exception('Server error ${response.statusCode}: ${response.body}');
   }
 
 // ---------- Rename Class ----------

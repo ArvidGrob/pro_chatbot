@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pro_chatbot/api/api_services.dart';
 import 'package:provider/provider.dart';
 import '/theme_manager.dart';
 import '/wave_background_layout.dart';
@@ -295,7 +296,7 @@ class _AddClassPageState extends State<AddClassPage> {
     );
   }
 
-  void _onCreateClass() {
+  void _onCreateClass() async {
     final name = _classNameCtrl.text.trim();
 
     if (name.isEmpty) {
@@ -308,12 +309,33 @@ class _AddClassPageState extends State<AddClassPage> {
       return;
     }
 
-    // Pass students as JSON/map
-    final studentsJson = _selectedStudents.map((u) => u.toJson()).toList();
+    setState(() => _isLoading = true);
 
-    Navigator.pop(context, {
-      'className': name,
-      'students': studentsJson,
-    });
+    try {
+      final api = ApiService();
+
+      // Convert students to list of maps
+      final studentObjects =
+          _selectedStudents.map((u) => {'id': u.id}).toList();
+
+      // Create the class via API
+      final classCreated = await api.createClass(
+        name,
+        studentObjects,
+      );
+
+      _toast('Klas ${classCreated.name} succesvol aangemaakt');
+
+      // Return a Map, not the SchoolClass object
+      Navigator.pop(context, {
+        'id': classCreated.id,
+        'className': classCreated.name,
+        'students': studentObjects,
+      });
+    } catch (e) {
+      _toast('Fout bij aanmaken klas: $e', success: false);
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 }
