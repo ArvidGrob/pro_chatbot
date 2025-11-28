@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pro_chatbot/api/api_services.dart';
 import '/models/user.dart';
 
 class UserProvider extends ChangeNotifier {
@@ -36,5 +37,25 @@ class UserProvider extends ChangeNotifier {
   /// Checks if the user has any of the given roles
   bool hasAnyRole(List<Role> roles) {
     return _currentUser != null && roles.contains(_currentUser!.role);
+  }
+
+  // ----------------------------------------------------------
+  // STUDENT LIST + FETCH METHOD
+  // ----------------------------------------------------------
+
+  List<User> _students = [];
+  List<User> get students => _students;
+
+  /// Fetch all students from API
+  Future<void> fetchStudents() async {
+    try {
+      final List<User> fetched =
+          await ApiService().fetchUsersByRole(Role.student);
+
+      _students = fetched;
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
   }
 }

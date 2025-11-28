@@ -40,7 +40,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
   List<SchoolClass> _classes = [];
   bool _loading = true;
 
-  static const primaryColor = Color(0xFF3D4ED8);
+  static const Color primaryColor = Color(0xFF3D4ED8);
 
   @override
   void initState() {
@@ -51,10 +51,8 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
   Future<void> _loadClasses() async {
     try {
       final classes = await _api.getClasses();
-
       classes
           .sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
-
       setState(() {
         _classes = classes;
         _loading = false;
@@ -99,7 +97,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
               const SizedBox(height: 16),
 
               // Header
-              const Center(
+              Center(
                 child: Text(
                   'Klas overzicht',
                   style: TextStyle(
@@ -156,7 +154,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                         child: Text(
                           'Klassen',
                           style: TextStyle(
-                            color: primaryColor,
+                            color: Color(0xFF3D4ED8),
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
                           ),
@@ -258,13 +256,16 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
   // ===== Actions =====
 
   Future<void> _onAddClass() async {
-    final newClassName = await Navigator.of(context).push<String>(
+    final result = await Navigator.of(context).push<Map<String, dynamic>>(
       MaterialPageRoute(
         builder: (_) => const AddClassPage(),
       ),
     );
 
-    if (newClassName == null || newClassName.trim().isEmpty) return;
+    if (result == null) return;
+
+    final newClassName = result['className'] as String;
+    final studentsJson = result['students'] as List<dynamic>; // optional
 
     try {
       final created = await _api.createClass(newClassName.trim());

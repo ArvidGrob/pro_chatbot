@@ -439,4 +439,42 @@ class ApiService {
       throw Exception('Delete failed: ${response.statusCode}');
     }
   }
+
+  // ---------- Add users to a Class ----------
+  Future<List<User>> fetchUsersByRole(Role role) async {
+    Uri url;
+
+    // Choose endpoint based on role
+    if (role == Role.student) {
+      url = Uri.parse('$baseUrl/api/users'); // backend already filters students
+    } else if (role == Role.teacher || role == Role.admin) {
+      url = Uri.parse('$baseUrl/api/users/teachers');
+    } else {
+      throw Exception('Unknown role: ${role.name}');
+    }
+
+    final response = await http.get(
+      url,
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonData = jsonDecode(response.body);
+      final users = jsonData.map((u) => User.fromJson(u)).toList();
+
+      // Filter if backend returns multiple roles
+      if (role == Role.student) {
+        return users.where((u) => u.role == Role.student).toList();
+      } else if (role == Role.teacher) {
+        return users.where((u) => u.role == Role.teacher).toList();
+      } else if (role == Role.admin) {
+        return users.where((u) => u.role == Role.admin).toList();
+      }
+
+      return users;
+    } else {
+      throw Exception(
+          'Failed to load users with role ${role.name}: ${response.statusCode}');
+    }
+  }
 }
