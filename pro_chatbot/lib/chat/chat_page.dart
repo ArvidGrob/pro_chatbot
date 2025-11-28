@@ -12,6 +12,7 @@ import '../history/chat_history_page.dart';
 import '../api/api_services.dart';
 import '../api/user_provider.dart';
 import '../models/conversation.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 void main() {
   runApp(const MaterialApp(
@@ -196,21 +197,6 @@ class _ChatPageState extends State<ChatPage> {
       });
       _scrollToBottom();
     });
-
-    // Simulate AI response with delay
-    // Future.delayed(const Duration(seconds: 2), () {
-    //   if (!mounted) return;
-    //   setState(() {
-    //     _isTyping = false;
-    //     _messages.add(ChatMessage(
-    //       id: DateTime.now().millisecondsSinceEpoch.toString(),
-    //       text: 'AI not yet implemented. Please try again later.',
-    //       isUser: false,
-    //       timestamp: DateTime.now(),
-    //     ));
-    //   });
-    //   _scrollToBottom();
-    // });
   }
 
   void _scrollToBottom() {
