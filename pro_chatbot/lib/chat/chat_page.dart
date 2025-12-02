@@ -38,10 +38,20 @@ class _ChatPageState extends State<ChatPage> {
   bool _viewHistoryPressed = false;
   bool _showPlusMenu = false;
   bool _newChatPressed = false;
+  FlutterTts flutterTts = FlutterTts();
+  String? _currentlySpeakingMessageId; // Track which message is speaking
 
   @override
   void initState() {
     super.initState();
+
+    flutterTts.setCompletionHandler(() {
+      if (mounted) {
+        setState(() {
+          _currentlySpeakingMessageId = null;
+        });
+      }
+    });
 
     // Set user ID for API service
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -95,6 +105,32 @@ class _ChatPageState extends State<ChatPage> {
     // Scroll to bottom after loading
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToBottom();
+    });
+  }
+
+  Future<void> _toggleSpeak(String messageId, String text) async {
+    await _stopSpeaking();
+    if (_currentlySpeakingMessageId == messageId) {
+      return;
+    }
+
+    await Future.delayed(Duration(milliseconds: 100));
+
+    setState(() {
+      _currentlySpeakingMessageId = messageId;
+    });
+
+    await flutterTts.setLanguage("nl-NL");
+    await flutterTts.setPitch(0.0);
+    await flutterTts.setSpeechRate(10);
+    await flutterTts.setVolume(0.30);
+    await flutterTts.speak(text);
+  }
+
+  Future<void> _stopSpeaking() async {
+    await flutterTts.stop();
+    setState(() {
+      _currentlySpeakingMessageId = null;
     });
   }
 
@@ -813,6 +849,17 @@ class _ChatPageState extends State<ChatPage> {
                   fontWeight: FontWeight.w500,
                 ),
               ),
+            if (!message.isUser && message.text.isNotEmpty)
+              IconButton(
+                icon: Icon(
+                  _currentlySpeakingMessageId == message.id
+                      ? Icons.volume_off
+                      : Icons.volume_up,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                onPressed: () => _toggleSpeak(message.id, message.text),
+              )
           ],
         ),
       ),

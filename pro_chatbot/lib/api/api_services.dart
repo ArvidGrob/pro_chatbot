@@ -25,6 +25,11 @@ class ApiService {
     _conversationId = null;
   }
 
+  /// Set conversation ID (for loading existing conversation)
+  void setConversationId(String conversationId) {
+    _conversationId = conversationId;
+  }
+
   Future<String> sendChatMessage(String message) async {
     final url = Uri.parse('$baseUrl/api/chat');
 
