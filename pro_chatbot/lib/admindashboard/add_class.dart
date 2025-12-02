@@ -248,7 +248,7 @@ class _AddClassPageState extends State<AddClassPage> {
                 ),
                 child: _filteredStudents.isEmpty
                     ? const Center(child: Text('Geen studenten gevonden'))
-                    : ListView.builder(
+                    : ListView.separated(
                         itemCount: _filteredStudents.length,
                         itemBuilder: (context, index) {
                           final student = _filteredStudents[index];
@@ -265,6 +265,8 @@ class _AddClassPageState extends State<AddClassPage> {
                             onTap: () => _toggleStudent(student),
                           );
                         },
+                        separatorBuilder: (context, index) =>
+                            const Divider(height: 1),
                       ),
               ),
             ],
