@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pro_chatbot/api/api_services.dart';
 import 'package:provider/provider.dart';
 import '/models/conversation.dart';
 import '/api/conversation_service.dart';
@@ -136,7 +137,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
     if (index < 0 || index >= _filteredConversations.length) return;
 
     final conversation = _filteredConversations[index];
-
+    ApiService().setConversationId(conversation.id);
     // Navigate back to chat with this conversation loaded
     Navigator.pop(context, conversation);
   }
