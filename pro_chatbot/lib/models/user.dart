@@ -88,6 +88,7 @@ class User {
   final String lastname;
   final String? middlename;
   final Role role;
+  final int? classId;
 
   bool online = false;
 
@@ -103,6 +104,7 @@ class User {
     required this.role,
     this.school,
     this.schoolClass,
+    this.classId,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -122,6 +124,9 @@ class User {
       // Parse class
       schoolClass:
           json['class'] != null ? SchoolClass.fromJson(json['class']) : null,
+
+      // Parse classId from JSON
+      classId: json['class_id'],
     );
   }
 
@@ -147,6 +152,7 @@ class User {
     Role? role,
     School? school,
     SchoolClass? schoolClass,
+    int? classId,
   }) {
     return User(
       id: id ?? this.id,
@@ -157,6 +163,7 @@ class User {
       role: role ?? this.role,
       school: school ?? this.school,
       schoolClass: schoolClass ?? this.schoolClass,
+      classId: classId ?? this.classId,
     );
   }
 }

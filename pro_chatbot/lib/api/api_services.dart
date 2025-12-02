@@ -385,6 +385,20 @@ class ApiService {
     throw Exception('Server returned ${response.statusCode}: ${response.body}');
   }
 
+// ---------- Filter list with students without a Class----------
+  Future<List<User>> fetchUnassignedStudents() async {
+    final url = Uri.parse('$baseUrl/api/users/unassigned-students');
+    final response =
+        await http.get(url, headers: {'Content-Type': 'application/json'});
+
+    if (response.statusCode == 200) {
+      final List data = jsonDecode(response.body);
+      return data.map((json) => User.fromJson(json)).toList();
+    } else {
+      throw Exception('Het is niet gelukt om studenten op te halen.');
+    }
+  }
+
 // ---------- Create Class ----------
   Future<SchoolClass> createClass(
       String name, List<Map<String, dynamic>> students) async {

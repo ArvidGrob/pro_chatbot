@@ -51,29 +51,21 @@ class _AddClassPageState extends State<AddClassPage> {
   }
 
   Future<void> _loadStudents() async {
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
-    final provider = Provider.of<UserProvider>(context, listen: false);
     try {
-      await provider.fetchStudents();
-      setState(() {
-        _allStudents =
-            provider.students.where((u) => u.role == Role.student).toList();
+      // Fetch only students without a class from backend
+      _allStudents = await ApiService().fetchUnassignedStudents();
 
-        // Sort alphabetically by full name
-        _allStudents.sort((a, b) => a.fullName.compareTo(b.fullName));
+      // Sort alphabetically by full name
+      _allStudents.sort((a, b) => a.fullName.compareTo(b.fullName));
 
-        // Initially all students are shown in filtered list
-        _filteredStudents = List.from(_allStudents);
-      });
+      // Initially show all students
+      _filteredStudents = List.from(_allStudents);
     } catch (e) {
       _toast('Fout bij ophalen studenten: $e', success: false);
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     }
   }
 
@@ -113,6 +105,45 @@ class _AddClassPageState extends State<AddClassPage> {
         duration: const Duration(seconds: 2),
       ),
     );
+  }
+
+  void _onCreateClass() async {
+    final name = _classNameCtrl.text.trim();
+
+    if (name.isEmpty) {
+      _toast('Voer een klasnaam in', success: false);
+      return;
+    }
+
+    if (_selectedStudents.isEmpty) {
+      _toast('Voeg ten minste één student toe', success: false);
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final api = ApiService();
+      final studentObjects =
+          _selectedStudents.map((u) => {'id': u.id}).toList();
+
+      final classCreated = await api.createClass(
+        name,
+        studentObjects,
+      );
+
+      _toast('Klas ${classCreated.name} succesvol aangemaakt');
+
+      Navigator.pop(context, {
+        'id': classCreated.id,
+        'className': classCreated.name,
+        'students': studentObjects,
+      });
+    } catch (e) {
+      _toast('Fout bij aanmaken klas: $e', success: false);
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -202,7 +233,6 @@ class _AddClassPageState extends State<AddClassPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Search container
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
@@ -273,7 +303,6 @@ class _AddClassPageState extends State<AddClassPage> {
           ),
         ),
         const SizedBox(height: 12),
-        // Added students container
         if (_selectedStudents.isNotEmpty)
           Container(
             padding: const EdgeInsets.all(12),
@@ -338,46 +367,6 @@ class _AddClassPageState extends State<AddClassPage> {
         ),
       ),
     );
-  }
-
-  void _onCreateClass() async {
-    final name = _classNameCtrl.text.trim();
-
-    if (name.isEmpty) {
-      _toast('Voer een klasnaam in', success: false);
-      return;
-    }
-
-    if (_selectedStudents.isEmpty) {
-      _toast('Voeg ten minste één student toe', success: false);
-      return;
-    }
-
-    setState(() => _isLoading = true);
-
-    try {
-      final api = ApiService();
-
-      final studentObjects =
-          _selectedStudents.map((u) => {'id': u.id}).toList();
-
-      final classCreated = await api.createClass(
-        name,
-        studentObjects,
-      );
-
-      _toast('Klas ${classCreated.name} succesvol aangemaakt');
-
-      Navigator.pop(context, {
-        'id': classCreated.id,
-        'className': classCreated.name,
-        'students': studentObjects,
-      });
-    } catch (e) {
-      _toast('Fout bij aanmaken klas: $e', success: false);
-    } finally {
-      setState(() => _isLoading = false);
-    }
   }
 }
 
