@@ -36,10 +36,11 @@ class _AddClassPageState extends State<AddClassPage> {
   static const Color primary = Color(0xFF4A4AFF);
 
   final TextEditingController _classNameCtrl = TextEditingController();
+  final TextEditingController _searchCtrl = TextEditingController();
 
   List<User> _allStudents = [];
+  List<User> _filteredStudents = [];
   List<User> _selectedStudents = [];
-  int? _selectedStudentId; // <-- Use int? for IDs
 
   bool _isLoading = false;
 
@@ -56,19 +57,16 @@ class _AddClassPageState extends State<AddClassPage> {
 
     final provider = Provider.of<UserProvider>(context, listen: false);
     try {
-      await provider.fetchStudents(); // fetch students via provider
+      await provider.fetchStudents();
       setState(() {
         _allStudents =
             provider.students.where((u) => u.role == Role.student).toList();
 
-        // Sort alphabetically by full name (firstname + middlename + lastname)
-        _allStudents.sort((a, b) {
-          final aFullName =
-              '${a.firstname} ${a.middlename ?? ''} ${a.lastname}'.trim();
-          final bFullName =
-              '${b.firstname} ${b.middlename ?? ''} ${b.lastname}'.trim();
-          return aFullName.compareTo(bFullName);
-        });
+        // Sort alphabetically by full name
+        _allStudents.sort((a, b) => a.fullName.compareTo(b.fullName));
+
+        // Initially all students are shown in filtered list
+        _filteredStudents = List.from(_allStudents);
       });
     } catch (e) {
       _toast('Fout bij ophalen studenten: $e', success: false);
@@ -79,9 +77,31 @@ class _AddClassPageState extends State<AddClassPage> {
     }
   }
 
+  void _toggleStudent(User student) {
+    setState(() {
+      if (_selectedStudents.contains(student)) {
+        _selectedStudents.remove(student);
+      } else {
+        _selectedStudents.add(student);
+      }
+      _filterStudents(_searchCtrl.text);
+    });
+  }
+
+  void _filterStudents(String query) {
+    setState(() {
+      _filteredStudents = _allStudents
+          .where((student) =>
+              student.fullName.toLowerCase().contains(query.toLowerCase()) &&
+              !_selectedStudents.contains(student))
+          .toList();
+    });
+  }
+
   @override
   void dispose() {
     _classNameCtrl.dispose();
+    _searchCtrl.dispose();
     super.dispose();
   }
 
@@ -125,9 +145,7 @@ class _AddClassPageState extends State<AddClassPage> {
                         hint: 'Voer een klasnaam in',
                       ),
                       const SizedBox(height: 24),
-                      _buildStudentDropdown(),
-                      const SizedBox(height: 16),
-                      _buildSelectedStudentsChips(),
+                      _buildStudentSearch(),
                       const SizedBox(height: 36),
                       _buildCreateClassButton(),
                       const SizedBox(height: 100),
@@ -180,24 +198,16 @@ class _AddClassPageState extends State<AddClassPage> {
     );
   }
 
-  Widget _buildStudentDropdown() {
+  Widget _buildStudentSearch() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Voeg studenten toe:',
-          style: TextStyle(
-            color: primary,
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 6),
+        // Search container
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: const Color(0xFFD9D9D9),
-            borderRadius: BorderRadius.circular(16),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(.1),
@@ -206,79 +216,102 @@ class _AddClassPageState extends State<AddClassPage> {
               ),
             ],
           ),
-          child: DropdownButton<int>(
-            value: _selectedStudentId,
-            isExpanded: true,
-            underline: const SizedBox(),
-            hint: const Text('Selecteer een student'),
-            items: _allStudents
-                .where((u) => !_selectedStudents.contains(u))
-                .map(
-                  (user) => DropdownMenuItem<int>(
-                    value: user.id, // int ID
-                    child: Text(
-                        "${user.firstname} ${user.middlename ?? ''} ${user.lastname}"),
-                  ),
-                )
-                .toList(),
-            onChanged: (value) {
-              if (value != null) {
-                final selected = _allStudents.firstWhere((u) => u.id == value);
-                setState(() {
-                  _selectedStudents.add(selected);
-                  _selectedStudentId = null;
-                });
-              }
-            },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Voeg studenten toe:',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF4A4AFF),
+                ),
+              ),
+              const SizedBox(height: 6),
+              TextField(
+                controller: _searchCtrl,
+                decoration: const InputDecoration(
+                  hintText: 'Zoek student...',
+                  prefixIcon: Icon(Icons.search),
+                  border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+                onChanged: _filterStudents,
+              ),
+              const SizedBox(height: 6),
+              Container(
+                height: 150,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: _filteredStudents.isEmpty
+                    ? const Center(child: Text('Geen studenten gevonden'))
+                    : ListView.builder(
+                        itemCount: _filteredStudents.length,
+                        itemBuilder: (context, index) {
+                          final student = _filteredStudents[index];
+                          return ListTile(
+                            title: Text(student.fullName),
+                            trailing: Icon(
+                              _selectedStudents.contains(student)
+                                  ? Icons.check_circle
+                                  : Icons.circle_outlined,
+                              color: _selectedStudents.contains(student)
+                                  ? Colors.green
+                                  : null,
+                            ),
+                            onTap: () => _toggleStudent(student),
+                          );
+                        },
+                      ),
+              ),
+            ],
           ),
         ),
+        const SizedBox(height: 12),
+        // Added students container
+        if (_selectedStudents.isNotEmpty)
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Toegevoegde studenten:',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF3D4ED8),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: _selectedStudents.map((student) {
+                    return Chip(
+                      label: Text(student.fullName),
+                      deleteIcon: const Icon(Icons.close),
+                      onDeleted: () => _toggleStudent(student),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          ),
       ],
-    );
-  }
-
-  Widget _buildSelectedStudentsChips() {
-    if (_selectedStudents.isEmpty) return const SizedBox();
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.8),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(.1),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Toegevoegde studenten:',
-            style:
-                TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
-          ),
-          const SizedBox(height: 6),
-          Wrap(
-            spacing: 8,
-            runSpacing: 6,
-            children: _selectedStudents.map((student) {
-              return Chip(
-                label: Text(
-                    "${student.firstname} ${student.middlename ?? ''} ${student.lastname}"),
-                deleteIcon: const Icon(Icons.close),
-                onDeleted: () {
-                  setState(() {
-                    _selectedStudents.remove(student);
-                  });
-                },
-              );
-            }).toList(),
-          ),
-        ],
-      ),
     );
   }
 
@@ -323,11 +356,9 @@ class _AddClassPageState extends State<AddClassPage> {
     try {
       final api = ApiService();
 
-      // Convert students to list of maps
       final studentObjects =
           _selectedStudents.map((u) => {'id': u.id}).toList();
 
-      // Create the class via API
       final classCreated = await api.createClass(
         name,
         studentObjects,
@@ -335,7 +366,6 @@ class _AddClassPageState extends State<AddClassPage> {
 
       _toast('Klas ${classCreated.name} succesvol aangemaakt');
 
-      // Return a Map, not the SchoolClass object
       Navigator.pop(context, {
         'id': classCreated.id,
         'className': classCreated.name,
@@ -347,4 +377,9 @@ class _AddClassPageState extends State<AddClassPage> {
       setState(() => _isLoading = false);
     }
   }
+}
+
+// User fullName extension
+extension UserFullName on User {
+  String get fullName => '${firstname} ${middlename ?? ''} ${lastname}'.trim();
 }
