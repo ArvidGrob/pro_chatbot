@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '/models/user.dart';
 import '/models/school_class.dart';
+import '/models/school_statistics.dart';
 
 class ApiService {
   static const String baseUrl = 'https://chatbot.duonra.nl';
@@ -447,6 +448,24 @@ class ApiService {
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw Exception(
           'Server returned ${response.statusCode}: ${response.body}');
+    }
+  }
+
+  // ---------- STATISTICS ----------
+  /// Get statistics for a specific school
+  Future<SchoolStatistics> getSchoolStatistics(int schoolId) async {
+    final url = Uri.parse('$baseUrl/api/statistics/$schoolId');
+
+    final response = await _client.get(url);
+
+    print('GET $url -> ${response.statusCode}');
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return SchoolStatistics.fromJson(data);
+    } else {
+      throw Exception(
+          'Failed to load statistics: ${response.statusCode} - ${response.body}');
     }
   }
 }
