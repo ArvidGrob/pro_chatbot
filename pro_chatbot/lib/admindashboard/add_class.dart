@@ -60,6 +60,15 @@ class _AddClassPageState extends State<AddClassPage> {
       setState(() {
         _allStudents =
             provider.students.where((u) => u.role == Role.student).toList();
+
+        // Sort alphabetically by full name (firstname + middlename + lastname)
+        _allStudents.sort((a, b) {
+          final aFullName =
+              '${a.firstname} ${a.middlename ?? ''} ${a.lastname}'.trim();
+          final bFullName =
+              '${b.firstname} ${b.middlename ?? ''} ${b.lastname}'.trim();
+          return aFullName.compareTo(bFullName);
+        });
       });
     } catch (e) {
       _toast('Fout bij ophalen studenten: $e', success: false);
