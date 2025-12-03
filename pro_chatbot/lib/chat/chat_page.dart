@@ -109,11 +109,12 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<void> _toggleSpeak(String messageId, String text) async {
-    await _stopSpeaking();
     if (_currentlySpeakingMessageId == messageId) {
+      await _stopSpeaking();
       return;
     }
 
+    await _stopSpeaking();
     await Future.delayed(Duration(milliseconds: 100));
 
     setState(() {
