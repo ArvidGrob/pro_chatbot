@@ -229,7 +229,7 @@ class _AddClassPageState extends State<AddClassPage> {
                           ),
 
                           const SizedBox(
-                              height: 100), // Espace pour le bouton return
+                              height: 100), // Space for the return button
                         ],
                       ),
                     ),
@@ -237,7 +237,7 @@ class _AddClassPageState extends State<AddClassPage> {
                 ],
               ),
 
-              // Bouton retour en bas centré
+              // Return button placed in center
               Positioned(
                 bottom: 20,
                 left: 0,
@@ -305,7 +305,6 @@ class _AddClassPageState extends State<AddClassPage> {
       return;
     }
 
-    // hier geben wir den Namen an die aufrufende Seite zurück
     Navigator.pop<String>(context, name);
   }
 }

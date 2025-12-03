@@ -109,6 +109,26 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
+  void _startNewChat() {
+    setState(() {
+      _messages.clear();
+      _messages.add(ChatMessage(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        text: 'Hallo! Hoe kan ik u helpen?',
+        isUser: false,
+        timestamp: DateTime.now(),
+      ));
+    });
+
+    // Reset conversation ID to start a new conversation
+    ApiService().resetConversation();
+
+    // Scroll to bottom after loading
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToBottom();
+    });
+  }
+
   Future<void> _toggleSpeak(String messageId, String text) async {
     if (_currentlySpeakingMessageId == messageId) {
       await _stopSpeaking();
@@ -723,8 +743,7 @@ class _ChatPageState extends State<ChatPage> {
                     onTapUp: (_) async {
                       setState(() => _viewHistoryPressed = false);
                       // Navigate to chat history page
-                      final selectedConversation =
-                          await Navigator.push<Conversation>(
+                      final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const ChatHistoryPage(),
@@ -732,8 +751,11 @@ class _ChatPageState extends State<ChatPage> {
                       );
 
                       // If a conversation was selected, load it
-                      if (selectedConversation != null) {
-                        _loadConversation(selectedConversation);
+                      if (result is Conversation) {
+                        _loadConversation(result);
+                      } else if (result == 'start_new_chat') {
+                        // User clicked return after possibly deleting - start fresh
+                        _startNewChat();
                       }
                     },
                     onTapCancel: () {
