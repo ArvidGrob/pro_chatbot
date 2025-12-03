@@ -395,7 +395,7 @@ class ApiService {
     }
   }
 
-  // ---------- Creatin Classes ----------
+  // ---------- Creating Classes ----------
   Future<SchoolClass> createClass(String name) async {
     final url = Uri.parse('$baseUrl/api/classes');
 

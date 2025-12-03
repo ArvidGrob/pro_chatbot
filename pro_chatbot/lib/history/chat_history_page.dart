@@ -10,7 +10,7 @@ import '/api/user_provider.dart';
 void main() {
   runApp(const MaterialApp(
     debugShowCheckedModeBanner: false,
-    home: _TestHomePage(), // Page de test avec bouton pour naviguer
+    home: _TestHomePage(), // test page with a navigateur button
   ));
 }
 
@@ -218,8 +218,8 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
       color: Colors.transparent,
       elevation: 0,
       position: RelativeRect.fromLTRB(
-        buttonPosition.dx - 150, // Position à gauche du bouton
-        buttonPosition.dy + 20, // Un peu en dessous du bouton
+        buttonPosition.dx - 150,
+        buttonPosition.dy + 20,
         overlay.size.width - buttonPosition.dx - 50,
         overlay.size.height - buttonPosition.dy,
       ),

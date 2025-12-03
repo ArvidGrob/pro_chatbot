@@ -280,11 +280,11 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
                     ),
                   ),
 
-                  const Spacer(), // Espace flexible
+                  const Spacer(), // flexible spacer
                 ],
               ),
 
-              // Bouton retour en bas centré
+              // Return button in center
               Positioned(
                 bottom: 20,
                 left: 0,

@@ -41,7 +41,7 @@ class StudentStore {
   bool containsName(String name) =>
       students.value.any((s) => s.name.toLowerCase() == name.toLowerCase());
 
-  // Neuer Weg zum Hinzufügen, damit Passwort gesetzt werden kann
+  // add new way to add a student, so that pw can be set new
   void addStudent(String name, {bool online = false, String? password}) {
     if (containsName(name)) return;
     final list = [

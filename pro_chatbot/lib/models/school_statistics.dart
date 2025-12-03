@@ -25,13 +25,13 @@ class SchoolStatistics {
     };
   }
 
-  /// Convertit la durée de session en format lisible (ex: "180 uur")
+  /// Converts the session duration into a readable format (e.g., "180 uur")
   String get formattedDuration {
     final hours = (totalSessionDuration / 60).floor();
     return '$hours uur';
   }
 
-  /// Convertit le nombre de questions en format lisible (ex: "6500 vragen")
+  /// Converts the number of questions into a readable format (e.g., "6500 questions")
   String get formattedQuestions {
     return '$totalQuestions vragen';
   }
