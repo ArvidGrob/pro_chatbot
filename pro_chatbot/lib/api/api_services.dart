@@ -394,13 +394,14 @@ class ApiService {
 
 // ---------- Create Class ----------
   Future<SchoolClass> createClass(
-      String name, List<Map<String, dynamic>> students) async {
+      String name, List<Map<String, dynamic>> students, int schoolId) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/classes'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'name': name,
-        'students': students, // this is a list of maps
+        'school_id': schoolId, // <-- include school ID
+        'students': students, // list of maps
       }),
     );
 

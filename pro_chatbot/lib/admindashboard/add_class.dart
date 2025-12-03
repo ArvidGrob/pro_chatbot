@@ -54,13 +54,8 @@ class _AddClassPageState extends State<AddClassPage> {
     setState(() => _isLoading = true);
 
     try {
-      // Fetch only students without a class from backend
       _allStudents = await ApiService().fetchUnassignedStudents();
-
-      // Sort alphabetically by full name
       _allStudents.sort((a, b) => a.fullName.compareTo(b.fullName));
-
-      // Initially show all students
       _filteredStudents = List.from(_allStudents);
     } catch (e) {
       _toast('Fout bij ophalen studenten: $e', success: false);
@@ -107,6 +102,7 @@ class _AddClassPageState extends State<AddClassPage> {
     );
   }
 
+  // ---------------- CREATE CLASS ----------------
   void _onCreateClass() async {
     final name = _classNameCtrl.text.trim();
 
@@ -120,6 +116,13 @@ class _AddClassPageState extends State<AddClassPage> {
       return;
     }
 
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final schoolId = userProvider.currentUser?.school?.id;
+    if (schoolId == null) {
+      _toast('Geen school gevonden voor huidige gebruiker', success: false);
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     try {
@@ -130,6 +133,7 @@ class _AddClassPageState extends State<AddClassPage> {
       final classCreated = await api.createClass(
         name,
         studentObjects,
+        schoolId, // Pass the school ID here
       );
 
       _toast('Klas ${classCreated.name} succesvol aangemaakt');
@@ -146,6 +150,7 @@ class _AddClassPageState extends State<AddClassPage> {
     }
   }
 
+  // ---------------- BUILD UI ----------------
   @override
   Widget build(BuildContext context) {
     final themeManager = Provider.of<ThemeManager>(context);
@@ -370,7 +375,7 @@ class _AddClassPageState extends State<AddClassPage> {
   }
 }
 
-// User fullName extension
+// ---------------- USER FULLNAME EXTENSION ----------------
 extension UserFullName on User {
   String get fullName => '${firstname} ${middlename ?? ''} ${lastname}'.trim();
 }
