@@ -144,7 +144,7 @@ class _ChatPageState extends State<ChatPage> {
 
     await flutterTts.setLanguage("nl-NL");
     await flutterTts.setPitch(0.0);
-    await flutterTts.setSpeechRate(10);
+    await flutterTts.setSpeechRate(0.8);
     await flutterTts.setVolume(0.30);
     await flutterTts.speak(text);
   }

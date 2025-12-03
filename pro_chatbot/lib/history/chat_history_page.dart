@@ -356,8 +356,24 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                 right: 0,
                 bottom: 120, // Above return button
                 child: Container(
-                  color: Colors.transparent,
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.white.withOpacity(0.0),
+                        Colors.white.withOpacity(0.8),
+                        Colors.white,
+                      ],
+                      stops: const [0.0, 0.3, 1.0],
+                    ),
+                  ),
+                  padding: const EdgeInsets.only(
+                    left: 24.0,
+                    right: 24.0,
+                    top: 20.0,
+                    bottom: 0,
+                  ),
                   child: Container(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
@@ -410,6 +426,17 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                       ],
                     ),
                   ),
+                ),
+              ),
+
+              // Background for return button area
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: 120,
+                child: Container(
+                  color: Colors.white,
                 ),
               ),
 

@@ -80,7 +80,7 @@ class _TeacherHelpInboxPageState extends State<TeacherHelpInboxPage> {
       case HelpRequestStatus.pending:
         return const Color(0xFFFF6B6B); // Rood voor in afwachting
       case HelpRequestStatus.responded:
-        return const Color(0xFFFFD93D); // Geel voor beantwoord
+        return const Color.fromARGB(255, 224, 182, 15); // Geel voor beantwoord
       case HelpRequestStatus.resolved:
         return const Color(0xFF6BCF7F); // Groen voor opgelost
     }
@@ -212,7 +212,7 @@ class _TeacherHelpInboxPageState extends State<TeacherHelpInboxPage> {
         },
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: const Color.fromARGB(255, 234, 234, 234),
             borderRadius: BorderRadius.circular(15),
             boxShadow: [
               BoxShadow(
