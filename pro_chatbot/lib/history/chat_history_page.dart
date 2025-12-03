@@ -333,11 +333,23 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
 
               // Title positioned at top (fixed, list scrolls behind it)
               Positioned(
-                top: 20,
+                top: 0,
                 left: 0,
                 right: 0,
                 child: Container(
-                  color: Colors.transparent,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.white,
+                        Colors.white.withOpacity(0.9),
+                        Colors.white.withOpacity(0.0),
+                      ],
+                      stops: const [0.0, 0.7, 1.0],
+                    ),
+                  ),
+                  padding: const EdgeInsets.only(top: 20, bottom: 20),
                   child: const Text(
                     'Chat geschiedenis',
                     style: TextStyle(
@@ -361,9 +373,9 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.white.withOpacity(0.0),
-                        Colors.white.withOpacity(0.8),
-                        Colors.white,
+                        const Color(0xFF1E1EBF).withOpacity(0.0),
+                        const Color(0xFF1E1EBF).withOpacity(0.8),
+                        const Color(0xFF1E1EBF),
                       ],
                       stops: const [0.0, 0.3, 1.0],
                     ),
@@ -436,7 +448,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                 bottom: 0,
                 height: 120,
                 child: Container(
-                  color: Colors.white,
+                  color: const Color(0xFF1E1EBF),
                 ),
               ),
 
