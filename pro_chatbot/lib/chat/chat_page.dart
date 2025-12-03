@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'chat_message_model.dart';
 import 'attachment_service.dart';
 import 'attachment_widget.dart';
@@ -824,7 +825,7 @@ class _ChatPageState extends State<ChatPage> {
         ),
         decoration: BoxDecoration(
           color: message.isUser
-              ? const Color(0xFFD9D9D9)
+              ? const Color.fromARGB(255, 123, 123, 123)
               : const Color(0xFF6464FF),
           borderRadius: BorderRadius.circular(20),
         ),
@@ -842,14 +843,78 @@ class _ChatPageState extends State<ChatPage> {
             ],
             // Show text if present
             if (message.text.isNotEmpty)
-              Text(
-                message.text,
-                style: TextStyle(
-                  color: message.isUser ? Colors.black87 : Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              message.isUser
+                  ? Text(
+                      message.text,
+                      style: const TextStyle(
+                        color: Color.fromARGB(221, 255, 255, 255),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    )
+                  : MarkdownBody(
+                      data: message.text,
+                      styleSheet: MarkdownStyleSheet(
+                        p: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        strong: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        em: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontStyle: FontStyle.italic,
+                        ),
+                        listBullet: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                        blockquote: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                        code: const TextStyle(
+                          color: Color.fromARGB(255, 0, 0, 0),
+                          backgroundColor: Color.fromARGB(255, 255, 255, 255),
+                          fontSize: 14,
+                        ),
+                        h1: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        h2: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        h3: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        h4: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        h5: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        h6: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
             if (!message.isUser && message.text.isNotEmpty)
               IconButton(
                 icon: Icon(

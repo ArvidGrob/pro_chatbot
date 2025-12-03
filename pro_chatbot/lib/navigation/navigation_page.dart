@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pro_chatbot/api/api_services.dart';
 import 'package:pro_chatbot/chat/chat_page.dart';
 import '../settings/settings_page.dart';
 import '../admindashboard/admin_dashboard.dart';
@@ -62,6 +63,7 @@ class _NavigationPageState extends State<NavigationPage> {
                 secondaryColor: themeManager
                     .getSecondaryColor(themeManager.getOptionSoftBlue()),
                 onTap: () {
+                  ApiService().resetConversation();
                   Navigator.push(
                     context,
                     MaterialPageRoute(
