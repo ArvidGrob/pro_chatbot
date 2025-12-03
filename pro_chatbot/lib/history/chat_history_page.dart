@@ -425,7 +425,8 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                       print('Return button tapped!');
                       if (Navigator.canPop(context)) {
                         print('Navigating back...');
-                        Navigator.pop(context);
+                        // Return a special value to indicate starting fresh
+                        Navigator.pop(context, 'start_new_chat');
                       } else {
                         print('Cannot pop - no previous route');
                       }
