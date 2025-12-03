@@ -54,7 +54,16 @@ class _AddClassPageState extends State<AddClassPage> {
     setState(() => _isLoading = true);
 
     try {
-      _allStudents = await ApiService().fetchUnassignedStudents();
+      // Get the current user's school ID
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final schoolId = userProvider.currentUser?.school?.id;
+
+      if (schoolId == null) {
+        _toast('Geen school gevonden voor huidige gebruiker', success: false);
+        return;
+      }
+
+      _allStudents = await ApiService().fetchUnassignedStudents(schoolId);
       _allStudents.sort((a, b) => a.fullName.compareTo(b.fullName));
       _filteredStudents = List.from(_allStudents);
     } catch (e) {

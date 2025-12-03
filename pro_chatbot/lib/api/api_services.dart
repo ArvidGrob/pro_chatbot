@@ -379,10 +379,14 @@ class ApiService {
   }
 
 // ---------- Filter list with students without a Class----------
-  Future<List<User>> fetchUnassignedStudents() async {
-    final url = Uri.parse('$baseUrl/api/users/unassigned-students');
-    final response =
-        await http.get(url, headers: {'Content-Type': 'application/json'});
+  Future<List<User>> fetchUnassignedStudents(int schoolId) async {
+    final url =
+        Uri.parse('$baseUrl/api/users/unassigned-students?school_id=$schoolId');
+
+    final response = await http.get(
+      url,
+      headers: {'Content-Type': 'application/json'},
+    );
 
     if (response.statusCode == 200) {
       final List data = jsonDecode(response.body);
