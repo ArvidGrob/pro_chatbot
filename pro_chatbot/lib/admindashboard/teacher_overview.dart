@@ -48,7 +48,15 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
 
   void _fetchUsers() {
     final api = ApiService();
-    _usersFuture = api.fetchTeachersAndAdmins().then((users) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    final schoolId = userProvider.currentUser?.school?.id;
+    if (schoolId == null) {
+      _usersFuture = Future.value([]); // or handle error
+      return;
+    }
+
+    _usersFuture = api.fetchTeachersAndAdmins(schoolId).then((users) {
       users.sort((a, b) =>
           a.firstname.toLowerCase().compareTo(b.firstname.toLowerCase()));
       return users;

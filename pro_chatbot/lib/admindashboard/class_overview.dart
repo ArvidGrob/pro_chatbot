@@ -49,8 +49,27 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
   }
 
   Future<void> _loadClasses() async {
+    setState(() => _loading = true);
+
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final user = userProvider.currentUser;
+
+    if (user == null) {
+      setState(() => _loading = false);
+      _toast('Geen ingelogde gebruiker gevonden', success: false);
+      return;
+    }
+
     try {
-      final classes = await _api.getClasses();
+      // Ensure the user's school is loaded
+      if (user.school == null) {
+        user.school = await _api.fetchUserSchool(user.id);
+      }
+
+      // Load classes for the user's school
+      final classes = await _api.getClasses(user.school!.id);
+
+      // Sort classes alphabetically
       classes
           .sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
 

@@ -49,10 +49,17 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
 
   void _fetchStudents() {
     final api = ApiService();
-    _studentsFuture = api.fetchStudents().then((students) {
-      students.sort((a, b) {
-        return a.firstname.toLowerCase().compareTo(b.firstname.toLowerCase());
-      });
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    final schoolId = userProvider.currentUser?.school?.id;
+    if (schoolId == null) {
+      _studentsFuture = Future.value([]); // or handle error
+      return;
+    }
+
+    _studentsFuture = api.fetchStudents(schoolId).then((students) {
+      students.sort((a, b) =>
+          a.firstname.toLowerCase().compareTo(b.firstname.toLowerCase()));
       return students;
     });
   }

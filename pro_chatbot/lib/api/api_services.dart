@@ -162,20 +162,15 @@ class ApiService {
   }
 
   // ------- Fetching Students from database ----------
-  Future<List<User>> fetchStudents() async {
-    final url = Uri.parse('$baseUrl/api/users');
-    final response =
-        await http.get(url, headers: {'Content-Type': 'application/json'});
+  Future<List<User>> fetchStudents(int schoolId) async {
+    final url = Uri.parse('$baseUrl/api/users?schoolId=$schoolId');
+    final response = await http.get(url);
 
     if (response.statusCode == 200) {
-      final List data = jsonDecode(response.body);
-      final students = data
-          .map((json) => User.fromJson(json))
-          .where((u) => u.role == Role.student)
-          .toList();
-      return students;
+      final data = jsonDecode(response.body) as List;
+      return data.map((json) => User.fromJson(json)).toList();
     } else {
-      throw Exception('Het is niet gelukt om studenten op te halen.');
+      throw Exception('Kon studenten niet ophalen');
     }
   }
 
@@ -323,16 +318,14 @@ class ApiService {
   }
 
   // ------- Fetching teachers and admins for lists ----------
-  Future<List<User>> fetchTeachersAndAdmins() async {
-    final url =
-        Uri.parse('$baseUrl/api/users/teachers'); // matches backend route
+  Future<List<User>> fetchTeachersAndAdmins(int schoolId) async {
+    final url = Uri.parse('$baseUrl/api/users/teachers?schoolId=$schoolId');
     final response =
         await http.get(url, headers: {'Content-Type': 'application/json'});
 
     if (response.statusCode == 200) {
       final List data = jsonDecode(response.body);
-      final users = data.map((json) => User.fromJson(json)).toList();
-      return users;
+      return data.map((json) => User.fromJson(json)).toList();
     } else {
       throw Exception('Het is niet gelukt om docenten en admins op te halen.');
     }
@@ -366,8 +359,8 @@ class ApiService {
   }
 
 // ---------- Load Classes ----------
-  Future<List<SchoolClass>> getClasses() async {
-    final url = Uri.parse('$baseUrl/api/classes');
+  Future<List<SchoolClass>> getClasses(int schoolId) async {
+    final url = Uri.parse('$baseUrl/api/classes?school_id=$schoolId');
 
     final response = await _client.get(url);
 
