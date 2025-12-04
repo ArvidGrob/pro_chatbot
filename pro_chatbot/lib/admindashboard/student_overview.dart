@@ -134,7 +134,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                       Expanded(
                         child: _pressableTile(
                           tileId: 'delete_student',
-                          label: 'Student verwijderen',
+                          label: 'Studenten verwijderen',
                           icon: Icons.delete_forever_rounded,
                           color: Colors.red,
                           onTap: () {
@@ -235,18 +235,15 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                               final list = snapshot.data ?? [];
                               final filtered = query.isEmpty
                                   ? list
-                                  : list.where((s) {
-                                      final fullName =
-                                          '${s.firstname} ${s.middlename ?? ''} ${s.lastname}';
-                                      return fullName
+                                  : list
+                                      .where((s) => s.fullName
                                           .toLowerCase()
-                                          .contains(query);
-                                    }).toList();
+                                          .contains(query))
+                                      .toList();
 
                               if (filtered.isEmpty) {
                                 return const Center(
-                                  child: Text('Geen studenten gevonden'),
-                                );
+                                    child: Text('Geen studenten gevonden'));
                               }
 
                               return ListView.separated(
@@ -255,13 +252,10 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                                     const Divider(height: 0, thickness: .4),
                                 itemBuilder: (context, i) {
                                   final s = filtered[i];
-                                  final fullName =
-                                      '${s.firstname} ${s.middlename ?? ''} ${s.lastname}'
-                                          .trim();
 
                                   return ListTile(
                                     title: Text(
-                                      fullName,
+                                      s.fullName,
                                       style: const TextStyle(
                                         color: Colors.blue,
                                         fontWeight: FontWeight.w600,
@@ -547,5 +541,16 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
         ),
       ),
     );
+  }
+}
+
+// ---------------- USER FULLNAME EXTENSION ----------------
+extension UserFullName on User {
+  String get fullName {
+    return [
+      firstname,
+      if (middlename != null && middlename!.trim().isNotEmpty) middlename,
+      lastname
+    ].join(' ');
   }
 }
