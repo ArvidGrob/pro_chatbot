@@ -435,6 +435,24 @@ class ApiService {
     }
   }
 
+  // ---------- Update class with students ----------
+  Future<void> updateClasses({
+    required int classId,
+    required int studentId,
+    required bool assign,
+  }) async {
+    final url = Uri.parse('$baseUrl/api/classes/$classId/updateclasses');
+    final response = await http.put(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'student_id': studentId, 'assign': assign}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Kon student niet updaten: ${response.body}');
+    }
+  }
+
 // ---------- Delete Class ----------
   Future<void> deleteClass(int id) async {
     final url = Uri.parse('$baseUrl/api/classes/$id');

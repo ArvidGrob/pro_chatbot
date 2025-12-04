@@ -133,6 +133,8 @@ class _ManageClassStudentsPageState extends State<ManageClassStudentsPage> {
                 ],
               ),
               const SizedBox(height: 12),
+
+              // ----------------- SEARCH BAR -----------------
               TextField(
                 controller: _searchCtrl,
                 onChanged: (_) => setState(() {}),
@@ -159,7 +161,9 @@ class _ManageClassStudentsPageState extends State<ManageClassStudentsPage> {
                   ),
                 ),
               ),
+
               const SizedBox(height: 16),
+
               _loading
                   ? const Expanded(
                       child: Center(child: CircularProgressIndicator()))
@@ -182,14 +186,17 @@ class _ManageClassStudentsPageState extends State<ManageClassStudentsPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // ----------------- STUDENTS IN CLASS -----------------
                               const Text(
                                 'Studenten in deze klas',
                                 style: TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 8),
+
                               if (filteredClassStudents.isEmpty)
                                 const Text('Geen studenten in deze klas'),
+
                               ...filteredClassStudents.map(
                                 (s) => ListTile(
                                   title: Text('${s.firstname} ${s.lastname}'),
@@ -201,48 +208,70 @@ class _ManageClassStudentsPageState extends State<ManageClassStudentsPage> {
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                     ),
-                                    onPressed: () async {
-                                      await _api.updateStudent(
-                                          student: s.copyWith(classId: null));
-                                      _toast(
-                                          '${s.firstname} verwijderd uit klas');
-                                      _loadStudents();
-                                    },
                                     child: const Text('Verwijder uit klas'),
+                                    onPressed: () async {
+                                      try {
+                                        await _api.updateClasses(
+                                          classId: widget.schoolClass.id,
+                                          studentId: s.id,
+                                          assign: false,
+                                        );
+
+                                        _toast(
+                                            '${s.fullName} verwijderd uit klas');
+                                        _loadStudents();
+                                      } catch (e) {
+                                        _toast(
+                                            'Kon student niet verwijderen: $e',
+                                            success: false);
+                                      }
+                                    },
                                   ),
                                 ),
                               ),
+
                               const Divider(height: 24),
+
+                              // ----------------- AVAILABLE STUDENTS -----------------
                               const Text(
                                 'Beschikbare studenten',
                                 style: TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 8),
+
                               if (filteredAvailableStudents.isEmpty)
                                 const Text(
                                     'Geen beschikbare studenten om toe te voegen'),
+
                               ...filteredAvailableStudents.map(
                                 (s) => ListTile(
                                   title: Text('${s.firstname} ${s.lastname}'),
                                   trailing: TextButton(
                                     style: TextButton.styleFrom(
-                                      backgroundColor:
-                                          const Color(0xFF01BA8F), // green
+                                      backgroundColor: const Color(0xFF01BA8F),
                                       foregroundColor: Colors.white,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                     ),
-                                    onPressed: () async {
-                                      await _api.updateStudent(
-                                          student: s.copyWith(
-                                              classId: widget.schoolClass.id));
-                                      _toast(
-                                          '${s.firstname} toegevoegd aan klas');
-                                      _loadStudents();
-                                    },
                                     child: const Text('Voeg toe'),
+                                    onPressed: () async {
+                                      try {
+                                        await _api.updateClasses(
+                                          classId: widget.schoolClass.id,
+                                          studentId: s.id,
+                                          assign: true,
+                                        );
+
+                                        _toast(
+                                            '${s.fullName} toegevoegd aan klas');
+                                        _loadStudents();
+                                      } catch (e) {
+                                        _toast('Kon student niet toevoegen: $e',
+                                            success: false);
+                                      }
+                                    },
                                   ),
                                 ),
                               ),
@@ -257,4 +286,8 @@ class _ManageClassStudentsPageState extends State<ManageClassStudentsPage> {
       ),
     );
   }
+}
+
+extension UserFullName on User {
+  String get fullName => '${firstname} ${middlename ?? ''} ${lastname}'.trim();
 }
