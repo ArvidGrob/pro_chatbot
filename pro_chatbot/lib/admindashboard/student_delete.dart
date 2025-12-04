@@ -5,7 +5,7 @@ import '/wave_background_layout.dart';
 import '../models/user.dart';
 import '../api/user_provider.dart';
 import '/api/auth_guard.dart';
-import '../api/api_services.dart'; // <-- API with deleteStudent
+import '../api/api_services.dart';
 
 void main() {
   runApp(
@@ -37,7 +37,6 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
 
   final TextEditingController _searchCtrl = TextEditingController();
   final FocusNode _searchFocus = FocusNode();
-  bool _showPopup = false;
 
   List<User> _allStudents = [];
   List<User> _filteredStudents = [];
@@ -48,10 +47,6 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
   void initState() {
     super.initState();
     _searchCtrl.addListener(_onSearchChanged);
-    _searchFocus.addListener(() {
-      setState(() =>
-          _showPopup = _searchFocus.hasFocus && _searchCtrl.text.isNotEmpty);
-    });
     _loadStudents();
   }
 
@@ -63,12 +58,7 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
     super.dispose();
   }
 
-  void _onSearchChanged() {
-    _filterStudents(_searchCtrl.text);
-    setState(() {
-      _showPopup = _searchFocus.hasFocus && _searchCtrl.text.trim().isNotEmpty;
-    });
-  }
+  void _onSearchChanged() => _filterStudents(_searchCtrl.text);
 
   Future<void> _loadStudents() async {
     setState(() => _isLoading = true);
@@ -77,7 +67,6 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
       final schoolId = userProvider.currentUser?.school?.id;
       if (schoolId == null) return;
 
-      // Fetch all students, not just unassigned
       _allStudents = await ApiService().fetchStudents(schoolId);
       _allStudents.sort((a, b) => a.fullName.compareTo(b.fullName));
       _filteredStudents = List.from(_allStudents);
@@ -91,9 +80,7 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
   void _filterStudents(String query) {
     setState(() {
       _filteredStudents = _allStudents
-          .where((s) =>
-              s.fullName.toLowerCase().contains(query.toLowerCase()) &&
-              !_selectedStudents.contains(s))
+          .where((s) => s.fullName.toLowerCase().contains(query.toLowerCase()))
           .toList();
     });
   }
@@ -105,52 +92,15 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
       } else {
         _selectedStudents.add(student);
       }
-      _filterStudents(_searchCtrl.text);
     });
   }
 
-  Future<void> _deleteStudent(User student) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Weet je het zeker?'),
-        content: Text('Wil je ${student.fullName} verwijderen?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Annuleren'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Verwijderen'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm != true) return;
-
-    setState(() => _isLoading = true);
-    try {
-      await ApiService().deleteStudent(student.id!);
-      _allStudents.remove(student);
-      _selectedStudents.remove(student);
-      _filterStudents(_searchCtrl.text);
-      _toast('Student ${student.fullName} verwijderd');
-    } catch (e) {
-      _toast('Fout bij verwijderen: $e', success: false);
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-
-  void _deleteSelected() async {
+  Future<void> _deleteSelected() async {
     if (_selectedStudents.isEmpty) return;
 
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (_) => AlertDialog(
         title: const Text('Bevestiging'),
         content: Text(
             'Weet je zeker dat je ${_selectedStudents.length} geselecteerde studenten wilt verwijderen?'),
@@ -176,8 +126,8 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
       for (var student in List<User>.from(_selectedStudents)) {
         await api.deleteStudent(student.id!);
         _allStudents.remove(student);
-        _selectedStudents.remove(student);
       }
+      _selectedStudents.clear();
       _filterStudents(_searchCtrl.text);
       _toast('Geselecteerde studenten succesvol verwijderd');
     } catch (e) {
@@ -215,7 +165,7 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
                     children: [
                       const SizedBox(height: 16),
                       const Text(
-                        'Studentenbeheer',
+                        'Studenten verwijderen',
                         style: TextStyle(
                           color: primary,
                           fontSize: 24,
@@ -242,7 +192,7 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
                       ),
                       const SizedBox(height: 16),
                       Container(
-                        height: 300,
+                        height: 400,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
@@ -266,99 +216,52 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
                                   final selected =
                                       _selectedStudents.contains(student);
                                   return ListTile(
+                                    leading: Checkbox(
+                                      value: selected,
+                                      onChanged: (_) => _toggleSelect(student),
+                                      activeColor: Colors.redAccent,
+                                    ),
                                     title: Text(
                                       student.fullName,
                                       style: TextStyle(
                                         color: selected
-                                            ? Colors.white
+                                            ? Colors.redAccent
                                             : Colors.blue,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
-                                    tileColor:
-                                        selected ? Colors.redAccent : null,
-                                    onTap: () => _toggleSelect(student),
-                                    onLongPress: () => _deleteStudent(student),
                                   );
                                 },
                               ),
                       ),
-                      const SizedBox(height: 16),
-                      if (_selectedStudents.isNotEmpty)
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Geselecteerde studenten',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 16),
-                              ),
-                              const SizedBox(height: 8),
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: _selectedStudents
-                                    .map(
-                                      (s) => Chip(
-                                        label: Text(s.fullName),
-                                        backgroundColor: Colors.redAccent,
-                                        labelStyle: const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold),
-                                        deleteIconColor: Colors.white,
-                                        onDeleted: () => _toggleSelect(s),
-                                      ),
-                                    )
-                                    .toList(),
-                              ),
-                              const SizedBox(height: 8),
-                              ElevatedButton(
-                                onPressed: _deleteSelected,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 12, horizontal: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                child: const Text('Verwijder geselecteerde'),
-                              ),
-                            ],
-                          ),
-                        ),
-                      const SizedBox(height: 16),
                     ],
                   ),
                 ),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: GestureDetector(
-            onTap: () => Navigator.of(context).maybePop(),
-            child: Image.asset(
-              'assets/images/return.png',
-              width: 70,
-              height: 70,
-              fit: BoxFit.contain,
-            ),
-          ),
-        ),
+        floatingActionButton: _selectedStudents.isEmpty
+            ? Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).maybePop(),
+                  child: Image.asset(
+                    'assets/images/return.png',
+                    width: 70,
+                    height: 70,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              )
+            : Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: FloatingActionButton.extended(
+                  onPressed: _deleteSelected,
+                  backgroundColor: Colors.red,
+                  label:
+                      Text('Verwijder ${_selectedStudents.length} student(en)'),
+                  icon: const Icon(Icons.delete),
+                ),
+              ),
       ),
     );
   }
