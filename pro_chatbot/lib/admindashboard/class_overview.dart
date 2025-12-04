@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pro_chatbot/admindashboard/class_managing.dart';
 import 'package:provider/provider.dart';
 import 'add_class.dart';
 import '/theme_manager.dart';
@@ -275,7 +276,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
     );
   }
 
-  // ----------------- EDIT / DELETE -----------------
+  // ----------------- CLASS ACTIONS -----------------
   void _openClassActions(SchoolClass cls) {
     showModalBottomSheet(
       context: context,
@@ -293,6 +294,14 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                 onTap: () {
                   Navigator.pop(context);
                   _showRenameDialog(cls);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.person),
+                title: const Text('Studenten beheren'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _openStudentManagement(cls);
                 },
               ),
               ListTile(
@@ -315,7 +324,6 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
 
   void _showRenameDialog(SchoolClass cls) {
     final ctrl = TextEditingController(text: cls.name);
-
     showDialog(
       context: context,
       builder: (context) {
@@ -327,20 +335,15 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Annuleer')),
             TextButton(
               onPressed: () async {
                 final newName = ctrl.text.trim();
-                if (newName.isEmpty || newName == cls.name) {
-                  Navigator.pop(context);
-                  return;
-                }
-
+                if (newName.isEmpty || newName == cls.name)
+                  return Navigator.pop(context);
                 try {
                   await _api.renameClass(cls.id, newName);
-
                   setState(() {
                     _classes = _classes
                         .map((c) => c.id == cls.id
@@ -348,14 +351,13 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                             : c)
                         .toList();
                   });
-
                   Navigator.pop(context);
                   _toast('Klas hernoemd naar "$newName"');
                 } catch (e) {
                   _toast('Kon klas niet hernoemen: $e', success: false);
                 }
               },
-              child: const Text('Save'),
+              child: const Text('Opslaan'),
             ),
           ],
         );
@@ -372,9 +374,8 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
           content: Text('Weet je zeker dat je "${cls.name}" wilt verwijderen?'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Annuleer'),
-            ),
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Annuleer')),
             TextButton(
               onPressed: () async {
                 Navigator.pop(context);
@@ -388,14 +389,21 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                   _toast('Kon klas niet verwijderen: $e', success: false);
                 }
               },
-              child: const Text(
-                'Verwijder',
-                style: TextStyle(color: Colors.red),
-              ),
+              child:
+                  const Text('Verwijder', style: TextStyle(color: Colors.red)),
             ),
           ],
         );
       },
+    );
+  }
+
+  // ----------------- STUDENT MANAGEMENT -----------------
+  void _openStudentManagement(SchoolClass cls) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ManageClassStudentsPage(schoolClass: cls),
+      ),
     );
   }
 }
