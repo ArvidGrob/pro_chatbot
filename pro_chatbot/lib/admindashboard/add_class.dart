@@ -26,7 +26,10 @@ void main() {
 }
 
 class AddClassPage extends StatefulWidget {
-  const AddClassPage({super.key});
+  /// Callback om de nieuwe klas door te geven aan ClassOverviewPage
+  final void Function(SchoolClass)? onClassCreated;
+
+  const AddClassPage({super.key, this.onClassCreated});
 
   @override
   State<AddClassPage> createState() => _AddClassPageState();
@@ -145,6 +148,13 @@ class _AddClassPageState extends State<AddClassPage> {
         schoolId,
       );
 
+      // Callback naar ClassOverviewPage
+      if (widget.onClassCreated != null) {
+        widget.onClassCreated!(SchoolClass(
+          id: classCreated.id,
+          name: classCreated.name,
+        ));
+      }
       _toast('Klas ${classCreated.name} succesvol aangemaakt');
 
       // STUDENTENLIJST OPNIEUW LADEN

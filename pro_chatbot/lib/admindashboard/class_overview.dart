@@ -260,31 +260,22 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
     );
   }
 
-  // ADD CLASS
-  Future<void> _onAddClass() async {
-    final result = await Navigator.of(context).push<Map<String, dynamic>>(
+  // ----------------- ADD CLASS WITH CALLBACK -----------------
+  void _onAddClass() {
+    Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => const AddClassPage(),
+        builder: (_) => AddClassPage(
+          onClassCreated: (newClass) {
+            setState(() {
+              _classes.add(newClass);
+            });
+          },
+        ),
       ),
     );
-
-    if (result == null) return;
-
-    // The class is ALREADY created in AddClassPage (add_class.dart)
-    setState(() {
-      _classes.add(
-        SchoolClass(
-          id: result['id'],
-          name: result['className'],
-        ),
-      );
-    });
-
-    _toast("Klas '${result['className']}' toegevoegd!");
   }
 
-  // EDIT / DELETE
-
+  // ----------------- EDIT / DELETE -----------------
   void _openClassActions(SchoolClass cls) {
     showModalBottomSheet(
       context: context,
