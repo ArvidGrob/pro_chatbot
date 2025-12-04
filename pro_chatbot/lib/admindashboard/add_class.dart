@@ -400,5 +400,11 @@ class _AddClassPageState extends State<AddClassPage> {
 
 // ---------------- USER FULLNAME EXTENSION ----------------
 extension UserFullName on User {
-  String get fullName => '${firstname} ${middlename ?? ''} ${lastname}'.trim();
+  String get fullName {
+    return [
+      firstname,
+      if (middlename != null && middlename!.trim().isNotEmpty) middlename,
+      lastname
+    ].join(' ');
+  }
 }
