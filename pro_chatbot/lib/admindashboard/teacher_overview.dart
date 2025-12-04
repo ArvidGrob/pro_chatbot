@@ -52,7 +52,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
 
     final schoolId = userProvider.currentUser?.school?.id;
     if (schoolId == null) {
-      _usersFuture = Future.value([]); // or handle error
+      _usersFuture = Future.value([]);
       return;
     }
 
@@ -229,13 +229,11 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                                     final list = snapshot.data ?? [];
                                     final filtered = query.isEmpty
                                         ? list
-                                        : list.where((u) {
-                                            final fullName =
-                                                '${u.firstname} ${u.middlename ?? ''} ${u.lastname}';
-                                            return fullName
+                                        : list
+                                            .where((u) => u.fullName
                                                 .toLowerCase()
-                                                .contains(query);
-                                          }).toList();
+                                                .contains(query))
+                                            .toList();
 
                                     if (filtered.isEmpty) {
                                       return const Center(
@@ -251,9 +249,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                                               height: 0, thickness: .4),
                                       itemBuilder: (context, i) {
                                         final user = filtered[i];
-                                        final fullName =
-                                            '${user.firstname} ${user.middlename ?? ''} ${user.lastname}'
-                                                .trim();
+                                        final fullName = user.fullName;
 
                                         return ListTile(
                                           title: Text(
@@ -361,8 +357,8 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Weet je het zeker?'),
-        content: Text(
-            'Weet je zeker dat je ${user.firstname} ${user.lastname} wilt verwijderen?'),
+        content:
+            Text('Weet je zeker dat je ${user.fullName} wilt verwijderen?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -376,8 +372,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
               Navigator.of(context).pop();
               try {
                 await ApiService().deleteTeacherOrAdmin(user.id);
-                _toast(
-                    'Gebruiker ${user.firstname} ${user.lastname} succesvol verwijderd');
+                _toast('Gebruiker ${user.fullName} succesvol verwijderd');
                 setState(_fetchUsers);
               } catch (e) {
                 _toast('Kon gebruiker niet verwijderen: $e', success: false);
@@ -466,9 +461,8 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                   setState(() => _fetchUsers());
                   Navigator.of(context).pop();
 
-                  String fullName =
-                      '${updatedUser.firstname} ${updatedUser.middlename ?? ''} ${updatedUser.lastname}'
-                          .trim();
+                  String fullName = updatedUser.fullName;
+
                   if (newPasswordCtrl.text.isNotEmpty) {
                     _toast('Wachtwoord van $fullName succesvol gewijzigd!');
                   } else if (emailCtrl.text.trim() != user.email) {
@@ -557,5 +551,16 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
         ),
       ),
     );
+  }
+}
+
+// ---------------- USER FULLNAME EXTENSION ----------------
+extension UserFullName on User {
+  String get fullName {
+    return [
+      firstname,
+      if (middlename != null && middlename!.trim().isNotEmpty) middlename,
+      lastname
+    ].join(' ');
   }
 }
