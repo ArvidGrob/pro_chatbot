@@ -94,18 +94,17 @@ class _ManageClassStudentsPageState extends State<ManageClassStudentsPage> {
     final themeManager = Provider.of<ThemeManager>(context);
     final query = _searchCtrl.text.trim().toLowerCase();
 
+    /// ---------------- USE fullName FOR SEARCH ----------------
     final filteredClassStudents = query.isEmpty
         ? _classStudents
         : _classStudents
-            .where((s) =>
-                '${s.firstname} ${s.lastname}'.toLowerCase().contains(query))
+            .where((s) => s.fullName.toLowerCase().contains(query))
             .toList();
 
     final filteredAvailableStudents = query.isEmpty
         ? _availableStudents
         : _availableStudents
-            .where((s) =>
-                '${s.firstname} ${s.lastname}'.toLowerCase().contains(query))
+            .where((s) => s.fullName.toLowerCase().contains(query))
             .toList();
 
     return WaveBackgroundLayout(
@@ -199,7 +198,9 @@ class _ManageClassStudentsPageState extends State<ManageClassStudentsPage> {
 
                               ...filteredClassStudents.map(
                                 (s) => ListTile(
-                                  title: Text('${s.firstname} ${s.lastname}'),
+                                  title: Text(s.fullName),
+
+                                  /// ← FULL NAME
                                   trailing: TextButton(
                                     style: TextButton.styleFrom(
                                       backgroundColor: Colors.red[400],
@@ -246,7 +247,9 @@ class _ManageClassStudentsPageState extends State<ManageClassStudentsPage> {
 
                               ...filteredAvailableStudents.map(
                                 (s) => ListTile(
-                                  title: Text('${s.firstname} ${s.lastname}'),
+                                  title: Text(s.fullName),
+
+                                  /// ← FULL NAME
                                   trailing: TextButton(
                                     style: TextButton.styleFrom(
                                       backgroundColor: const Color(0xFF01BA8F),
@@ -288,6 +291,13 @@ class _ManageClassStudentsPageState extends State<ManageClassStudentsPage> {
   }
 }
 
+/// ---------------- USER FULLNAME EXTENSION ----------------
 extension UserFullName on User {
-  String get fullName => '${firstname} ${middlename ?? ''} ${lastname}'.trim();
+  String get fullName {
+    return [
+      firstname,
+      if (middlename != null && middlename!.trim().isNotEmpty) middlename,
+      lastname
+    ].join(' ');
+  }
 }
