@@ -142,15 +142,19 @@ class _AddClassPageState extends State<AddClassPage> {
       final classCreated = await api.createClass(
         name,
         studentObjects,
-        schoolId, // Pass the school ID here
+        schoolId,
       );
 
       _toast('Klas ${classCreated.name} succesvol aangemaakt');
 
-      Navigator.pop(context, {
-        'id': classCreated.id,
-        'className': classCreated.name,
-        'students': studentObjects,
+      // STUDENTENLIJST OPNIEUW LADEN
+      await _loadStudents();
+
+      // --- RESET FORM TO CREATE ANOTHER CLASS ---
+      setState(() {
+        _classNameCtrl.clear();
+        _selectedStudents.clear();
+        _filteredStudents = List.from(_allStudents); // reset filtered list
       });
     } catch (e) {
       _toast('Fout bij aanmaken klas: $e', success: false);
@@ -202,7 +206,7 @@ class _AddClassPageState extends State<AddClassPage> {
         floatingActionButton: Padding(
           padding: const EdgeInsets.only(bottom: 16),
           child: GestureDetector(
-            onTap: () => Navigator.of(context).maybePop(),
+            onTap: () => Navigator.pop(context),
             child: Image.asset(
               'assets/images/return.png',
               width: 70,
