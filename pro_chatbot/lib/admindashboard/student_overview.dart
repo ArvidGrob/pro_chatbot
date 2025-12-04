@@ -543,14 +543,3 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
     );
   }
 }
-
-// ---------------- USER FULLNAME EXTENSION ----------------
-extension UserFullName on User {
-  String get fullName {
-    return [
-      firstname,
-      if (middlename != null && middlename!.trim().isNotEmpty) middlename,
-      lastname
-    ].join(' ');
-  }
-}
