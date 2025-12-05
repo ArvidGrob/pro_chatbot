@@ -510,4 +510,22 @@ class ApiService {
           'Failed to load users with role ${role.name}: ${response.statusCode}');
     }
   }
+
+  // ---------- STATISTICS ----------
+  /// Get statistics for a specific school
+  Future<SchoolStatistics> getSchoolStatistics(int schoolId) async {
+    final url = Uri.parse('$baseUrl/api/statistics/$schoolId');
+
+    final response = await _client.get(url);
+
+    print('GET $url -> ${response.statusCode}');
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return SchoolStatistics.fromJson(data);
+    } else {
+      throw Exception(
+          'Failed to load statistics: ${response.statusCode} - ${response.body}');
+    }
+  }
 }
