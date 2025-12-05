@@ -207,23 +207,24 @@ class _AddClassPageState extends State<AddClassPage> {
                       _buildStudentSearch(),
                       const SizedBox(height: 36),
                       _buildCreateClassButton(),
-                      const SizedBox(height: 100),
+                      const SizedBox(height: 20),
+
+                      // ---------------- RETURN BUTTON ----------------
+                      Center(
+                        child: GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Image.asset(
+                            'assets/images/return.png',
+                            width: 70,
+                            height: 70,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Image.asset(
-              'assets/images/return.png',
-              width: 70,
-              height: 70,
-              fit: BoxFit.contain,
-            ),
-          ),
         ),
       ),
     );

@@ -234,34 +234,38 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
                                 },
                               ),
                       ),
+
+                      const SizedBox(height: 20),
+                      // ---------------- DELETE BUTTON ----------------
+                      if (_selectedStudents.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: FloatingActionButton.extended(
+                            onPressed: _deleteSelected,
+                            backgroundColor: Colors.red,
+                            label: Text(
+                                'Verwijder ${_selectedStudents.length} student(en)'),
+                            icon: const Icon(Icons.delete),
+                          ),
+                        ),
+
+                      // ---------------- RETURN BUTTON ----------------
+                      Center(
+                        child: GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Image.asset(
+                            'assets/images/return.png',
+                            width: 70,
+                            height: 70,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: _selectedStudents.isEmpty
-            ? Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: GestureDetector(
-                  onTap: () => Navigator.of(context).maybePop(),
-                  child: Image.asset(
-                    'assets/images/return.png',
-                    width: 70,
-                    height: 70,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              )
-            : Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: FloatingActionButton.extended(
-                  onPressed: _deleteSelected,
-                  backgroundColor: Colors.red,
-                  label:
-                      Text('Verwijder ${_selectedStudents.length} student(en)'),
-                  icon: const Icon(Icons.delete),
-                ),
-              ),
       ),
     );
   }

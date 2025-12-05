@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pro_chatbot/admindashboard/admin_dashboard.dart';
 import 'package:pro_chatbot/admindashboard/class_managing.dart';
 import 'package:provider/provider.dart';
 import 'add_class.dart';
@@ -243,17 +244,26 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              GestureDetector(
-                onTap: () => Navigator.of(context).maybePop(),
-                child: SizedBox(
-                  width: 70,
-                  height: 70,
+              // Return button (to SettingsPage - Custom made image)
+              Center(
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AdminDashboard(),
+                      ),
+                    );
+                  },
                   child: Image.asset(
                     'assets/images/return.png',
+                    width: 70,
+                    height: 70,
                     fit: BoxFit.contain,
                   ),
                 ),
               ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
