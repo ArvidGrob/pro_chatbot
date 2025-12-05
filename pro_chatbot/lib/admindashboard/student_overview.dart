@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pro_chatbot/admindashboard/admin_dashboard.dart';
 import 'package:pro_chatbot/api/api_services.dart';
-import 'student_store.dart';
 import 'student_delete.dart';
 import 'addstudent.dart';
 import 'package:provider/provider.dart';
