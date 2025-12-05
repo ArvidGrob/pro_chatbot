@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '/models/user.dart';
+import '/models/school_statistics.dart';
 
 class ApiService {
   static const String baseUrl = 'https://chatbot.duonra.nl';
