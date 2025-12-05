@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pro_chatbot/admindashboard/admin_dashboard.dart';
-import 'package:pro_chatbot/admindashboard/class_managing.dart';
 import 'package:provider/provider.dart';
 import 'add_class.dart';
 import '/theme_manager.dart';
@@ -42,7 +40,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
   List<SchoolClass> _classes = [];
   bool _loading = true;
 
-  static const Color primaryColor = Color(0xFF3D4ED8);
+  static const primaryColor = Color(0xFF3D4ED8);
 
   @override
   void initState() {
@@ -52,28 +50,12 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
 
   Future<void> _loadClasses() async {
     setState(() => _loading = true);
-
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final user = userProvider.currentUser;
-
-    if (user == null) {
-      setState(() => _loading = false);
-      _toast('Geen ingelogde gebruiker gevonden', success: false);
-      return;
-    }
-
     try {
-      // Ensure the user's school is loaded
-      if (user.school == null) {
-        user.school = await _api.fetchUserSchool(user.id);
-      }
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final schoolId = userProvider.currentUser?.school?.id;
+      if (schoolId == null) throw Exception("School niet gevonden");
 
-      // Load classes for the user's school
-      final classes = await _api.getClasses(user.school!.id);
-
-      // Sort classes alphabetically
-      classes
-          .sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+      final classes = await _api.getClasses(schoolId);
 
       setState(() {
         _classes = classes;
@@ -106,7 +88,8 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
     final themeManager = Provider.of<ThemeManager>(context);
     final query = _searchCtrl.text.trim().toLowerCase();
 
-    final filtered = query.isEmpty
+    // Filter classes by search query
+    final filteredClasses = query.isEmpty
         ? _classes
         : _classes.where((c) => c.name.toLowerCase().contains(query)).toList();
 
@@ -118,7 +101,9 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
           child: Column(
             children: [
               const SizedBox(height: 16),
-              Center(
+
+              // Header
+              const Center(
                 child: Text(
                   'Klas overzicht',
                   style: TextStyle(
@@ -129,6 +114,8 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                 ),
               ),
               const SizedBox(height: 18),
+
+              // Add class button
               SizedBox(
                 width: double.infinity,
                 height: 42,
@@ -147,6 +134,8 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                 ),
               ),
               const SizedBox(height: 14),
+
+              // Container with title + search + list
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
@@ -164,18 +153,22 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 16),
+
+                      // Title
                       const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 16.0),
                         child: Text(
                           'Klassen',
                           style: TextStyle(
-                            color: Color(0xFF3D4ED8),
+                            color: primaryColor,
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
                       ),
                       const SizedBox(height: 10),
+
+                      // Search field
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12.0),
                         child: TextField(
@@ -209,18 +202,20 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                       ),
                       const SizedBox(height: 6),
                       const Divider(height: 0),
+
+                      // Class list
                       Expanded(
                         child: _loading
                             ? const Center(child: CircularProgressIndicator())
-                            : filtered.isEmpty
+                            : filteredClasses.isEmpty
                                 ? const Center(
                                     child: Text('Geen klassen gevonden'))
                                 : ListView.separated(
-                                    itemCount: filtered.length,
+                                    itemCount: filteredClasses.length,
                                     separatorBuilder: (_, __) => const Divider(
                                         height: 0, thickness: 0.4),
                                     itemBuilder: (context, i) {
-                                      final cls = filtered[i];
+                                      final cls = filteredClasses[i];
                                       return ListTile(
                                         title: Text(
                                           cls.name,
@@ -244,26 +239,19 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              // Return button (to SettingsPage - Custom made image)
-              Center(
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AdminDashboard(),
-                      ),
-                    );
-                  },
+
+              // Return button
+              GestureDetector(
+                onTap: () => Navigator.of(context).maybePop(),
+                child: SizedBox(
+                  width: 70,
+                  height: 70,
                   child: Image.asset(
                     'assets/images/return.png',
-                    width: 70,
-                    height: 70,
                     fit: BoxFit.contain,
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -271,22 +259,32 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
     );
   }
 
-  // ----------------- ADD CLASS WITH CALLBACK -----------------
-  void _onAddClass() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => AddClassPage(
-          onClassCreated: (newClass) {
-            setState(() {
-              _classes.add(newClass);
-            });
-          },
-        ),
-      ),
+  // ===== Actions =====
+
+  Future<void> _onAddClass() async {
+    final newClassName = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => const AddClassPage()),
     );
+
+    if (newClassName == null || newClassName.trim().isEmpty) return;
+
+    try {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final schoolId = userProvider.currentUser?.school?.id;
+      if (schoolId == null) throw Exception("School niet gevonden");
+
+      final created = await _api.createClass(newClassName.trim(), [], schoolId);
+
+      setState(() {
+        _classes.add(created);
+      });
+
+      _toast('Klas "${created.name}" aangemaakt');
+    } catch (e) {
+      _toast('Kon klas niet aanmaken: $e', success: false);
+    }
   }
 
-  // ----------------- CLASS ACTIONS -----------------
   void _openClassActions(SchoolClass cls) {
     showModalBottomSheet(
       context: context,
@@ -304,14 +302,6 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                 onTap: () {
                   Navigator.pop(context);
                   _showRenameDialog(cls);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.person),
-                title: const Text('Studenten beheren'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _openStudentManagement(cls);
                 },
               ),
               ListTile(
@@ -334,6 +324,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
 
   void _showRenameDialog(SchoolClass cls) {
     final ctrl = TextEditingController(text: cls.name);
+
     showDialog(
       context: context,
       builder: (context) {
@@ -345,15 +336,20 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
           ),
           actions: [
             TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Annuleer')),
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
             TextButton(
               onPressed: () async {
                 final newName = ctrl.text.trim();
-                if (newName.isEmpty || newName == cls.name)
-                  return Navigator.pop(context);
+                if (newName.isEmpty || newName == cls.name) {
+                  Navigator.pop(context);
+                  return;
+                }
+
                 try {
                   await _api.renameClass(cls.id, newName);
+
                   setState(() {
                     _classes = _classes
                         .map((c) => c.id == cls.id
@@ -361,13 +357,14 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                             : c)
                         .toList();
                   });
+
                   Navigator.pop(context);
                   _toast('Klas hernoemd naar "$newName"');
                 } catch (e) {
                   _toast('Kon klas niet hernoemen: $e', success: false);
                 }
               },
-              child: const Text('Opslaan'),
+              child: const Text('Save'),
             ),
           ],
         );
@@ -384,8 +381,9 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
           content: Text('Weet je zeker dat je "${cls.name}" wilt verwijderen?'),
           actions: [
             TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Annuleer')),
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Annuleer'),
+            ),
             TextButton(
               onPressed: () async {
                 Navigator.pop(context);
@@ -399,21 +397,14 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                   _toast('Kon klas niet verwijderen: $e', success: false);
                 }
               },
-              child:
-                  const Text('Verwijder', style: TextStyle(color: Colors.red)),
+              child: const Text(
+                'Verwijder',
+                style: TextStyle(color: Colors.red),
+              ),
             ),
           ],
         );
       },
-    );
-  }
-
-  // ----------------- STUDENT MANAGEMENT -----------------
-  void _openStudentManagement(SchoolClass cls) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => ManageClassStudentsPage(schoolClass: cls),
-      ),
     );
   }
 }
