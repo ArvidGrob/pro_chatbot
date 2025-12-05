@@ -7,7 +7,6 @@ import '../models/user.dart';
 import '../api/user_provider.dart';
 import '/api/auth_guard.dart';
 import '../api/api_services.dart';
-import '../models/school_class.dart';
 
 void main() {
   runApp(
