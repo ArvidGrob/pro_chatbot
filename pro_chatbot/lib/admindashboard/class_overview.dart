@@ -51,9 +51,11 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
 
   Future<void> _loadClasses() async {
     setState(() => _loading = true);
+
     try {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final schoolId = userProvider.currentUser?.school?.id;
+
       if (schoolId == null) throw Exception("School niet gevonden");
 
       final classes = await _api.getClasses(schoolId);
@@ -87,9 +89,8 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
   @override
   Widget build(BuildContext context) {
     final themeManager = Provider.of<ThemeManager>(context);
-    final query = _searchCtrl.text.trim().toLowerCase();
 
-    // Filter classes by search query
+    final query = _searchCtrl.text.trim().toLowerCase();
     final filteredClasses = query.isEmpty
         ? _classes
         : _classes.where((c) => c.name.toLowerCase().contains(query)).toList();
@@ -102,8 +103,6 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
           child: Column(
             children: [
               const SizedBox(height: 16),
-
-              // Header
               const Center(
                 child: Text(
                   'Klas overzicht',
@@ -115,8 +114,6 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                 ),
               ),
               const SizedBox(height: 18),
-
-              // Add class button
               SizedBox(
                 width: double.infinity,
                 height: 42,
@@ -125,7 +122,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                   icon: const Icon(Icons.add),
                   label: const Text('Klasse toevoegen'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF6F73FF),
+                    backgroundColor: Color(0xFF6F73FF),
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -135,8 +132,6 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                 ),
               ),
               const SizedBox(height: 14),
-
-              // Container with title + search + list
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
@@ -146,7 +141,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                       BoxShadow(
                         color: Colors.black.withOpacity(0.08),
                         blurRadius: 16,
-                        offset: const Offset(0, 6),
+                        offset: Offset(0, 6),
                       ),
                     ],
                   ),
@@ -154,8 +149,6 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 16),
-
-                      // Title
                       const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 16.0),
                         child: Text(
@@ -168,8 +161,6 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                         ),
                       ),
                       const SizedBox(height: 10),
-
-                      // Search field
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12.0),
                         child: TextField(
@@ -203,8 +194,6 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                       ),
                       const SizedBox(height: 6),
                       const Divider(height: 0),
-
-                      // Class list
                       Expanded(
                         child: _loading
                             ? const Center(child: CircularProgressIndicator())
@@ -214,7 +203,9 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                                 : ListView.separated(
                                     itemCount: filteredClasses.length,
                                     separatorBuilder: (_, __) => const Divider(
-                                        height: 0, thickness: 0.4),
+                                      height: 0,
+                                      thickness: 0.4,
+                                    ),
                                     itemBuilder: (context, i) {
                                       final cls = filteredClasses[i];
                                       return ListTile(
@@ -240,8 +231,6 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                 ),
               ),
               const SizedBox(height: 20),
-
-              // Return button
               GestureDetector(
                 onTap: () => Navigator.of(context).maybePop(),
                 child: SizedBox(
@@ -260,30 +249,23 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
     );
   }
 
-  // ===== Actions =====
+  // ==================== CLASS ACTIONS ====================
 
   Future<void> _onAddClass() async {
-    final newClassName = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const AddClassPage()),
+    // Push AddClassPage and expect a list of created classes
+    final createdClasses = await Navigator.of(context).push<List<SchoolClass>>(
+      MaterialPageRoute(
+        builder: (_) => AddClassPage(),
+      ),
     );
 
-    if (newClassName == null || newClassName.trim().isEmpty) return;
+    // If user canceled or no classes were created, do nothing
+    if (createdClasses == null || createdClasses.isEmpty) return;
 
-    try {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final schoolId = userProvider.currentUser?.school?.id;
-      if (schoolId == null) throw Exception("School niet gevonden");
-
-      final created = await _api.createClass(newClassName.trim(), [], schoolId);
-
-      setState(() {
-        _classes.add(created);
-      });
-
-      _toast('Klas "${created.name}" aangemaakt');
-    } catch (e) {
-      _toast('Kon klas niet aanmaken: $e', success: false);
-    }
+    // Add all new classes to the overview
+    setState(() {
+      _classes.addAll(createdClasses);
+    });
   }
 
   void _openClassActions(SchoolClass cls) {
@@ -351,6 +333,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
             TextButton(
               onPressed: () async {
                 final newName = ctrl.text.trim();
+
                 if (newName.isEmpty || newName == cls.name) {
                   Navigator.pop(context);
                   return;
@@ -398,9 +381,11 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                 Navigator.pop(context);
                 try {
                   await _api.deleteClass(cls.id);
+
                   setState(() {
                     _classes.removeWhere((c) => c.id == cls.id);
                   });
+
                   _toast('Klas "${cls.name}" verwijderd');
                 } catch (e) {
                   _toast('Kon klas niet verwijderen: $e', success: false);
@@ -417,7 +402,6 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
     );
   }
 
-  // ----------------- STUDENT MANAGEMENT -----------------
   void _openStudentManagement(SchoolClass cls) {
     Navigator.of(context).push(
       MaterialPageRoute(
