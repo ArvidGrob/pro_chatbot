@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pro_chatbot/api/api_services.dart';
 import 'package:provider/provider.dart';
 import '/theme_manager.dart';
 import '/wave_background_layout.dart';
@@ -25,7 +26,10 @@ void main() {
 }
 
 class AddClassPage extends StatefulWidget {
-  const AddClassPage({super.key});
+  /// Callback om de nieuwe klas door te geven aan ClassOverviewPage
+  final void Function(SchoolClass)? onClassCreated;
+
+  const AddClassPage({super.key, this.onClassCreated});
 
   @override
   State<AddClassPage> createState() => _AddClassPageState();
@@ -35,24 +39,141 @@ class _AddClassPageState extends State<AddClassPage> {
   static const Color primary = Color(0xFF4A4AFF);
 
   final TextEditingController _classNameCtrl = TextEditingController();
-  final List<String> _allStudents = [
-    'Emma de Vries',
-    'Liam Bakker',
-    'Sofie Jansen',
-    'Noah Visser',
-    'Mila de Boer',
-    'Daan Willems',
-  ];
+  final TextEditingController _searchCtrl = TextEditingController();
 
-  final List<String> _selectedStudents = [];
-  String? _selectedStudent;
+  List<User> _allStudents = [];
+  List<User> _filteredStudents = [];
+  List<User> _selectedStudents = [];
+
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStudents();
+  }
+
+  Future<void> _loadStudents() async {
+    setState(() => _isLoading = true);
+
+    try {
+      // Get the current user's school ID
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final schoolId = userProvider.currentUser?.school?.id;
+
+      if (schoolId == null) {
+        _toast('Geen school gevonden voor huidige gebruiker', success: false);
+        return;
+      }
+
+      _allStudents = await ApiService().fetchUnassignedStudents(schoolId);
+      _allStudents.sort((a, b) => a.fullName.compareTo(b.fullName));
+      _filteredStudents = List.from(_allStudents);
+    } catch (e) {
+      _toast('Fout bij ophalen studenten: $e', success: false);
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  void _toggleStudent(User student) {
+    setState(() {
+      if (_selectedStudents.contains(student)) {
+        _selectedStudents.remove(student);
+      } else {
+        _selectedStudents.add(student);
+      }
+      _filterStudents(_searchCtrl.text);
+    });
+  }
+
+  void _filterStudents(String query) {
+    setState(() {
+      _filteredStudents = _allStudents
+          .where((student) =>
+              student.fullName.toLowerCase().contains(query.toLowerCase()) &&
+              !_selectedStudents.contains(student))
+          .toList();
+    });
+  }
 
   @override
   void dispose() {
     _classNameCtrl.dispose();
+    _searchCtrl.dispose();
     super.dispose();
   }
 
+  void _toast(String msg, {bool success = true}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: success ? Colors.green : Colors.red,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  // ---------------- CREATE CLASS ----------------
+  void _onCreateClass() async {
+    final name = _classNameCtrl.text.trim();
+
+    if (name.isEmpty) {
+      _toast('Voer een klasnaam in', success: false);
+      return;
+    }
+
+    if (_selectedStudents.isEmpty) {
+      _toast('Voeg ten minste één student toe', success: false);
+      return;
+    }
+
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final schoolId = userProvider.currentUser?.school?.id;
+    if (schoolId == null) {
+      _toast('Geen school gevonden voor huidige gebruiker', success: false);
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final api = ApiService();
+      final studentObjects =
+          _selectedStudents.map((u) => {'id': u.id}).toList();
+
+      final classCreated = await api.createClass(
+        name,
+        studentObjects,
+        schoolId,
+      );
+
+      // Callback naar ClassOverviewPage
+      if (widget.onClassCreated != null) {
+        widget.onClassCreated!(SchoolClass(
+          id: classCreated.id,
+          name: classCreated.name,
+        ));
+      }
+      _toast('Klas ${classCreated.name} succesvol aangemaakt');
+
+      // STUDENTENLIJST OPNIEUW LADEN
+      await _loadStudents();
+
+      // --- RESET FORM TO CREATE ANOTHER CLASS ---
+      setState(() {
+        _classNameCtrl.clear();
+        _selectedStudents.clear();
+        _filteredStudents = List.from(_allStudents); // reset filtered list
+      });
+    } catch (e) {
+      _toast('Fout bij aanmaken klas: $e', success: false);
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  // ---------------- BUILD UI ----------------
   @override
   Widget build(BuildContext context) {
     final themeManager = Provider.of<ThemeManager>(context);
@@ -62,200 +183,48 @@ class _AddClassPageState extends State<AddClassPage> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(
-          child: Stack(
-            children: [
-              Column(
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const Text(
-                            'Klas toevoegen',
-                            style: TextStyle(
-                              color: Color(0xFF3D4ED8),
-                              fontSize: 28,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          const SizedBox(height: 32),
-
-                          // Klasnaam
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              'Klasnaam:',
-                              style: TextStyle(
-                                color: primary,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          _buildInputField(
-                            controller: _classNameCtrl,
-                            hint: 'Voer een klasnaam in',
-                          ),
-
-                          const SizedBox(height: 24),
-
-                          // studenten
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              'Voeg studenten toe:',
-                              style: TextStyle(
-                                color: primary,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 14),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFD9D9D9),
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(.1),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ],
-                            ),
-                            child: DropdownButton<String>(
-                              value: _selectedStudent,
-                              isExpanded: true,
-                              underline: const SizedBox(),
-                              hint: const Text('Selecteer een student'),
-                              items: _allStudents
-                                  .where((s) => !_selectedStudents.contains(s))
-                                  .map(
-                                    (student) => DropdownMenuItem(
-                                      value: student,
-                                      child: Text(student),
-                                    ),
-                                  )
-                                  .toList(),
-                              onChanged: (value) {
-                                if (value != null &&
-                                    !_selectedStudents.contains(value)) {
-                                  setState(() {
-                                    _selectedStudents.add(value);
-                                    _selectedStudent = null;
-                                  });
-                                }
-                              },
-                            ),
-                          ),
-
-                          const SizedBox(height: 16),
-
-                          if (_selectedStudents.isNotEmpty)
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.8),
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(.1),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 3),
-                                  ),
-                                ],
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Toegevoegde studenten:',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Wrap(
-                                    spacing: 8,
-                                    runSpacing: 6,
-                                    children: _selectedStudents.map((student) {
-                                      return Chip(
-                                        label: Text(student),
-                                        deleteIcon: const Icon(Icons.close),
-                                        onDeleted: () {
-                                          setState(() {
-                                            _selectedStudents.remove(student);
-                                          });
-                                        },
-                                      );
-                                    }).toList(),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                          const SizedBox(height: 36),
-
-                          SizedBox(
-                            width: 180,
-                            height: 48,
-                            child: ElevatedButton(
-                              onPressed: _onCreateClass,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF6F73FF),
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                elevation: 8,
-                                shadowColor: Colors.black.withOpacity(.25),
-                              ),
-                              child: const Text(
-                                'Create class',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(
-                              height: 100), // Space for the return button
-                        ],
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'Klas toevoegen',
+                        style: TextStyle(
+                          color: Color(0xFF3D4ED8),
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
-                    ),
-                  ),
-                ],
-              ),
+                      const SizedBox(height: 32),
+                      _buildInputField(
+                        controller: _classNameCtrl,
+                        hint: 'Voer een klasnaam in',
+                      ),
+                      const SizedBox(height: 24),
+                      _buildStudentSearch(),
+                      const SizedBox(height: 36),
+                      _buildCreateClassButton(),
+                      const SizedBox(height: 20),
 
-              // Return button placed in center
-              Positioned(
-                bottom: 20,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: GestureDetector(
-                    onTap: () => Navigator.of(context).maybePop(),
-                    child: Image.asset(
-                      'assets/images/return.png',
-                      width: 70,
-                      height: 70,
-                      fit: BoxFit.contain,
-                    ),
+                      // ---------------- RETURN BUTTON ----------------
+                      Center(
+                        child: GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Image.asset(
+                            'assets/images/return.png',
+                            width: 70,
+                            height: 70,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
                   ),
                 ),
-              ),
-            ],
-          ),
         ),
       ),
     );
@@ -289,22 +258,154 @@ class _AddClassPageState extends State<AddClassPage> {
     );
   }
 
-  void _onCreateClass() {
-    final name = _classNameCtrl.text.trim();
-    if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Voer een klasnaam in')),
-      );
-      return;
-    }
+  Widget _buildStudentSearch() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(.1),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Voeg studenten toe:',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF4A4AFF),
+                ),
+              ),
+              const SizedBox(height: 6),
+              TextField(
+                controller: _searchCtrl,
+                decoration: const InputDecoration(
+                  hintText: 'Zoek student...',
+                  prefixIcon: Icon(Icons.search),
+                  border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+                onChanged: _filterStudents,
+              ),
+              const SizedBox(height: 6),
+              Container(
+                height: 150,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: _filteredStudents.isEmpty
+                    ? const Center(child: Text('Geen studenten gevonden'))
+                    : ListView.separated(
+                        itemCount: _filteredStudents.length,
+                        itemBuilder: (context, index) {
+                          final student = _filteredStudents[index];
+                          return ListTile(
+                            title: Text(student.fullName),
+                            trailing: Icon(
+                              _selectedStudents.contains(student)
+                                  ? Icons.check_circle
+                                  : Icons.circle_outlined,
+                              color: _selectedStudents.contains(student)
+                                  ? Colors.green
+                                  : null,
+                            ),
+                            onTap: () => _toggleStudent(student),
+                          );
+                        },
+                        separatorBuilder: (context, index) =>
+                            const Divider(height: 1),
+                      ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        if (_selectedStudents.isNotEmpty)
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Toegevoegde studenten:',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF3D4ED8),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: _selectedStudents.map((student) {
+                    return Chip(
+                      label: Text(student.fullName),
+                      deleteIcon: const Icon(Icons.close),
+                      onDeleted: () => _toggleStudent(student),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
 
-    if (_selectedStudents.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Voeg ten minste één student toe')),
-      );
-      return;
-    }
+  Widget _buildCreateClassButton() {
+    return SizedBox(
+      width: 180,
+      height: 48,
+      child: ElevatedButton(
+        onPressed: _onCreateClass,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF6F73FF),
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          elevation: 8,
+          shadowColor: Colors.black.withOpacity(.25),
+        ),
+        child: const Text(
+          'Create class',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+        ),
+      ),
+    );
+  }
+}
 
-    Navigator.pop<String>(context, name);
+// ---------------- USER FULLNAME EXTENSION ----------------
+extension UserFullName on User {
+  String get fullName {
+    return [
+      firstname,
+      if (middlename != null && middlename!.trim().isNotEmpty) middlename,
+      lastname
+    ].join(' ');
   }
 }
