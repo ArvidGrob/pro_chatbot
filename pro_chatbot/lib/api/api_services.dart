@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '/models/user.dart';
-import '/models/school_class.dart';
-import '/models/school_statistics.dart';
 
 class ApiService {
   static const String baseUrl = 'https://chatbot.duonra.nl';
@@ -169,20 +167,15 @@ class ApiService {
   }
 
   // ------- Fetching Students from database ----------
-  Future<List<User>> fetchStudents() async {
-    final url = Uri.parse('$baseUrl/api/users');
-    final response =
-        await http.get(url, headers: {'Content-Type': 'application/json'});
+  Future<List<User>> fetchStudents(int schoolId) async {
+    final url = Uri.parse('$baseUrl/api/users?schoolId=$schoolId');
+    final response = await http.get(url);
 
     if (response.statusCode == 200) {
-      final List data = jsonDecode(response.body);
-      final students = data
-          .map((json) => User.fromJson(json))
-          .where((u) => u.role == Role.student)
-          .toList();
-      return students;
+      final data = jsonDecode(response.body) as List;
+      return data.map((json) => User.fromJson(json)).toList();
     } else {
-      throw Exception('Het is niet gelukt om studenten op te halen.');
+      throw Exception('Kon studenten niet ophalen');
     }
   }
 
@@ -330,16 +323,14 @@ class ApiService {
   }
 
   // ------- Fetching teachers and admins for lists ----------
-  Future<List<User>> fetchTeachersAndAdmins() async {
-    final url =
-        Uri.parse('$baseUrl/api/users/teachers'); // matches backend route
+  Future<List<User>> fetchTeachersAndAdmins(int schoolId) async {
+    final url = Uri.parse('$baseUrl/api/users/teachers?schoolId=$schoolId');
     final response =
         await http.get(url, headers: {'Content-Type': 'application/json'});
 
     if (response.statusCode == 200) {
       final List data = jsonDecode(response.body);
-      final users = data.map((json) => User.fromJson(json)).toList();
-      return users;
+      return data.map((json) => User.fromJson(json)).toList();
     } else {
       throw Exception('Het is niet gelukt om docenten en admins op te halen.');
     }
@@ -372,9 +363,9 @@ class ApiService {
     }
   }
 
-  // ---------- Load Classes ----------
-  Future<List<SchoolClass>> getClasses() async {
-    final url = Uri.parse('$baseUrl/api/classes');
+// ---------- Load Classes ----------
+  Future<List<SchoolClass>> getClasses(int schoolId) async {
+    final url = Uri.parse('$baseUrl/api/classes?school_id=$schoolId');
 
     final response = await _client.get(url);
 
@@ -383,46 +374,55 @@ class ApiService {
 
     if (response.statusCode == 200) {
       final body = response.body.trim();
-      if (body.isEmpty) {
-        throw Exception('Leere Antwort vom Server.');
-      }
+      if (body.isEmpty) throw Exception("Empty response");
 
       final List<dynamic> jsonList = jsonDecode(body);
-      return jsonList.map((e) => SchoolClass.fromJson(e)).toList();
-    } else {
-      throw Exception(
-          'Server returned ${response.statusCode}: ${response.body}');
+      return jsonList.map((item) => SchoolClass.fromJson(item)).toList();
     }
+
+    throw Exception('Server returned ${response.statusCode}: ${response.body}');
   }
 
-  // ---------- Creating Classes ----------
-  Future<SchoolClass> createClass(String name) async {
-    final url = Uri.parse('$baseUrl/api/classes');
+// ---------- Filter list with students without a Class----------
+  Future<List<User>> fetchUnassignedStudents(int schoolId) async {
+    final url =
+        Uri.parse('$baseUrl/api/users/unassigned-students?school_id=$schoolId');
 
-    final response = await _client.post(
+    final response = await http.get(
       url,
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'name': name}),
     );
 
-    print('POST $url -> ${response.statusCode}');
-    print('BODY: ${response.body}');
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      final body = response.body.trim();
-      if (body.isEmpty) {
-        throw Exception('Leere Antwort beim Erstellen der Klasse.');
-      }
-
-      final Map<String, dynamic> data = jsonDecode(body);
-      return SchoolClass.fromJson(data);
+    if (response.statusCode == 200) {
+      final List data = jsonDecode(response.body);
+      return data.map((json) => User.fromJson(json)).toList();
     } else {
-      throw Exception(
-          'Server returned ${response.statusCode}: ${response.body}');
+      throw Exception('Het is niet gelukt om studenten op te halen.');
     }
   }
 
-  // ---------- Rename Classes ----------
+// ---------- Create Class ----------
+  Future<SchoolClass> createClass(
+      String name, List<Map<String, dynamic>> students, int schoolId) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/classes'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'name': name,
+        'school_id': schoolId, // <-- include school ID
+        'students': students, // list of maps
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      final data = jsonDecode(response.body);
+      return SchoolClass.fromJson(data); // convert JSON back to object
+    } else {
+      throw Exception('Kon klas niet aanmaken: ${response.body}');
+    }
+  }
+
+// ---------- Rename Class ----------
   Future<void> renameClass(int id, String newName) async {
     final url = Uri.parse('$baseUrl/api/classes/$id');
 
@@ -436,12 +436,29 @@ class ApiService {
     print('BODY: ${response.body}');
 
     if (response.statusCode != 200) {
-      throw Exception(
-          'Server returned ${response.statusCode}: ${response.body}');
+      throw Exception('Error renaming: ${response.statusCode}');
     }
   }
 
-  // ---------- Delete Classes ----------
+  // ---------- Update class with students ----------
+  Future<void> updateClasses({
+    required int classId,
+    required int studentId,
+    required bool assign,
+  }) async {
+    final url = Uri.parse('$baseUrl/api/classes/$classId/updateclasses');
+    final response = await http.put(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'student_id': studentId, 'assign': assign}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Kon student niet updaten: ${response.body}');
+    }
+  }
+
+// ---------- Delete Class ----------
   Future<void> deleteClass(int id) async {
     final url = Uri.parse('$baseUrl/api/classes/$id');
 
@@ -451,26 +468,45 @@ class ApiService {
     print('BODY: ${response.body}');
 
     if (response.statusCode != 200 && response.statusCode != 204) {
-      throw Exception(
-          'Server returned ${response.statusCode}: ${response.body}');
+      throw Exception('Delete failed: ${response.statusCode}');
     }
   }
 
-  // ---------- STATISTICS ----------
-  /// Get statistics for a specific school
-  Future<SchoolStatistics> getSchoolStatistics(int schoolId) async {
-    final url = Uri.parse('$baseUrl/api/statistics/$schoolId');
+  // ---------- Add users to a Class ----------
+  Future<List<User>> fetchUsersByRole(Role role) async {
+    Uri url;
 
-    final response = await _client.get(url);
+    // Choose endpoint based on role
+    if (role == Role.student) {
+      url = Uri.parse('$baseUrl/api/users'); // backend already filters students
+    } else if (role == Role.teacher || role == Role.admin) {
+      url = Uri.parse('$baseUrl/api/users/teachers');
+    } else {
+      throw Exception('Unknown role: ${role.name}');
+    }
 
-    print('GET $url -> ${response.statusCode}');
+    final response = await http.get(
+      url,
+      headers: {'Content-Type': 'application/json'},
+    );
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return SchoolStatistics.fromJson(data);
+      final List<dynamic> jsonData = jsonDecode(response.body);
+      final users = jsonData.map((u) => User.fromJson(u)).toList();
+
+      // Filter if backend returns multiple roles
+      if (role == Role.student) {
+        return users.where((u) => u.role == Role.student).toList();
+      } else if (role == Role.teacher) {
+        return users.where((u) => u.role == Role.teacher).toList();
+      } else if (role == Role.admin) {
+        return users.where((u) => u.role == Role.admin).toList();
+      }
+
+      return users;
     } else {
       throw Exception(
-          'Failed to load statistics: ${response.statusCode} - ${response.body}');
+          'Failed to load users with role ${role.name}: ${response.statusCode}');
     }
   }
 }

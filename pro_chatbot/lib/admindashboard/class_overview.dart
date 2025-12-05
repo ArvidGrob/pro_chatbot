@@ -7,7 +7,6 @@ import '../models/user.dart';
 import '../api/user_provider.dart';
 import '/api/auth_guard.dart';
 import '../api/api_services.dart';
-import '../models/school_class.dart';
 
 void main() {
   runApp(
@@ -50,8 +49,14 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
   }
 
   Future<void> _loadClasses() async {
+    setState(() => _loading = true);
     try {
-      final classes = await _api.getClasses();
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final schoolId = userProvider.currentUser?.school?.id;
+      if (schoolId == null) throw Exception("School niet gevonden");
+
+      final classes = await _api.getClasses(schoolId);
+
       setState(() {
         _classes = classes;
         _loading = false;
@@ -82,7 +87,9 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
   Widget build(BuildContext context) {
     final themeManager = Provider.of<ThemeManager>(context);
     final query = _searchCtrl.text.trim().toLowerCase();
-    final filtered = query.isEmpty
+
+    // Filter classes by search query
+    final filteredClasses = query.isEmpty
         ? _classes
         : _classes.where((c) => c.name.toLowerCase().contains(query)).toList();
 
@@ -200,15 +207,15 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                       Expanded(
                         child: _loading
                             ? const Center(child: CircularProgressIndicator())
-                            : filtered.isEmpty
+                            : filteredClasses.isEmpty
                                 ? const Center(
                                     child: Text('Geen klassen gevonden'))
                                 : ListView.separated(
-                                    itemCount: filtered.length,
+                                    itemCount: filteredClasses.length,
                                     separatorBuilder: (_, __) => const Divider(
                                         height: 0, thickness: 0.4),
                                     itemBuilder: (context, i) {
-                                      final cls = filtered[i];
+                                      final cls = filteredClasses[i];
                                       return ListTile(
                                         title: Text(
                                           cls.name,
@@ -256,15 +263,17 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
 
   Future<void> _onAddClass() async {
     final newClassName = await Navigator.of(context).push<String>(
-      MaterialPageRoute(
-        builder: (_) => const AddClassPage(),
-      ),
+      MaterialPageRoute(builder: (_) => const AddClassPage()),
     );
 
     if (newClassName == null || newClassName.trim().isEmpty) return;
 
     try {
-      final created = await _api.createClass(newClassName.trim());
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final schoolId = userProvider.currentUser?.school?.id;
+      if (schoolId == null) throw Exception("School niet gevonden");
+
+      final created = await _api.createClass(newClassName.trim(), [], schoolId);
 
       setState(() {
         _classes.add(created);

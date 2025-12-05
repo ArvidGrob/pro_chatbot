@@ -7,8 +7,6 @@ import '../models/user.dart';
 import '../api/user_provider.dart';
 import '/api/api_services.dart';
 import '/api/auth_guard.dart';
-import '../models/school_statistics.dart';
-import 'dart:async';
 
 void main() {
   runApp(
@@ -42,50 +40,10 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
   bool _loading = true;
   final ApiService api = ApiService();
 
-  // Statistics
-  SchoolStatistics? _statistics;
-  bool _loadingStats = true;
-  Timer? _refreshTimer;
-
   @override
   void initState() {
     super.initState();
     _loadUserSchool();
-    _startAutoRefresh();
-  }
-
-  @override
-  void dispose() {
-    _refreshTimer?.cancel();
-    super.dispose();
-  }
-
-  /// Auto-refresh statistics every 30 seconds
-  void _startAutoRefresh() {
-    _refreshTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
-      if (user?.school != null) {
-        _loadStatistics();
-      }
-    });
-  }
-
-  Future<void> _loadStatistics() async {
-    if (user?.school == null) return;
-
-    try {
-      final stats = await api.getSchoolStatistics(user!.school!.id);
-      if (mounted) {
-        setState(() {
-          _statistics = stats;
-          _loadingStats = false;
-        });
-      }
-    } catch (e) {
-      print('Error loading statistics: $e');
-      if (mounted) {
-        setState(() => _loadingStats = false);
-      }
-    }
   }
 
   Future<void> _loadUserSchool() async {
@@ -94,7 +52,6 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
       user = userProvider.currentUser!;
       if (user!.school != null) {
         setState(() => _loading = false);
-        _loadStatistics(); // Load statistics after school is loaded
       } else {
         try {
           final school = await api.fetchUserSchool(user!.id);
@@ -102,7 +59,6 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
             user!.school = school;
             _loading = false;
           });
-          _loadStatistics(); // Load statistics after school is loaded
         } catch (e) {
           setState(() => _loading = false);
           ScaffoldMessenger.of(context).showSnackBar(
@@ -142,6 +98,8 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
     final houseCtrl =
         TextEditingController(text: user.school?.houseNumber ?? '');
     final townCtrl = TextEditingController(text: user.school?.town ?? '');
+
+    bool isPressed = false;
 
     showDialog(
       context: context,
@@ -287,49 +245,13 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
                     ),
                   ),
                 const SizedBox(height: 20),
-                // Three statistics containers
-                Column(
+                // Two side-by-side containers
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Expanded(
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 4.0),
-                            child: _infoContainer(
-                              'Aantal logins',
-                              _loadingStats
-                                  ? 'Laden...'
-                                  : '${_statistics?.totalLogins ?? 0} logins',
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 4.0),
-                            child: _infoContainer(
-                              'Aantal vragen',
-                              _loadingStats
-                                  ? 'Laden...'
-                                  : _statistics?.formattedQuestions ??
-                                      '0 vragen',
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: _infoContainer(
-                        'Gebruikstijd alle gebruikers',
-                        _loadingStats
-                            ? 'Laden...'
-                            : _statistics?.formattedDuration ?? '0 uur',
-                      ),
-                    ),
+                    _infoContainer('Gebruikstijd alle gebruikers', '180 uur'),
+                    _infoContainer(
+                        'Aantal vragen alle gebruikers', '6500 vragen'),
                   ],
                 ),
                 const Spacer(),
@@ -364,7 +286,7 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
 
   Widget _infoContainer(String title, String value) {
     return Container(
-      width: double.infinity,
+      width: MediaQuery.of(context).size.width * 0.42,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.blueGrey.shade50,
@@ -383,7 +305,7 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
           Text(
             title,
             style: const TextStyle(
-              fontSize: 14,
+              fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
             textAlign: TextAlign.center,

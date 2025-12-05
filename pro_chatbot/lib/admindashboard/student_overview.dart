@@ -49,10 +49,17 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
 
   void _fetchStudents() {
     final api = ApiService();
-    _studentsFuture = api.fetchStudents().then((students) {
-      students.sort((a, b) {
-        return a.firstname.toLowerCase().compareTo(b.firstname.toLowerCase());
-      });
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    final schoolId = userProvider.currentUser?.school?.id;
+    if (schoolId == null) {
+      _studentsFuture = Future.value([]); // or handle error
+      return;
+    }
+
+    _studentsFuture = api.fetchStudents(schoolId).then((students) {
+      students.sort((a, b) =>
+          a.firstname.toLowerCase().compareTo(b.firstname.toLowerCase()));
       return students;
     });
   }
@@ -127,7 +134,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                       Expanded(
                         child: _pressableTile(
                           tileId: 'delete_student',
-                          label: 'Student verwijderen',
+                          label: 'Studenten verwijderen',
                           icon: Icons.delete_forever_rounded,
                           color: Colors.red,
                           onTap: () {
@@ -228,18 +235,15 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                               final list = snapshot.data ?? [];
                               final filtered = query.isEmpty
                                   ? list
-                                  : list.where((s) {
-                                      final fullName =
-                                          '${s.firstname} ${s.middlename ?? ''} ${s.lastname}';
-                                      return fullName
+                                  : list
+                                      .where((s) => s.fullName
                                           .toLowerCase()
-                                          .contains(query);
-                                    }).toList();
+                                          .contains(query))
+                                      .toList();
 
                               if (filtered.isEmpty) {
                                 return const Center(
-                                  child: Text('Geen studenten gevonden'),
-                                );
+                                    child: Text('Geen studenten gevonden'));
                               }
 
                               return ListView.separated(
@@ -248,13 +252,10 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                                     const Divider(height: 0, thickness: .4),
                                 itemBuilder: (context, i) {
                                   final s = filtered[i];
-                                  final fullName =
-                                      '${s.firstname} ${s.middlename ?? ''} ${s.lastname}'
-                                          .trim();
 
                                   return ListTile(
                                     title: Text(
-                                      fullName,
+                                      s.fullName,
                                       style: const TextStyle(
                                         color: Colors.blue,
                                         fontWeight: FontWeight.w600,
@@ -284,29 +285,30 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 100),
+
+                  // ---------------- RETURN BUTTON ----------------
+                  const SizedBox(height: 20),
+                  Center(
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AdminDashboard(),
+                          ),
+                        );
+                      },
+                      child: Image.asset(
+                        'assets/images/return.png',
+                        width: 70,
+                        height: 70,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
                 ],
               ),
-            ),
-          ),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const AdminDashboard(),
-                ),
-              );
-            },
-            child: Image.asset(
-              'assets/images/return.png',
-              width: 70,
-              height: 70,
-              fit: BoxFit.contain,
             ),
           ),
         ),
