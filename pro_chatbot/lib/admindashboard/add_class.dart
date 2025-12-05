@@ -26,10 +26,7 @@ void main() {
 }
 
 class AddClassPage extends StatefulWidget {
-  /// Callback om de nieuwe klas door te geven aan ClassOverviewPage
-  final void Function(SchoolClass)? onClassCreated;
-
-  const AddClassPage({super.key, this.onClassCreated});
+  const AddClassPage({super.key});
 
   @override
   State<AddClassPage> createState() => _AddClassPageState();
@@ -45,6 +42,9 @@ class _AddClassPageState extends State<AddClassPage> {
   List<User> _filteredStudents = [];
   List<User> _selectedStudents = [];
 
+  /// Store all classes created in this session
+  final List<SchoolClass> _createdClasses = [];
+
   bool _isLoading = false;
 
   @override
@@ -55,17 +55,13 @@ class _AddClassPageState extends State<AddClassPage> {
 
   Future<void> _loadStudents() async {
     setState(() => _isLoading = true);
-
     try {
-      // Get the current user's school ID
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final schoolId = userProvider.currentUser?.school?.id;
-
       if (schoolId == null) {
         _toast('Geen school gevonden voor huidige gebruiker', success: false);
         return;
       }
-
       _allStudents = await ApiService().fetchUnassignedStudents(schoolId);
       _allStudents.sort((a, b) => a.fullName.compareTo(b.fullName));
       _filteredStudents = List.from(_allStudents);
@@ -148,23 +144,22 @@ class _AddClassPageState extends State<AddClassPage> {
         schoolId,
       );
 
-      // Callback naar ClassOverviewPage
-      if (widget.onClassCreated != null) {
-        widget.onClassCreated!(SchoolClass(
-          id: classCreated.id,
-          name: classCreated.name,
-        ));
-      }
+      // Add to local session list
+      _createdClasses.add(SchoolClass(
+        id: classCreated.id,
+        name: classCreated.name,
+      ));
+
       _toast('Klas ${classCreated.name} succesvol aangemaakt');
 
-      // STUDENTENLIJST OPNIEUW LADEN
+      // Reload student list
       await _loadStudents();
 
-      // --- RESET FORM TO CREATE ANOTHER CLASS ---
+      // Reset form for next class
       setState(() {
         _classNameCtrl.clear();
         _selectedStudents.clear();
-        _filteredStudents = List.from(_allStudents); // reset filtered list
+        _filteredStudents = List.from(_allStudents);
       });
     } catch (e) {
       _toast('Fout bij aanmaken klas: $e', success: false);
@@ -212,7 +207,7 @@ class _AddClassPageState extends State<AddClassPage> {
                       // ---------------- RETURN BUTTON ----------------
                       Center(
                         child: GestureDetector(
-                          onTap: () => Navigator.pop(context),
+                          onTap: () => Navigator.pop(context, _createdClasses),
                           child: Image.asset(
                             'assets/images/return.png',
                             width: 70,
