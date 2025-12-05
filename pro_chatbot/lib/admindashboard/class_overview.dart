@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pro_chatbot/admindashboard/class_managing.dart';
 import 'package:provider/provider.dart';
 import 'add_class.dart';
 import '/theme_manager.dart';
@@ -297,6 +298,14 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
+                leading: const Icon(Icons.person),
+                title: const Text('Studenten beheren'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _openStudentManagement(cls);
+                },
+              ),
+              ListTile(
                 leading: const Icon(Icons.edit),
                 title: const Text('Klas hernoemen'),
                 onTap: () {
@@ -405,6 +414,15 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
           ],
         );
       },
+    );
+  }
+
+  // ----------------- STUDENT MANAGEMENT -----------------
+  void _openStudentManagement(SchoolClass cls) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ManageClassStudentsPage(schoolClass: cls),
+      ),
     );
   }
 }
