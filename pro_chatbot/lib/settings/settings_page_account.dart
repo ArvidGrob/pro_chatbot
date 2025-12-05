@@ -109,7 +109,7 @@ class _SettingsPageAccountState extends State<SettingsPageAccount> {
                         final bool isMissingClass = user != null &&
                             user.role != Role.admin &&
                             user.role != Role.teacher &&
-                            user.klass == null;
+                            user.schoolClass == null;
 
                         final String displayedClass = (() {
                           if (user != null) {
@@ -117,7 +117,7 @@ class _SettingsPageAccountState extends State<SettingsPageAccount> {
                                 user.role == Role.teacher) {
                               return "-";
                             } else {
-                              return user.klass ??
+                              return user.schoolClass?.name ??
                                   "Nog niet gekoppeld aan een klas";
                             }
                           }
