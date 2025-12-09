@@ -56,13 +56,9 @@ class _ChatPageState extends State<ChatPage> {
 
     // Set user ID for API service
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      try {
-        final userProvider = Provider.of<UserProvider>(context, listen: false);
-        if (userProvider.currentUser != null) {
-          ApiService().setUserId(userProvider.currentUser!.id);
-        }
-      } catch (e) {
-        print('UserProvider not found - running in test mode: $e');
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      if (userProvider.currentUser != null) {
+        ApiService().setUserId(userProvider.currentUser!.id);
       }
 
       // Load existing conversation if provided
@@ -147,9 +143,9 @@ class _ChatPageState extends State<ChatPage> {
     });
 
     await flutterTts.setLanguage("nl-NL");
-    await flutterTts.setPitch(0.0);
+    await flutterTts.setPitch(1.0);
     await flutterTts.setSpeechRate(0.8);
-    await flutterTts.setVolume(0.30);
+    await flutterTts.setVolume(1.0);
     await flutterTts.speak(text);
   }
 
