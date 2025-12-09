@@ -56,9 +56,13 @@ class _ChatPageState extends State<ChatPage> {
 
     // Set user ID for API service
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      if (userProvider.currentUser != null) {
-        ApiService().setUserId(userProvider.currentUser!.id);
+      try {
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        if (userProvider.currentUser != null) {
+          ApiService().setUserId(userProvider.currentUser!.id);
+        }
+      } catch (e) {
+        print('UserProvider not found - running in test mode: $e');
       }
 
       // Load existing conversation if provided
