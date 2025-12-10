@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'chat_message_model.dart';
+import 'chat_controller.dart';
 import 'attachment_service.dart';
 import 'attachment_widget.dart';
 import 'speech_to_text_dialog.dart';
@@ -34,23 +35,20 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final List<ChatMessage> _messages = [];
-  bool _isTyping = false;
+  late final ChatController _chatController;
   bool _viewHistoryPressed = false;
   bool _showPlusMenu = false;
   bool _newChatPressed = false;
   FlutterTts flutterTts = FlutterTts();
-  String? _currentlySpeakingMessageId; // Track which message is speaking
 
   @override
   void initState() {
     super.initState();
+    _chatController = ChatController();
 
     flutterTts.setCompletionHandler(() {
       if (mounted) {
-        setState(() {
-          _currentlySpeakingMessageId = null;
-        });
+        _chatController.stopSpeaking();
       }
     });
 
@@ -69,7 +67,7 @@ class _ChatPageState extends State<ChatPage> {
 
     // Add initial message only if no conversation provided
     if (widget.conversation == null) {
-      _messages.add(ChatMessage(
+      _chatController.addMessage(ChatMessage(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         text: 'Hallo! Hoe kan ik u helpen?',
         isUser: false,
@@ -82,23 +80,22 @@ class _ChatPageState extends State<ChatPage> {
   void dispose() {
     _messageController.dispose();
     _scrollController.dispose();
+    _chatController.dispose();
     super.dispose();
   }
 
   void _loadConversation(Conversation conversation) {
-    setState(() {
-      _messages.clear();
+    // Convert conversation messages to ChatMessage format
+    final messages = conversation.messages.map((msg) {
+      return ChatMessage(
+        id: msg.timestamp.millisecondsSinceEpoch.toString(),
+        text: msg.content,
+        isUser: msg.role == 'user',
+        timestamp: msg.timestamp,
+      );
+    }).toList();
 
-      // Convert conversation messages to ChatMessage format
-      for (var msg in conversation.messages) {
-        _messages.add(ChatMessage(
-          id: msg.timestamp.millisecondsSinceEpoch.toString(),
-          text: msg.content,
-          isUser: msg.role == 'user',
-          timestamp: msg.timestamp,
-        ));
-      }
-    });
+    _chatController.loadMessages(messages);
 
     // Set the conversation ID in API service to continue this conversation
     // Note: The conversation ID will be set automatically when sending next message
@@ -110,15 +107,7 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _startNewChat() {
-    setState(() {
-      _messages.clear();
-      _messages.add(ChatMessage(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        text: 'Hallo! Hoe kan ik u helpen?',
-        isUser: false,
-        timestamp: DateTime.now(),
-      ));
-    });
+    _chatController.startNewConversation();
 
     // Reset conversation ID to start a new conversation
     ApiService().resetConversation();
@@ -130,7 +119,7 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<void> _toggleSpeak(String messageId, String text) async {
-    if (_currentlySpeakingMessageId == messageId) {
+    if (_chatController.currentlySpeakingMessageId == messageId) {
       await _stopSpeaking();
       return;
     }
@@ -138,9 +127,7 @@ class _ChatPageState extends State<ChatPage> {
     await _stopSpeaking();
     await Future.delayed(Duration(milliseconds: 100));
 
-    setState(() {
-      _currentlySpeakingMessageId = messageId;
-    });
+    _chatController.startSpeaking(messageId);
 
     await flutterTts.setLanguage("nl-NL");
     await flutterTts.setPitch(1.0);
@@ -151,49 +138,35 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<void> _stopSpeaking() async {
     await flutterTts.stop();
-    setState(() {
-      _currentlySpeakingMessageId = null;
-    });
+    _chatController.stopSpeaking();
   }
 
   void _retryMessage(String message) {
     ApiService().sendChatMessage(message).then((response) {
       if (!mounted) return;
-      setState(() {
-        _isTyping = false;
-        _messages.add(ChatMessage(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          text: response,
-          isUser: false,
-          timestamp: DateTime.now(),
-        ));
-      });
+      _chatController.setTyping(false);
+      _chatController.addMessage(ChatMessage(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        text: response,
+        isUser: false,
+        timestamp: DateTime.now(),
+      ));
       _scrollToBottom();
     }).catchError((error) {
       if (!mounted) return;
-      setState(() {
-        _isTyping = false;
-        _messages.add(ChatMessage(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          text: 'Erreur de connexion: ${error.toString()}',
-          isUser: false,
-          timestamp: DateTime.now(),
-        ));
-      });
+      _chatController.setTyping(false);
+      _chatController.addMessage(ChatMessage(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        text: 'Erreur de connexion: ${error.toString()}',
+        isUser: false,
+        timestamp: DateTime.now(),
+      ));
       _scrollToBottom();
     });
   }
 
   void _startNewConversation() {
-    setState(() {
-      _messages.clear();
-      _messages.add(ChatMessage(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        text: 'Hallo! Hoe kan ik u helpen?',
-        isUser: false,
-        timestamp: DateTime.now(),
-      ));
-    });
+    _chatController.startNewConversation();
     ApiService().resetConversation();
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -209,30 +182,26 @@ class _ChatPageState extends State<ChatPage> {
     if (_messageController.text.trim().isEmpty) return;
 
     final userMessage = _messageController.text.trim();
-    setState(() {
-      _messages.add(ChatMessage(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        text: userMessage,
-        isUser: true,
-        timestamp: DateTime.now(),
-      ));
-      _isTyping = true;
-    });
+    _chatController.addMessage(ChatMessage(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      text: userMessage,
+      isUser: true,
+      timestamp: DateTime.now(),
+    ));
+    _chatController.setTyping(true);
 
     _messageController.clear();
     _scrollToBottom();
 
     ApiService().sendChatMessage(userMessage).then((response) {
       if (!mounted) return;
-      setState(() {
-        _isTyping = false;
-        _messages.add(ChatMessage(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          text: response,
-          isUser: false,
-          timestamp: DateTime.now(),
-        ));
-      });
+      _chatController.setTyping(false);
+      _chatController.addMessage(ChatMessage(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        text: response,
+        isUser: false,
+        timestamp: DateTime.now(),
+      ));
       _scrollToBottom();
     }).catchError((error) {
       if (!mounted) return;
@@ -244,15 +213,13 @@ class _ChatPageState extends State<ChatPage> {
         return;
       }
 
-      setState(() {
-        _isTyping = false;
-        _messages.add(ChatMessage(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          text: 'Erreur: ${error.toString()}',
-          isUser: false,
-          timestamp: DateTime.now(),
-        ));
-      });
+      _chatController.setTyping(false);
+      _chatController.addMessage(ChatMessage(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        text: 'Erreur: ${error.toString()}',
+        isUser: false,
+        timestamp: DateTime.now(),
+      ));
       _scrollToBottom();
     });
   }
@@ -477,53 +444,34 @@ class _ChatPageState extends State<ChatPage> {
         uploadProgress: 0.0,
       );
 
+      _chatController.addMessage(message);
       setState(() {
-        _messages.add(message);
         _showPlusMenu = false; // Close the menu
       });
       _scrollToBottom();
 
       // Simulate upload progress
       await for (final progress in AttachmentService.simulateUpload()) {
-        final index = _messages.indexWhere((m) => m.id == messageId);
-        if (index != -1) {
-          setState(() {
-            _messages[index] = _messages[index].copyWith(
-              uploadProgress: progress,
-            );
-          });
-        }
+        _chatController.updateMessageProgress(messageId, progress);
       }
 
       // Mark as uploaded
-      final index = _messages.indexWhere((m) => m.id == messageId);
-      if (index != -1) {
-        setState(() {
-          _messages[index] = _messages[index].copyWith(
-            isUploading: false,
-            uploadProgress: 1.0,
-          );
-        });
-      }
+      _chatController.markMessageUploaded(messageId);
 
       _scrollToBottom();
 
       // Simulate AI response after attachment is uploaded
-      setState(() {
-        _isTyping = true;
-      });
+      _chatController.setTyping(true);
 
       Future.delayed(const Duration(seconds: 2), () {
         if (!mounted) return;
-        setState(() {
-          _isTyping = false;
-          _messages.add(ChatMessage(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            text: 'AI not yet implemented. Please try again later.',
-            isUser: false,
-            timestamp: DateTime.now(),
-          ));
-        });
+        _chatController.setTyping(false);
+        _chatController.addMessage(ChatMessage(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          text: 'AI not yet implemented. Please try again later.',
+          isUser: false,
+          timestamp: DateTime.now(),
+        ));
         _scrollToBottom();
       });
     } catch (e) {
@@ -567,18 +515,26 @@ class _ChatPageState extends State<ChatPage> {
                   ),
 
                   // Messages
-                  ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 20,
-                    ),
-                    itemCount: _messages.length + (_isTyping ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      if (index == _messages.length && _isTyping) {
-                        return _buildTypingIndicator();
-                      }
-                      return _buildMessageBubble(_messages[index]);
+                  ListenableBuilder(
+                    listenable: _chatController,
+                    builder: (context, _) {
+                      return ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 20,
+                        ),
+                        itemCount: _chatController.messages.length +
+                            (_chatController.isTyping ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          if (index == _chatController.messages.length &&
+                              _chatController.isTyping) {
+                            return _buildTypingIndicator();
+                          }
+                          return _buildMessageBubble(
+                              _chatController.messages[index]);
+                        },
+                      );
                     },
                   ),
 
@@ -938,15 +894,20 @@ class _ChatPageState extends State<ChatPage> {
                       ),
                     ),
             if (!message.isUser && message.text.isNotEmpty)
-              IconButton(
-                icon: Icon(
-                  _currentlySpeakingMessageId == message.id
-                      ? Icons.volume_off
-                      : Icons.volume_up,
-                  color: Colors.white,
-                  size: 20,
-                ),
-                onPressed: () => _toggleSpeak(message.id, message.text),
+              ListenableBuilder(
+                listenable: _chatController,
+                builder: (context, _) {
+                  return IconButton(
+                    icon: Icon(
+                      _chatController.currentlySpeakingMessageId == message.id
+                          ? Icons.volume_off
+                          : Icons.volume_up,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    onPressed: () => _toggleSpeak(message.id, message.text),
+                  );
+                },
               )
           ],
         ),
@@ -998,7 +959,7 @@ class _ChatPageState extends State<ChatPage> {
         );
       },
       onEnd: () {
-        if (mounted && _isTyping) {
+        if (mounted && _chatController.isTyping) {
           setState(() {});
         }
       },
