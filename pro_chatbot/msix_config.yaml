@@ -3,7 +3,7 @@
 display_name: Luminara AI
 publisher_display_name: Luminara AI
 identity_name: LuminaraAI.LuminaraAI
-publisher: CN=2AF02F98-D5C1-4CE1-AAD4-4E357ED25785
+publisher: CN=Luminara AI   #CN=Luminara AI (for local self-signed certificate) #publisher: CN=2AF02F98-D5C1-4CE1-AAD4-4E357ED25785 (for store submission)
 version: 1.0.0.0
 logo_path: assets/luminara_icon_app.png
 
