@@ -46,7 +46,7 @@ dependencies:
   speech_to_text: ^7.0.0
   msix: ^3.16.12
 
-msix:
+msix_config:
   display_name: Luminara AI
   publisher_display_name: Luminara AI
   identity_name: LuminaraAI.LuminaraAI
