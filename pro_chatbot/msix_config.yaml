@@ -9,3 +9,7 @@ logo_path: assets/luminara_icon_app.png
 
 capabilities:
   - internetClient
+
+# self-signed certificate
+certificate_path: D:\Nuget\test_certificate.pfx
+certificate_password: SmartAi@1379
