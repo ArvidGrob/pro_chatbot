@@ -44,11 +44,27 @@ dependencies:
   path_provider: ^2.1.4
   path: ^1.9.0
   speech_to_text: ^7.0.0
+  msix: ^3.16.12
+
+msix:
+  display_name: Luminara AI
+  publisher_display_name: Luminara AI
+  identity_name: LuminaraAI.LuminaraAI
+  publisher: CN=2AF02F98-D5C1-4CE1-AAD4-4E357ED25785
+  msix_version: 1.0.0.0  # Must be 4-part version
+  logo_path: assets/luminara_icon_app.png
+  store: true
+
+  # Add capabilities your app needs:
+  capabilities:
+    - internetClient
+    - microphone  # For speech_to_text and record packages
+    - picturesLibrary  # For image_picker and file_picker
+
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  msix: ^3.16.3
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
