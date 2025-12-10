@@ -53,7 +53,7 @@ msix_config:
   publisher: CN=2AF02F98-D5C1-4CE1-AAD4-4E357ED25785
   msix_version: 1.0.0.0  # Must be 4-part version
   logo_path: assets/luminara_icon_app.png
-  store: true
+  store: "true"
 
   # Add capabilities your app needs:
   capabilities:
