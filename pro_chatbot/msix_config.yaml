@@ -1,0 +1,10 @@
+display_name: Luminara AI
+publisher_display_name: Luminara AI
+identity_name: LuminaraAI.LuminaraAI
+publisher: CN=2AF02F98-D5C1-4CE1-AAD4-4E357ED25785
+msix_version: 1.0.0.0
+store: true
+capabilities:
+  - internetClient
+  - microphone
+  - picturesLibrary

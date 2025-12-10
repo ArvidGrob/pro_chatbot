@@ -71,7 +71,6 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
-    - assets/luminara_icon_app.png  # ADDED: Required for MSIX logo
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -98,21 +97,6 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
-
-msix_config:
-  display_name: Luminara AI
-  publisher_display_name: Luminara AI
-  identity_name: LuminaraAI.LuminaraAI
-  publisher: CN=2AF02F98-D5C1-4CE1-AAD4-4E357ED25785
-  msix_version: 1.0.0.0  # Must be 4-part version
-  logo_path: assets/images/luminara_icon_app.png 
-  store: true
-
-  # Add capabilities your app needs:
-  capabilities:
-    - internetClient
-    - microphone  # For speech_to_text and record packages
-    - picturesLibrary  # For image_picker and file_picker
 
 flutter_launcher_icons:
   android: true
