@@ -1,4 +1,4 @@
-name: pro_chatbot
+﻿name: pro_chatbot
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -45,6 +45,21 @@ dependencies:
   path: ^1.9.0
   speech_to_text: ^7.0.0
   msix: ^3.16.12
+
+msix_config:
+  display_name: Luminara AI
+  publisher_display_name: Luminara AI
+  identity_name: LuminaraAI.LuminaraAI
+  publisher: CN=2AF02F98-D5C1-4CE1-AAD4-4E357ED25785
+  msix_version: 1.0.0.0  # Must be 4-part version
+  logo_path: assets/luminara_icon_app.png
+  store: true
+
+  # Add capabilities your app needs:
+  capabilities:
+    - internetClient
+    - microphone  # For speech_to_text and record packages
+    - picturesLibrary  # For image_picker and file_picker
 
 dev_dependencies:
   flutter_test:
