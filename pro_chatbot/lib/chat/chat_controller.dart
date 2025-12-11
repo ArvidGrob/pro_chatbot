@@ -6,7 +6,6 @@ class ChatController extends ChangeNotifier {
   bool _isTyping = false;
   String? _currentlySpeakingMessageId;
 
-  // Read-only access to state
   List<ChatMessage> get messages => List.unmodifiable(_messages);
   bool get isTyping => _isTyping;
   String? get currentlySpeakingMessageId => _currentlySpeakingMessageId;
