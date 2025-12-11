@@ -1,4 +1,4 @@
-name: pro_chatbot
+﻿name: pro_chatbot
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -112,4 +112,10 @@ msix_config:
   publisher: CN=2AF02F98-D5C1-4CE1-AAD4-4E357ED25785
   identity_name: LuminaraAI.LuminaraAI
   logo_path: assets/images/luminara_icon_app.png
+
+  # IMPORTANT: disable runFullTrust
+  enable_full_trust: false
+  
   capabilities: internetClient, microphone, picturesLibrary  # For image_picker and file_picker - For speech_to_text and record packages
+
+  
