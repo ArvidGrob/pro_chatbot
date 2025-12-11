@@ -40,7 +40,7 @@ class _AddClassPageState extends State<AddClassPage> {
 
   List<User> _allStudents = [];
   List<User> _filteredStudents = [];
-  List<User> _selectedStudents = [];
+  final List<User> _selectedStudents = [];
 
   /// Store all classes created in this session
   final List<SchoolClass> _createdClasses = [];

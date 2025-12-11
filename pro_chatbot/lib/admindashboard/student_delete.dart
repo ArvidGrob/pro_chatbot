@@ -124,7 +124,7 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
     try {
       final api = ApiService();
       for (var student in List<User>.from(_selectedStudents)) {
-        await api.deleteStudent(student.id!);
+        await api.deleteStudent(student.id);
         _allStudents.remove(student);
       }
       _selectedStudents.clear();

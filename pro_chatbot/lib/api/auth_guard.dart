@@ -14,10 +14,10 @@ class AuthGuard extends StatelessWidget {
   final List<Role> allowedRoles;
 
   const AuthGuard({
-    Key? key,
+    super.key,
     required this.child,
     required this.allowedRoles,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

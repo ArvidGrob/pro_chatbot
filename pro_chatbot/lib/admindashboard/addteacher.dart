@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pro_chatbot/admindashboard/admin_dashboard.dart';
 import 'package:pro_chatbot/admindashboard/teacher_overview.dart';
 import 'package:pro_chatbot/api/api_services.dart';
 import 'package:provider/provider.dart';
@@ -87,16 +86,21 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
     final pw = _pwCtrl.text.trim();
     final repw = _pwRepeatCtrl.text.trim();
 
-    if (firstName.isEmpty)
+    if (firstName.isEmpty) {
       return _toast('Vul een voornaam in.', success: false);
-    if (lastName.isEmpty)
+    }
+    if (lastName.isEmpty) {
       return _toast('Vul een achternaam in.', success: false);
-    if (!_isValidEmail(email))
+    }
+    if (!_isValidEmail(email)) {
       return _toast('Vul een geldig e-mailadres in.', success: false);
-    if (pw.isEmpty || repw.isEmpty)
+    }
+    if (pw.isEmpty || repw.isEmpty) {
       return _toast('Vul beide wachtwoorden in.', success: false);
-    if (pw != repw)
+    }
+    if (pw != repw) {
       return _toast('Wachtwoorden komen niet overeen.', success: false);
+    }
 
     setState(() => _submitting = true);
 
@@ -245,8 +249,9 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
                           isExpanded: true,
                           underline: const SizedBox(),
                           onChanged: (value) {
-                            if (value != null)
+                            if (value != null) {
                               setState(() => _selectedRole = value);
+                            }
                           },
                           items: const [
                             DropdownMenuItem(

@@ -164,7 +164,7 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
               onPressed: () => Navigator.of(context).pop(),
               style: ButtonStyle(
                 backgroundColor:
-                    MaterialStateProperty.all(const Color(0xFFFF4D4D)),
+                    WidgetStateProperty.all(const Color(0xFFFF4D4D)),
               ),
               child: const Text(
                 'Annuleren',
@@ -173,8 +173,8 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
             ),
             ElevatedButton(
               style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.resolveWith((states) {
-                  if (states.contains(MaterialState.pressed)) {
+                backgroundColor: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.pressed)) {
                     return const Color(0xFF018F6F);
                   }
                   return const Color(0xFF01BA8F);
@@ -271,11 +271,10 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
                         const SizedBox(height: 12),
                         ElevatedButton(
                           style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.resolveWith(
-                                (states) =>
-                                    states.contains(MaterialState.pressed)
-                                        ? const Color(0xFF4A4AEE)
-                                        : primaryBlue),
+                            backgroundColor: WidgetStateProperty.resolveWith(
+                                (states) => states.contains(WidgetState.pressed)
+                                    ? const Color(0xFF4A4AEE)
+                                    : primaryBlue),
                           ),
                           onPressed: () => _showEditDialog(user!),
                           child: const Text(

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 /// Type of attachment in a chat message
 enum AttachmentType {
   none,

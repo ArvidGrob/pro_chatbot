@@ -39,149 +39,151 @@ class _NavigationPageState extends State<NavigationPage> {
     return WaveBackgroundLayout(
       backgroundColor: themeManager.backgroundColor,
       child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: const Text(
-                  'Navigation',
-                  style: TextStyle(
-                    color: Color(0xFF3B3B98),
-                    fontSize: 36,
-                    fontWeight: FontWeight.bold,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: const Text(
+                    'Navigation',
+                    style: TextStyle(
+                      color: Color(0xFF3B3B98),
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 40),
-              _buildNavigationButton(
-                id: 'chat',
-                title: 'Chat',
-                iconPath: 'assets/images/chat.png',
-                primaryColor: themeManager.getOptionSoftBlue(),
-                secondaryColor: themeManager
-                    .getSecondaryColor(themeManager.getOptionSoftBlue()),
-                onTap: () {
-                  ApiService().resetConversation();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ChatPage(),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 30),
-              _buildNavigationButton(
-                id: 'training',
-                title: 'Training',
-                iconPath: 'assets/images/training.png',
-                primaryColor: themeManager.getOptionBrightPink(),
-                secondaryColor: themeManager
-                    .getSecondaryColor(themeManager.getOptionBrightPink()),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const TrainingPage(),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 30),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  // Calculate square size that fits the available space
-                  final maxWidth = (constraints.maxWidth - 30) / 2;
-                  final buttonSize = maxWidth < 200 ? maxWidth : 200.0;
-                  
-                  return Row(
-                    children: [
-                      Expanded(
-                        child: _buildSquareNavigationButton(
-                          id: 'instellingen',
-                          title: 'Instellingen',
-                          iconPath: 'assets/images/settings.png',
-                          primaryColor: themeManager.getOptionBlazeOrange(),
-                          secondaryColor: themeManager.getSecondaryColor(
-                              themeManager.getOptionBlazeOrange()),
-                          maxSize: buttonSize,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const SettingsPage(),
-                              ),
-                            );
-                          },
-                        ),
+                const SizedBox(height: 40),
+                _buildNavigationButton(
+                  id: 'chat',
+                  title: 'Chat',
+                  iconPath: 'assets/images/chat.png',
+                  primaryColor: themeManager.getOptionSoftBlue(),
+                  secondaryColor: themeManager
+                      .getSecondaryColor(themeManager.getOptionSoftBlue()),
+                  onTap: () {
+                    ApiService().resetConversation();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ChatPage(),
                       ),
-                      const SizedBox(width: 30),
-                      Expanded(
-                        child: _buildSquareNavigationButton(
-                          id: 'admin',
-                          title: 'Admin',
-                          iconPath: 'assets/images/admin.png',
-                          primaryColor: themeManager.getOptionYellowSea(),
-                          secondaryColor: themeManager
-                              .getSecondaryColor(themeManager.getOptionYellowSea()),
-                          maxSize: buttonSize,
-                          onTap: () {
-                            final userProvider =
-                                Provider.of<UserProvider>(context, listen: false);
+                    );
+                  },
+                ),
+                const SizedBox(height: 30),
+                _buildNavigationButton(
+                  id: 'training',
+                  title: 'Training',
+                  iconPath: 'assets/images/training.png',
+                  primaryColor: themeManager.getOptionBrightPink(),
+                  secondaryColor: themeManager
+                      .getSecondaryColor(themeManager.getOptionBrightPink()),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const TrainingPage(),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 30),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final maxWidth = (constraints.maxWidth - 30) / 2;
+                    final buttonSize = maxWidth < 200 ? maxWidth : 200.0;
 
-                            if (userProvider.hasRole(Role.admin) ||
-                                userProvider.hasRole(Role.teacher)) {
+                    return Row(
+                      children: [
+                        Expanded(
+                          child: _buildSquareNavigationButton(
+                            id: 'instellingen',
+                            title: 'Instellingen',
+                            iconPath: 'assets/images/settings.png',
+                            primaryColor: themeManager.getOptionBlazeOrange(),
+                            secondaryColor: themeManager.getSecondaryColor(
+                                themeManager.getOptionBlazeOrange()),
+                            maxSize: buttonSize,
+                            onTap: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const AdminDashboard(),
+                                  builder: (context) => const SettingsPage(),
                                 ),
                               );
-                            } else {
-                              // Create a list of allowed roles
-                              final allowedRoles = [Role.admin, Role.teacher];
-                              final roleNames = allowedRoles
-                                  .map((role) => role.toString().split('.').last)
-                                  .join(' of ');
-
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: RichText(
-                                    text: TextSpan(
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                      ),
-                                      children: [
-                                        const TextSpan(
-                                          text:
-                                              "Toegang geweigerd. Deze pagina vereist de rol ",
-                                        ),
-                                        TextSpan(
-                                          text: roleNames,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  backgroundColor: Colors.red,
-                                  duration: const Duration(seconds: 3),
-                                ),
-                              );
-                            }
-                          },
+                            },
+                          ),
                         ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-              const Spacer(),
-            ],
+                        const SizedBox(width: 30),
+                        Expanded(
+                          child: _buildSquareNavigationButton(
+                            id: 'admin',
+                            title: 'Admin',
+                            iconPath: 'assets/images/admin.png',
+                            primaryColor: themeManager.getOptionYellowSea(),
+                            secondaryColor: themeManager.getSecondaryColor(
+                                themeManager.getOptionYellowSea()),
+                            maxSize: buttonSize,
+                            onTap: () {
+                              final userProvider = Provider.of<UserProvider>(
+                                  context,
+                                  listen: false);
+
+                              if (userProvider.hasRole(Role.admin) ||
+                                  userProvider.hasRole(Role.teacher)) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const AdminDashboard(),
+                                  ),
+                                );
+                              } else {
+                                final allowedRoles = [Role.admin, Role.teacher];
+                                final roleNames = allowedRoles
+                                    .map((role) =>
+                                        role.toString().split('.').last)
+                                    .join(' of ');
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: RichText(
+                                      text: TextSpan(
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                        ),
+                                        children: [
+                                          const TextSpan(
+                                            text:
+                                                "Toegang geweigerd. Deze pagina vereist de rol ",
+                                          ),
+                                          TextSpan(
+                                            text: roleNames,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    backgroundColor: Colors.red,
+                                    duration: const Duration(seconds: 3),
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -199,7 +201,6 @@ class _NavigationPageState extends State<NavigationPage> {
     final themeManager = Provider.of<ThemeManager>(context, listen: false);
     final isPressed = _pressedButton == id;
 
-    // Darken both primary and secondary when pressed
     final Color displayPrimary =
         isPressed ? themeManager.darkenColor(primaryColor, 0.25) : primaryColor;
 
@@ -315,7 +316,8 @@ class _NavigationPageState extends State<NavigationPage> {
                   flex: 1,
                   child: Center(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12.0, vertical: 8.0),
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Text(

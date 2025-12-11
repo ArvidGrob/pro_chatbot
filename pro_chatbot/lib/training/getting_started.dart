@@ -558,7 +558,7 @@ class GettingStarted extends StatelessWidget {
                 ],
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );

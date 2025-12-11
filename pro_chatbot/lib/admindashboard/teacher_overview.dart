@@ -344,7 +344,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
           ),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.red),
+              backgroundColor: WidgetStateProperty.all(Colors.red),
             ),
             onPressed: () async {
               Navigator.of(context).pop();
@@ -403,15 +403,15 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
               onPressed: () => Navigator.of(context).pop(),
               style: ButtonStyle(
                 backgroundColor:
-                    MaterialStateProperty.all(const Color(0xFFFF4D4D)),
+                    WidgetStateProperty.all(const Color(0xFFFF4D4D)),
               ),
               child: const Text('Annuleren',
                   style: TextStyle(color: Colors.white)),
             ),
             ElevatedButton(
               style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.resolveWith((states) =>
-                    states.contains(MaterialState.pressed)
+                backgroundColor: WidgetStateProperty.resolveWith((states) =>
+                    states.contains(WidgetState.pressed)
                         ? const Color(0xFF018F6F)
                         : const Color(0xFF01BA8F)),
               ),

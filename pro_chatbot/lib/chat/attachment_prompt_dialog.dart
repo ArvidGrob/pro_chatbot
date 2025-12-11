@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
 import 'chat_message_model.dart';
 import 'attachment_widget.dart';
 
