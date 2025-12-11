@@ -50,6 +50,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Use default debug signing config
+            // No custom signingConfig needed for debug builds
+        }
         release {
             // Use release signing config instead of debug keys
             signingConfig = signingConfigs.getByName("release")
