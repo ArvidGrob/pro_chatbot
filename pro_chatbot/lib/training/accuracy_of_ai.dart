@@ -86,6 +86,39 @@ class AccuracyOfAi extends StatelessWidget {
                 ],
               ),
 
+              // Fade gradient above return button
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 30,
+                child: Container(
+                  height: 70,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        const Color(0xFF5959FF).withOpacity(0.0),
+                        const Color(0xFF5959FF).withOpacity(0.8),
+                        const Color(0xFF5959FF),
+                      ],
+                      stops: const [0.0, 0.5, 1.0],
+                    ),
+                  ),
+                ),
+              ),
+
+              // Background for return button area
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: 30,
+                child: Container(
+                  color: const Color(0xFF5959FF),
+                ),
+              ),
+
               // Return button at the bottom
               Positioned(
                 bottom: 20,
