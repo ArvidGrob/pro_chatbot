@@ -1,4 +1,4 @@
-package com.example.pro_chatbot
+package com.luminaraai.pro_chatbot
 
 import io.flutter.embedding.android.FlutterActivity
 
