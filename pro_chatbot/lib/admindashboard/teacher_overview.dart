@@ -128,7 +128,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                     Expanded(
                       child: _pressableTile(
                         tileId: 'add_teacher',
-                        label: 'Leraar toevoegen',
+                        label: 'Toevoegen',
                         icon: Icons.person_add,
                         onTap: () {
                           Navigator.of(context)

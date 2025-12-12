@@ -115,7 +115,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                       Expanded(
                         child: _pressableTile(
                           tileId: 'add_student',
-                          label: 'Student toevoegen',
+                          label: 'Toevoegen',
                           icon: Icons.person_add_alt_1_rounded,
                           color: primary,
                           onTap: () {
@@ -133,7 +133,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                       Expanded(
                         child: _pressableTile(
                           tileId: 'delete_student',
-                          label: 'Studenten verwijderen',
+                          label: 'Verwijderen',
                           icon: Icons.delete_forever_rounded,
                           color: Colors.red,
                           onTap: () {

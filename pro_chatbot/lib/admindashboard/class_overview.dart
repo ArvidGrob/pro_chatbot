@@ -109,7 +109,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                   style: TextStyle(
                     color: primaryColor,
                     fontSize: 26,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
@@ -120,7 +120,13 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                 child: ElevatedButton.icon(
                   onPressed: _onAddClass,
                   icon: const Icon(Icons.add),
-                  label: const Text('Klasse toevoegen'),
+                  label: const Text(
+                    'Klassen toevoegen',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF6F73FF),
                     foregroundColor: Colors.white,
