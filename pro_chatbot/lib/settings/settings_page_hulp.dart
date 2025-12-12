@@ -139,7 +139,10 @@ class _SettingsPageHulpState extends State<SettingsPageHulp> {
                   MaterialPageRoute(
                     builder: (context) => const SettingsPageHulp23(
                       title: 'Appversie',
-                      content: '',
+                      content: '''
+1.0.0  
+Alle rechten voorbehouden © 2025.
+''',
                     ),
                   ),
                 ),
@@ -157,7 +160,10 @@ class _SettingsPageHulpState extends State<SettingsPageHulp> {
                   MaterialPageRoute(
                     builder: (context) => const SettingsPageHulp23(
                       title: 'Ontwikkelaar',
-                      content: 'Bedankt voor het\ngebruiken van onze app!',
+                      content: '''
+Luminara AI™ — ontwikkeld door LUM.INC \n 
+In samenwerking met het lectoraat van Hogeschool Windesheim.
+''',
                     ),
                   ),
                 ),
