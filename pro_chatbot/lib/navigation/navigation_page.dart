@@ -54,7 +54,7 @@ class _NavigationPageState extends State<NavigationPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
               _buildNavigationButton(
                 id: 'chat',
                 title: 'Chat',
@@ -72,7 +72,7 @@ class _NavigationPageState extends State<NavigationPage> {
                   );
                 },
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
               _buildNavigationButton(
                 id: 'training',
                 title: 'Training',
@@ -89,13 +89,13 @@ class _NavigationPageState extends State<NavigationPage> {
                   );
                 },
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
               LayoutBuilder(
                 builder: (context, constraints) {
                   // Calculate square size that fits the available space
                   final maxWidth = (constraints.maxWidth - 30) / 2;
                   final buttonSize = maxWidth < 200 ? maxWidth : 200.0;
-                  
+
                   return Row(
                     children: [
                       Expanded(
@@ -124,12 +124,13 @@ class _NavigationPageState extends State<NavigationPage> {
                           title: 'Admin',
                           iconPath: 'assets/images/admin.png',
                           primaryColor: themeManager.getOptionYellowSea(),
-                          secondaryColor: themeManager
-                              .getSecondaryColor(themeManager.getOptionYellowSea()),
+                          secondaryColor: themeManager.getSecondaryColor(
+                              themeManager.getOptionYellowSea()),
                           maxSize: buttonSize,
                           onTap: () {
-                            final userProvider =
-                                Provider.of<UserProvider>(context, listen: false);
+                            final userProvider = Provider.of<UserProvider>(
+                                context,
+                                listen: false);
 
                             if (userProvider.hasRole(Role.admin) ||
                                 userProvider.hasRole(Role.teacher)) {
@@ -143,7 +144,8 @@ class _NavigationPageState extends State<NavigationPage> {
                               // Create a list of allowed roles
                               final allowedRoles = [Role.admin, Role.teacher];
                               final roleNames = allowedRoles
-                                  .map((role) => role.toString().split('.').last)
+                                  .map(
+                                      (role) => role.toString().split('.').last)
                                   .join(' of ');
 
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -315,7 +317,8 @@ class _NavigationPageState extends State<NavigationPage> {
                   flex: 1,
                   child: Center(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12.0, vertical: 8.0),
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Text(
