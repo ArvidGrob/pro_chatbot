@@ -309,7 +309,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
           children: [
             ListTile(
               leading: const Icon(Icons.edit),
-              title: const Text('Naam wijzigen'),
+              title: const Text('Gebruiker wijzigen'),
               onTap: () {
                 Navigator.pop(context);
                 _showEditUserDialog(user);
