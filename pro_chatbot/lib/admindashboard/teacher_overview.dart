@@ -14,11 +14,13 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
+        // Provide global state objects to the widget tree
         ChangeNotifierProvider(create: (_) => ThemeManager()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
       ],
       child: const MaterialApp(
         debugShowCheckedModeBanner: false,
+        // Restrict access to admins only
         home: AuthGuard(
           allowedRoles: [Role.admin],
           child: TeacherOverviewPage(),
@@ -28,6 +30,7 @@ void main() {
   );
 }
 
+/// Page that displays an overview of teachers and admins
 class TeacherOverviewPage extends StatefulWidget {
   const TeacherOverviewPage({super.key});
 
@@ -36,8 +39,11 @@ class TeacherOverviewPage extends StatefulWidget {
 }
 
 class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
+  // Controller for the search input field
   final TextEditingController _searchCtrl = TextEditingController();
+  // Future holding the fetched list of users
   late Future<List<User>> _usersFuture;
+  // Used to track pressed tiles for visual feedback
   String _pressedTile = '';
 
   @override
@@ -46,16 +52,20 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
     _fetchUsers();
   }
 
+  // Fetch teachers and admins for the current user's school
   void _fetchUsers() {
     final api = ApiService();
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
+    // Get school ID from the logged-in user (We need it to fetch all the admins and teachers only from that school)
     final schoolId = userProvider.currentUser?.school?.id;
+    // If no school is available, return an empty list
     if (schoolId == null) {
       _usersFuture = Future.value([]);
       return;
     }
 
+    // Fetch users and sort them alphabetically by first name
     _usersFuture = api.fetchTeachersAndAdmins(schoolId).then((users) {
       users.sort((a, b) =>
           a.firstname.toLowerCase().compareTo(b.firstname.toLowerCase()));
@@ -69,6 +79,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
     super.dispose();
   }
 
+  // Show a snackbar message (success or error)
   void _toast(String msg, {bool success = true}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -82,6 +93,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
   @override
   Widget build(BuildContext context) {
     final themeManager = Provider.of<ThemeManager>(context);
+    // Lowercase search query for case-insensitive matching
     final query = _searchCtrl.text.trim().toLowerCase();
 
     return WaveBackgroundLayout(
@@ -95,6 +107,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 16),
+                // Page title
                 Center(
                   child: const Text(
                     'Management Overzicht',
@@ -107,7 +120,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                 ),
                 const SizedBox(height: 20),
 
-                // Row with School and Add Teacher buttons
+                // Navigation tiles (School overview & Add teacher)
                 Row(
                   children: [
                     Expanded(
@@ -137,6 +150,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                                   builder: (_) => const AddTeacherPage(),
                                 ),
                               )
+                              // Refresh list after returning
                               .then((_) => setState(_fetchUsers));
                         },
                       ),
@@ -145,7 +159,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                 ),
                 const SizedBox(height: 20),
 
-                // Teacher/Admin list container
+                // Container holding the teacher/admin list
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -162,6 +176,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 10),
+                      // Section title
                       const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 16.0),
                         child: Text(
@@ -174,6 +189,8 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                         ),
                       ),
                       const SizedBox(height: 10),
+
+                      // Search input field
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12.0),
                         child: TextField(
@@ -197,6 +214,8 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                       ),
                       const SizedBox(height: 6),
                       const Divider(height: 0),
+
+                      // List of users loaded asynchronously
                       SizedBox(
                         height: MediaQuery.of(context).size.height * 0.55,
                         child: FutureBuilder<List<User>>(
@@ -215,6 +234,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                               );
                             }
 
+                            // Filter users based on search query
                             final list = snapshot.data ?? [];
                             final filtered = query.isEmpty
                                 ? list
@@ -230,6 +250,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                               );
                             }
 
+                            // Scrollable list of users
                             return ListView.separated(
                               itemCount: filtered.length,
                               separatorBuilder: (_, __) =>
@@ -269,7 +290,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                 ),
                 const SizedBox(height: 20),
 
-                // ---------------- RETURN BUTTON ----------------
+                // Return to admin dashboard
                 Center(
                   child: GestureDetector(
                     onTap: () {
@@ -297,6 +318,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
     );
   }
 
+  // Opens bottom sheet with user actions (edit / delete)
   void _openUserActions(User user) {
     showModalBottomSheet(
       context: context,
@@ -330,6 +352,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
     );
   }
 
+  // Confirmation dialog before deleting a user
   void _confirmDeleteUser(User user) {
     showDialog(
       context: context,
@@ -366,6 +389,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
     );
   }
 
+  // Shows dialog to edit user information and password
   void _showEditUserDialog(User user) {
     final firstnameCtrl = TextEditingController(text: user.firstname);
     final middlenameCtrl = TextEditingController(text: user.middlename ?? '');
@@ -399,6 +423,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
             ),
           ),
           actions: [
+            // Cancel button
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               style: ButtonStyle(
@@ -408,6 +433,8 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
               child: const Text('Annuleren',
                   style: TextStyle(color: Colors.white)),
             ),
+
+            // Save button
             ElevatedButton(
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.resolveWith((states) =>
@@ -462,6 +489,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
     );
   }
 
+  // Reusable dialog input field
   Widget _dialogField(String label, TextEditingController controller,
       {bool obscureText = false}) {
     return Padding(
@@ -477,6 +505,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
     );
   }
 
+  // Pressable tile with visual feedback
   Widget _pressableTile({
     required String tileId,
     required String label,
