@@ -1,10 +1,13 @@
+// Defines the roles a user can have in the system
 enum Role {
   admin,
   teacher,
   student,
 }
 
+// Extension to add extra functionality to the Role enum
 extension RoleExtension on Role {
+  // Returns a readable name for each role
   String get displayName {
     switch (this) {
       case Role.admin:
@@ -17,6 +20,7 @@ extension RoleExtension on Role {
   }
 }
 
+// Model representing a school entity
 class School {
   int id;
   String name;
@@ -25,6 +29,7 @@ class School {
   String houseNumber;
   String town;
 
+  // Constructor for creating a School instance
   School({
     required this.id,
     required this.name,
@@ -34,6 +39,7 @@ class School {
     required this.town,
   });
 
+  // Creates a School object from a JSON map
   factory School.fromJson(Map<String, dynamic> json) {
     return School(
       id: json['id'],
@@ -45,6 +51,7 @@ class School {
     );
   }
 
+  // Converts a School object to a JSON map
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -57,15 +64,18 @@ class School {
   }
 }
 
+// Model representing a class within a school
 class SchoolClass {
   int id;
   String name;
 
+  // Constructor for creating a SchoolClass instance
   SchoolClass({
     required this.id,
     required this.name,
   });
 
+  // Creates a SchoolClass object from a JSON map
   factory SchoolClass.fromJson(Map<String, dynamic> json) {
     return SchoolClass(
       id: json['id'],
@@ -73,6 +83,7 @@ class SchoolClass {
     );
   }
 
+  // Converts the SchoolClass object to a JSON map
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -81,6 +92,7 @@ class SchoolClass {
   }
 }
 
+// Model representing a user in the system
 class User {
   final int id;
   final String email;
@@ -90,11 +102,14 @@ class User {
   final Role role;
   final int? classId;
 
+  // Indicates whether the user is currently online (Later implementation)
   bool online = false;
 
+  // Related school and class objects
   SchoolClass? schoolClass;
   School? school;
 
+  // Constructor for creating a User instance
   User({
     required this.id,
     required this.email,
@@ -107,6 +122,7 @@ class User {
     this.classId,
   });
 
+  // Creates a User object from a JSON map
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'],
@@ -130,6 +146,7 @@ class User {
     );
   }
 
+  // Converts the User object to a JSON map
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -137,12 +154,15 @@ class User {
       'firstname': firstname,
       'lastname': lastname,
       'middlename': middlename,
+      // Convert Role enum back to string for API usage
       'role': role.toString().split('.').last,
+      // Include related objects only if they exist
       'school': school?.toJson(),
       'class': schoolClass?.toJson(),
     };
   }
 
+  // Creates a copy of the User with optional overridden values
   User copyWith({
     int? id,
     String? email,
