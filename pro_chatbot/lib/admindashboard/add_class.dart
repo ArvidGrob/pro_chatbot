@@ -9,6 +9,7 @@ import '/api/auth_guard.dart';
 
 void main() {
   runApp(
+    // Provide global state objects to the widget tree
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeManager()),
@@ -16,6 +17,7 @@ void main() {
       ],
       child: const MaterialApp(
         debugShowCheckedModeBanner: false,
+        // Only admins and teachers are allowed to access this page
         home: AuthGuard(
           allowedRoles: [Role.admin, Role.teacher],
           child: AddClassPage(),
@@ -25,6 +27,7 @@ void main() {
   );
 }
 
+/// Page for creating a new class and assigning students to it
 class AddClassPage extends StatefulWidget {
   const AddClassPage({super.key});
 
@@ -33,18 +36,24 @@ class AddClassPage extends StatefulWidget {
 }
 
 class _AddClassPageState extends State<AddClassPage> {
+  // Controller for the search input field
   static const Color primary = Color(0xFF4A4AFF);
-
+  // Controller for class name input
   final TextEditingController _classNameCtrl = TextEditingController();
+  // Controller for student search input
   final TextEditingController _searchCtrl = TextEditingController();
 
+  // List of all unassigned students
   List<User> _allStudents = [];
+  // List of students matching the search query (to search for students)
   List<User> _filteredStudents = [];
+  // List of students selected for the new class (to be assigned to the class and remove them)
   List<User> _selectedStudents = [];
 
   /// Store all classes created in this session
   final List<SchoolClass> _createdClasses = [];
 
+  // Indicates whether data is currently loading
   bool _isLoading = false;
 
   @override
@@ -53,17 +62,23 @@ class _AddClassPageState extends State<AddClassPage> {
     _loadStudents();
   }
 
+  // Loads all unassigned students for the current school
   Future<void> _loadStudents() async {
     setState(() => _isLoading = true);
     try {
+      // Access the user provider without listening for changes
       final userProvider = Provider.of<UserProvider>(context, listen: false);
+      // Get the school ID of the current user
       final schoolId = userProvider.currentUser?.school?.id;
       if (schoolId == null) {
         _toast('Geen school gevonden voor huidige gebruiker', success: false);
         return;
       }
+      // Fetch students who are not yet assigned to a class
       _allStudents = await ApiService().fetchUnassignedStudents(schoolId);
+      // Sort students alphabetically by full name
       _allStudents.sort((a, b) => a.fullName.compareTo(b.fullName));
+      // Initialize the filtered list
       _filteredStudents = List.from(_allStudents);
     } catch (e) {
       _toast('Fout bij ophalen studenten: $e', success: false);
@@ -72,6 +87,7 @@ class _AddClassPageState extends State<AddClassPage> {
     }
   }
 
+  // Adds or removes a student from the selected list
   void _toggleStudent(User student) {
     setState(() {
       if (_selectedStudents.contains(student)) {
@@ -79,10 +95,13 @@ class _AddClassPageState extends State<AddClassPage> {
       } else {
         _selectedStudents.add(student);
       }
+      // Update filtered list to reflect selection changes
       _filterStudents(_searchCtrl.text);
     });
   }
 
+  // Filters students based on search query
+  // Also excludes students that are already selected
   void _filterStudents(String query) {
     setState(() {
       _filteredStudents = _allStudents
@@ -95,11 +114,13 @@ class _AddClassPageState extends State<AddClassPage> {
 
   @override
   void dispose() {
+    // Dispose controllers to prevent memory leaks
     _classNameCtrl.dispose();
     _searchCtrl.dispose();
     super.dispose();
   }
 
+  // [success] determines the color (green or red)
   void _toast(String msg, {bool success = true}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -112,18 +133,22 @@ class _AddClassPageState extends State<AddClassPage> {
 
   // ---------------- CREATE CLASS ----------------
   void _onCreateClass() async {
+    // Trim whitespace from class name
     final name = _classNameCtrl.text.trim();
 
+    // Validate class name input
     if (name.isEmpty) {
       _toast('Voer een klasnaam in', success: false);
       return;
     }
 
+    // Validate that at least one student is selected
     if (_selectedStudents.isEmpty) {
       _toast('Voeg ten minste één student toe', success: false);
       return;
     }
 
+    // Access the user provider to get current user's school ID
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final schoolId = userProvider.currentUser?.school?.id;
     if (schoolId == null) {
@@ -135,9 +160,10 @@ class _AddClassPageState extends State<AddClassPage> {
 
     try {
       final api = ApiService();
+      // Prepare student objects for API request
       final studentObjects =
           _selectedStudents.map((u) => {'id': u.id}).toList();
-
+      // Call API to create the class
       final classCreated = await api.createClass(
         name,
         studentObjects,
@@ -185,6 +211,7 @@ class _AddClassPageState extends State<AddClassPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      // ---------------- PAGE TITLE ----------------
                       const Text(
                         'Klas toevoegen',
                         style: TextStyle(
@@ -193,6 +220,7 @@ class _AddClassPageState extends State<AddClassPage> {
                           fontWeight: FontWeight.w800,
                         ),
                       ),
+                      // class name input field
                       const SizedBox(height: 32),
                       _buildInputField(
                         controller: _classNameCtrl,
@@ -225,6 +253,7 @@ class _AddClassPageState extends State<AddClassPage> {
     );
   }
 
+  // Builds a styled input field
   Widget _buildInputField({
     required TextEditingController controller,
     required String hint,
@@ -253,6 +282,7 @@ class _AddClassPageState extends State<AddClassPage> {
     );
   }
 
+  // Builds the student search UI and list of students
   Widget _buildStudentSearch() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -327,6 +357,7 @@ class _AddClassPageState extends State<AddClassPage> {
           ),
         ),
         const SizedBox(height: 12),
+        // Display selected students
         if (_selectedStudents.isNotEmpty)
           Container(
             padding: const EdgeInsets.all(12),
@@ -370,6 +401,7 @@ class _AddClassPageState extends State<AddClassPage> {
     );
   }
 
+  // Builds the button used to create the class
   Widget _buildCreateClassButton() {
     return SizedBox(
       width: 180,
