@@ -12,6 +12,7 @@ import '/api/auth_guard.dart';
 
 void main() {
   runApp(
+    // Provide global state objects to the widget tree
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeManager()),
@@ -19,6 +20,7 @@ void main() {
       ],
       child: const MaterialApp(
         debugShowCheckedModeBanner: false,
+        // Only admins and teachers are allowed to access this page
         home: AuthGuard(
           allowedRoles: [Role.admin, Role.teacher],
           child: StudentOverviewPage(),
@@ -28,6 +30,7 @@ void main() {
   );
 }
 
+// Page for displaying an overview of students
 class StudentOverviewPage extends StatefulWidget {
   const StudentOverviewPage({super.key});
 
@@ -36,8 +39,13 @@ class StudentOverviewPage extends StatefulWidget {
 }
 
 class _StudentOverviewPageState extends State<StudentOverviewPage> {
+  // Primary color used in the UI
   static const primary = Color(0xFF6464FF);
+
+  // Controller for student search input
   final TextEditingController _searchCtrl = TextEditingController();
+
+  // Future for fetching the list of students
   late Future<List<User>> _studentsFuture;
 
   @override
@@ -46,16 +54,19 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
     _fetchStudents();
   }
 
+  // Fetches the list of students from the API
   void _fetchStudents() {
     final api = ApiService();
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
+    // Get the school ID of the current user
     final schoolId = userProvider.currentUser?.school?.id;
     if (schoolId == null) {
       _studentsFuture = Future.value([]); // or handle error
       return;
     }
 
+    // Fetch students and sort them by first name
     _studentsFuture = api.fetchStudents(schoolId).then((students) {
       students.sort((a, b) =>
           a.firstname.toLowerCase().compareTo(b.firstname.toLowerCase()));
@@ -69,7 +80,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
     super.dispose();
   }
 
-  // TOAST MESSAGE
+  // Show error/success toast message
   void _toast(String msg, {bool success = true}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -80,6 +91,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
     );
   }
 
+  // Build the main UI
   @override
   Widget build(BuildContext context) {
     final themeManager = Provider.of<ThemeManager>(context);
@@ -96,7 +108,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
               child: Column(
                 children: [
                   const SizedBox(height: 16),
-                  // Header
+                  // title text
                   Center(
                     child: const Text(
                       'Studentenoverzicht',
@@ -108,8 +120,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // Buttons row
+                  // Row with add and delete student buttons
                   Row(
                     children: [
                       Expanded(
@@ -129,6 +140,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                           },
                         ),
                       ),
+                      // delete button
                       const SizedBox(width: 12),
                       Expanded(
                         child: _pressableTile(
@@ -180,6 +192,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                           ),
                         ),
                         const SizedBox(height: 10),
+                        // Search field
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 12.0),
                           child: TextField(
@@ -213,6 +226,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                         ),
                         const SizedBox(height: 6),
                         const Divider(height: 0),
+                        // Student list
                         SizedBox(
                           height: MediaQuery.of(context).size.height * 0.55,
                           child: FutureBuilder<List<User>>(
@@ -230,7 +244,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                                   ),
                                 );
                               }
-
+                              // Filter students based on search query
                               final list = snapshot.data ?? [];
                               final filtered = query.isEmpty
                                   ? list
@@ -239,19 +253,19 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                                           .toLowerCase()
                                           .contains(query))
                                       .toList();
-
+                              // Show message if no students found
                               if (filtered.isEmpty) {
                                 return const Center(
                                     child: Text('Geen studenten gevonden'));
                               }
-
+                              // Display the list of students
                               return ListView.separated(
                                 itemCount: filtered.length,
                                 separatorBuilder: (_, __) =>
                                     const Divider(height: 0, thickness: .4),
                                 itemBuilder: (context, i) {
                                   final s = filtered[i];
-
+                                  // Individual student tile
                                   return ListTile(
                                     title: Text(
                                       s.fullName,
@@ -315,6 +329,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
     );
   }
 
+  // Pressable tile widget
   Widget _pressableTile({
     required String tileId,
     required String label,
@@ -322,6 +337,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
     required Color color,
     required VoidCallback onTap,
   }) {
+    // Build a pressable tile with given properties
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -356,6 +372,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
     );
   }
 
+  // Opens the bottom bar with student altering actions
   void _openStudentActions(User s) {
     showModalBottomSheet(
       context: context,
@@ -389,6 +406,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
     );
   }
 
+  // Confirm deletion of a student
   void _confirmDeleteStudent(User student) {
     showDialog(
       context: context,
@@ -405,6 +423,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(Colors.red),
             ),
+            // Delete student action
             onPressed: () async {
               Navigator.of(context).pop(); // sluit de dialoog
               try {
@@ -427,6 +446,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
     );
   }
 
+  // Show dialog to edit student details
   void _showEditStudentDialog(User student) {
     final firstnameCtrl = TextEditingController(text: student.firstname);
     final middlenameCtrl =
@@ -435,7 +455,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
     final emailCtrl = TextEditingController(text: student.email);
     final oldPasswordCtrl = TextEditingController();
     final newPasswordCtrl = TextEditingController();
-
+    // Show the edit student dialog
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -444,6 +464,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
           content: SingleChildScrollView(
             child: Column(
               children: [
+                // Input fields for student details
                 _dialogField('Voornaam', firstnameCtrl),
                 _dialogField('Tussenvoegsel', middlenameCtrl),
                 _dialogField('Achternaam', lastnameCtrl),
@@ -470,6 +491,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
               child: const Text('Annuleren',
                   style: TextStyle(color: Colors.white)),
             ),
+            // Save changes button
             ElevatedButton(
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.resolveWith((states) =>
@@ -477,6 +499,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                         ? const Color(0xFF018F6F)
                         : const Color(0xFF01BA8F)),
               ),
+              // Save edited student details
               onPressed: () async {
                 try {
                   final updatedStudent = User(
@@ -487,7 +510,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                     email: emailCtrl.text.trim(),
                     role: student.role,
                   );
-
+                  // Update student via API
                   await ApiService().updateStudent(
                     student: updatedStudent,
                     oldPassword: oldPasswordCtrl.text.isEmpty
@@ -497,11 +520,11 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
                         ? null
                         : newPasswordCtrl.text,
                   );
-
+                  // Refresh student list
                   setState(() => _fetchStudents());
                   Navigator.of(context).pop();
 
-                  // ----- TOAST AFTER POPUP -----
+                  // Show success or error toast
                   String fullName =
                       '${updatedStudent.firstname} ${updatedStudent.middlename ?? ''} ${updatedStudent.lastname}'
                           .trim();
@@ -528,6 +551,7 @@ class _StudentOverviewPageState extends State<StudentOverviewPage> {
     );
   }
 
+  // Dialog field widget
   Widget _dialogField(String label, TextEditingController controller,
       {bool obscureText = false}) {
     return Padding(
