@@ -12,6 +12,7 @@ import '../navigation/navigation_page.dart';
 
 void main() {
   runApp(
+    // Provide global state objects to the widget tree
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeManager()),
@@ -19,6 +20,7 @@ void main() {
       ],
       child: const MaterialApp(
         debugShowCheckedModeBanner: false,
+        // Only admins and teachers are allowed to access this page
         home: AuthGuard(
           allowedRoles: [Role.admin, Role.teacher],
           child: AdminDashboard(),
@@ -28,6 +30,7 @@ void main() {
   );
 }
 
+// page for the admin dashboard management
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
 
@@ -40,10 +43,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   @override
   Widget build(BuildContext context) {
+    // Access theme colors
     final themeManager = Provider.of<ThemeManager>(context);
+    // Get currently logged-in user
     final currentUser = Provider.of<UserProvider>(context).currentUser;
 
     return WaveBackgroundLayout(
+      // Access theme manager for background color
       backgroundColor: themeManager.backgroundColor,
       child: SafeArea(
         child: SingleChildScrollView(
@@ -96,7 +102,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   ),
                   const SizedBox(height: 40),
 
-                  // Docent button
+                  // teachers button
                   _buildDashboardButton(
                     buttonId: 'docent',
                     label: 'Docent',
@@ -165,7 +171,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   ),
                   const SizedBox(height: 25),
 
-                  // Beheer button
+                  // Class button
                   _buildDashboardButton(
                     buttonId: 'klas',
                     label: 'Klas',
@@ -209,6 +215,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
+  // Widget for dashboard buttons
   Widget _buildDashboardButton({
     required String buttonId,
     required String label,
@@ -217,6 +224,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     required Color secondaryColor,
     required VoidCallback onTap,
   }) {
+    // Determine if the button is currently pressed
     bool isPressed = _pressedButton == buttonId;
     final Color displayPrimary = isPressed
         ? ThemeManager().darkenColor(primaryColor, 0.25)
@@ -225,6 +233,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
         ? ThemeManager().darkenColor(secondaryColor, 0.25)
         : secondaryColor;
 
+    // Build the button widget
     return GestureDetector(
       onTapDown: (_) => setState(() => _pressedButton = buttonId),
       onTapUp: (_) {
@@ -284,6 +293,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
+  // Widget for return button
   Widget _buildReturnButton({
     required String buttonId,
     required String iconPath,
