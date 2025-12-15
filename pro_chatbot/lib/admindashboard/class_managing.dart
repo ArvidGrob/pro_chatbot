@@ -10,6 +10,7 @@ import '/wave_background_layout.dart';
 
 void main() {
   runApp(
+    // Provide global state objects to the widget tree
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeManager()),
@@ -17,6 +18,7 @@ void main() {
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
+        // Only admins and teachers are allowed to access this page
         home: AuthGuard(
           allowedRoles: [Role.admin, Role.teacher],
           child: ClassOverviewPage(),
@@ -26,7 +28,9 @@ void main() {
   );
 }
 
+// Page for managing students in a specific class
 class ManageClassStudentsPage extends StatefulWidget {
+  // The class to manage
   final SchoolClass schoolClass;
 
   const ManageClassStudentsPage({super.key, required this.schoolClass});
@@ -37,11 +41,16 @@ class ManageClassStudentsPage extends StatefulWidget {
 }
 
 class _ManageClassStudentsPageState extends State<ManageClassStudentsPage> {
+  // API service instance
   final ApiService _api = ApiService();
+  // Search controller
   final TextEditingController _searchCtrl = TextEditingController();
 
+  // Lists to hold students
   List<User> _classStudents = [];
+  // list of available students not in a class already
   List<User> _availableStudents = [];
+  // Loading state
   bool _loading = true;
 
   @override
@@ -50,17 +59,19 @@ class _ManageClassStudentsPageState extends State<ManageClassStudentsPage> {
     _loadStudents();
   }
 
+  // Load students from the API
   Future<void> _loadStudents() async {
     setState(() => _loading = true);
-
+    // Get current user's school ID
     try {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final schoolId = userProvider.currentUser?.school?.id;
       if (schoolId == null) throw Exception("School niet gevonden");
-
+      // Fetch students and unassigned students
       final students = await _api.fetchStudents(schoolId);
       final unassigned = await _api.fetchUnassignedStudents(schoolId);
 
+      // Update state with fetched data
       setState(() {
         _classStudents =
             students.where((s) => s.classId == widget.schoolClass.id).toList();
@@ -73,6 +84,7 @@ class _ManageClassStudentsPageState extends State<ManageClassStudentsPage> {
     }
   }
 
+  // Show a toast message
   void _toast(String msg, {bool success = true}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -94,13 +106,14 @@ class _ManageClassStudentsPageState extends State<ManageClassStudentsPage> {
     final themeManager = Provider.of<ThemeManager>(context);
     final query = _searchCtrl.text.trim().toLowerCase();
 
-    /// ---------------- USE fullName FOR SEARCH ----------------
+    // ---------------- USE fullName FOR SEARCH for students added to the class ----------------
     final filteredClassStudents = query.isEmpty
         ? _classStudents
         : _classStudents
             .where((s) => s.fullName.toLowerCase().contains(query))
             .toList();
 
+    // ---------------- USE fullName FOR SEARCH for available students----------------
     final filteredAvailableStudents = query.isEmpty
         ? _availableStudents
         : _availableStudents
@@ -121,6 +134,7 @@ class _ManageClassStudentsPageState extends State<ManageClassStudentsPage> {
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                   const SizedBox(width: 10),
+                  // Page title
                   Text(
                     'Studenten beheren klas: ${widget.schoolClass.name}',
                     style: const TextStyle(
