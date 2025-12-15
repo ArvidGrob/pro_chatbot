@@ -11,6 +11,7 @@ import '../api/api_services.dart';
 
 void main() {
   runApp(
+    // Provide global state objects to the widget tree
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeManager()),
@@ -18,6 +19,7 @@ void main() {
       ],
       child: const MaterialApp(
         debugShowCheckedModeBanner: false,
+        // Only admins and teachers are allowed to access this page
         home: AuthGuard(
           allowedRoles: [Role.admin, Role.teacher],
           child: ClassOverviewPage(),
@@ -27,6 +29,7 @@ void main() {
   );
 }
 
+// page for displaying an overview of classes
 class ClassOverviewPage extends StatefulWidget {
   const ClassOverviewPage({super.key});
 
@@ -34,11 +37,16 @@ class ClassOverviewPage extends StatefulWidget {
   State<ClassOverviewPage> createState() => _ClassOverviewPageState();
 }
 
+// State class for ClassOverviewPage
 class _ClassOverviewPageState extends State<ClassOverviewPage> {
+  // Controller for the search input field
   final TextEditingController _searchCtrl = TextEditingController();
+  // API service instance for making requests
   final ApiService _api = ApiService();
 
+  // List of classes to display
   List<SchoolClass> _classes = [];
+  // Loading state indicator
   bool _loading = true;
 
   static const primaryColor = Color(0xFF3D4ED8);
@@ -49,15 +57,17 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
     _loadClasses();
   }
 
+  // Loads classes from the API
   Future<void> _loadClasses() async {
     setState(() => _loading = true);
 
     try {
+      // Get current user's school ID
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final schoolId = userProvider.currentUser?.school?.id;
 
       if (schoolId == null) throw Exception("School niet gevonden");
-
+      // Fetch classes from the API
       final classes = await _api.getClasses(schoolId);
 
       setState(() {
@@ -76,6 +86,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
     super.dispose();
   }
 
+  // show success or error toast message
   void _toast(String msg, {bool success = true}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -88,8 +99,10 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Access the theme manager from the provider
     final themeManager = Provider.of<ThemeManager>(context);
 
+    // Get the current search query
     final query = _searchCtrl.text.trim().toLowerCase();
     final filteredClasses = query.isEmpty
         ? _classes
@@ -103,6 +116,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
           child: Column(
             children: [
               const SizedBox(height: 16),
+              // Page title
               const Center(
                 child: Text(
                   'Klas overzicht',
@@ -114,6 +128,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                 ),
               ),
               const SizedBox(height: 18),
+              // Button to add a new class
               SizedBox(
                 width: double.infinity,
                 height: 42,
@@ -151,6 +166,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                       ),
                     ],
                   ),
+                  // Content of the class overview
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -167,6 +183,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                         ),
                       ),
                       const SizedBox(height: 10),
+                      // Search input field
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12.0),
                         child: TextField(
@@ -200,6 +217,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                       ),
                       const SizedBox(height: 6),
                       const Divider(height: 0),
+                      // List of classes
                       Expanded(
                         child: _loading
                             ? const Center(child: CircularProgressIndicator())
@@ -237,6 +255,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
                 ),
               ),
               const SizedBox(height: 20),
+              // Return button
               GestureDetector(
                 onTap: () => Navigator.of(context).maybePop(),
                 child: SizedBox(
@@ -274,12 +293,14 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
     });
   }
 
+  // Opens the bottom sheet with class actions
   void _openClassActions(SchoolClass cls) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
+      // Content of the altering class details
       builder: (context) {
         return SafeArea(
           child: Column(
@@ -319,6 +340,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
     );
   }
 
+  // Shows a dialog to rename the class
   void _showRenameDialog(SchoolClass cls) {
     final ctrl = TextEditingController(text: cls.name);
 
@@ -370,6 +392,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
     );
   }
 
+  // Confirms deletion of the class
   void _confirmDelete(SchoolClass cls) {
     showDialog(
       context: context,
@@ -408,6 +431,7 @@ class _ClassOverviewPageState extends State<ClassOverviewPage> {
     );
   }
 
+  // Opens the student management page for the selected class
   void _openStudentManagement(SchoolClass cls) {
     Navigator.of(context).push(
       MaterialPageRoute(
