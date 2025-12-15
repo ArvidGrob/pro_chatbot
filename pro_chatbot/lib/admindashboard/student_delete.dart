@@ -9,6 +9,7 @@ import '../api/api_services.dart';
 
 void main() {
   runApp(
+    // Provide global state objects to the widget tree
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeManager()),
@@ -16,6 +17,7 @@ void main() {
       ],
       child: const MaterialApp(
         debugShowCheckedModeBanner: false,
+        // Only admins and teachers are allowed to access this page
         home: AuthGuard(
           allowedRoles: [Role.admin, Role.teacher],
           child: StudentDeletePage(),
@@ -25,6 +27,7 @@ void main() {
   );
 }
 
+// Page for deleting mutiple students from the system
 class StudentDeletePage extends StatefulWidget {
   const StudentDeletePage({super.key});
 
@@ -33,13 +36,18 @@ class StudentDeletePage extends StatefulWidget {
 }
 
 class _StudentDeletePageState extends State<StudentDeletePage> {
+  // Primary color for the page
   static const primary = Color(0xFF6464FF);
-
+  // Controller for student search input
   final TextEditingController _searchCtrl = TextEditingController();
+  // Focus node for search input
   final FocusNode _searchFocus = FocusNode();
 
+  // All students lists at the start
   List<User> _allStudents = [];
+  // Filtered students based on search
   List<User> _filteredStudents = [];
+  // Selected students for deletion
   final Set<User> _selectedStudents = {};
   bool _isLoading = false;
 
@@ -58,15 +66,18 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
     super.dispose();
   }
 
+  // Handle search input changes
   void _onSearchChanged() => _filterStudents(_searchCtrl.text);
-
+  // Load students from the API
   Future<void> _loadStudents() async {
     setState(() => _isLoading = true);
     try {
+      // Get current user's school ID
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final schoolId = userProvider.currentUser?.school?.id;
       if (schoolId == null) return;
 
+      // Fetch students from the API
       _allStudents = await ApiService().fetchStudents(schoolId);
       _allStudents.sort((a, b) => a.fullName.compareTo(b.fullName));
       _filteredStudents = List.from(_allStudents);
@@ -77,6 +88,7 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
     }
   }
 
+  // Filter students based on search query
   void _filterStudents(String query) {
     setState(() {
       _filteredStudents = _allStudents
@@ -85,6 +97,7 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
     });
   }
 
+  // Toggle student selection for deletion
   void _toggleSelect(User student) {
     setState(() {
       if (_selectedStudents.contains(student)) {
@@ -95,6 +108,7 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
     });
   }
 
+  // Delete selected students after confirmation
   Future<void> _deleteSelected() async {
     if (_selectedStudents.isEmpty) return;
 
@@ -119,14 +133,16 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
     );
 
     if (confirm != true) return;
-
+    // Proceed with deletion
     setState(() => _isLoading = true);
     try {
+      // Delete each selected student via the API
       final api = ApiService();
       for (var student in List<User>.from(_selectedStudents)) {
         await api.deleteStudent(student.id!);
         _allStudents.remove(student);
       }
+      // Clear selection and refresh filtered list
       _selectedStudents.clear();
       _filterStudents(_searchCtrl.text);
       _toast('Geselecteerde studenten succesvol verwijderd');
@@ -137,6 +153,7 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
     }
   }
 
+  // sjow success or error toast message
   void _toast(String msg, {bool success = true}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -164,6 +181,7 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       const SizedBox(height: 16),
+                      // ---------------- PAGE TITLE ----------------
                       const Text(
                         'Studenten verwijderen',
                         style: TextStyle(
@@ -173,6 +191,7 @@ class _StudentDeletePageState extends State<StudentDeletePage> {
                         ),
                       ),
                       const SizedBox(height: 16),
+                      // ---------------- SEARCH FIELD ----------------
                       TextField(
                         controller: _searchCtrl,
                         focusNode: _searchFocus,
