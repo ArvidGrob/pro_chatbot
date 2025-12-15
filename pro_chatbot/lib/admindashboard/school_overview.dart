@@ -12,6 +12,7 @@ import 'dart:async';
 
 void main() {
   runApp(
+    // Provide global state objects to the widget tree
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeManager()),
@@ -19,6 +20,7 @@ void main() {
       ],
       child: const MaterialApp(
         debugShowCheckedModeBanner: false,
+        // Restrict access to admins only
         home: AuthGuard(
           allowedRoles: [Role.admin],
           child: SchoolOverviewPage(),
@@ -28,6 +30,7 @@ void main() {
   );
 }
 
+// page for displaying an overview of the school
 class SchoolOverviewPage extends StatefulWidget {
   const SchoolOverviewPage({super.key});
 
@@ -35,11 +38,14 @@ class SchoolOverviewPage extends StatefulWidget {
   State<SchoolOverviewPage> createState() => _SchoolOverviewPageState();
 }
 
+// State class for SchoolOverviewPage
 class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
   static const Color primaryBlue = Color(0xFF6464FF);
 
+  // Current user
   User? user;
   bool _loading = true;
+  // API service instance
   final ApiService api = ApiService();
 
   // Statistics
@@ -69,9 +75,11 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
     });
   }
 
+  // Load school statistics
   Future<void> _loadStatistics() async {
     if (user?.school == null) return;
 
+    // Fetch statistics from API
     try {
       final stats = await api.getSchoolStatistics(user!.school!.id);
       if (mounted) {
@@ -88,6 +96,7 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
     }
   }
 
+  // Load the user's school information
   Future<void> _loadUserSchool() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     if (userProvider.currentUser != null) {
@@ -113,6 +122,7 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
     }
   }
 
+  // Update school information
   Future<void> _updateSchool(School updatedSchool) async {
     try {
       await api.updateSchool(updatedSchool);
@@ -134,6 +144,7 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
     }
   }
 
+  // Show dialog to edit school information
   void _showEditDialog(User user) {
     final nameCtrl = TextEditingController(text: user.school?.name ?? '');
     final zipCtrl = TextEditingController(text: user.school?.zipCode ?? '');
@@ -142,7 +153,7 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
     final houseCtrl =
         TextEditingController(text: user.school?.houseNumber ?? '');
     final townCtrl = TextEditingController(text: user.school?.town ?? '');
-
+    // Show the dialog
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -159,6 +170,7 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
               ],
             ),
           ),
+          // Dialog actions
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -180,6 +192,7 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
                   return const Color(0xFF01BA8F);
                 }),
               ),
+              // Save button action
               onPressed: () {
                 final updatedSchool = School(
                   id: user.school?.id ?? 0,
@@ -203,6 +216,7 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
     );
   }
 
+  // Widget for dialog text fields
   Widget _dialogField(String label, TextEditingController controller) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
@@ -216,6 +230,7 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
     );
   }
 
+  // Build method for the widget
   @override
   Widget build(BuildContext context) {
     final themeManager = Provider.of<ThemeManager>(context);
@@ -235,6 +250,7 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 20),
+                // Page title
                 const Text(
                   'Schoolinformatie',
                   style: TextStyle(
@@ -260,6 +276,7 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
                         ),
                       ],
                     ),
+                    // School information
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -277,6 +294,7 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
                                         ? const Color(0xFF4A4AEE)
                                         : primaryBlue),
                           ),
+                          // Edit school button
                           onPressed: () => _showEditDialog(user!),
                           child: const Text(
                             'Wijzig school',
@@ -294,6 +312,7 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         Expanded(
+                          // Statistic login container
                           child: Padding(
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 4.0),
@@ -305,6 +324,7 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
                             ),
                           ),
                         ),
+                        // Statistic users number of questions container
                         Expanded(
                           child: Padding(
                             padding:
@@ -321,6 +341,7 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
                       ],
                     ),
                     const SizedBox(height: 12),
+                    // Statistic total usage time container
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
                       child: _infoContainer(
@@ -362,6 +383,7 @@ class _SchoolOverviewPageState extends State<SchoolOverviewPage> {
     );
   }
 
+  // Widget for displaying information containers
   Widget _infoContainer(String title, String value) {
     return Container(
       width: double.infinity,
