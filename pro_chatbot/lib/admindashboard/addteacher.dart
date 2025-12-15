@@ -12,6 +12,7 @@ import '/api/auth_guard.dart';
 // import 'login/login_page.dart';
 void main() {
   runApp(
+    // Provide global state objects to the widget tree
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeManager()),
@@ -19,6 +20,7 @@ void main() {
       ],
       child: const MaterialApp(
         debugShowCheckedModeBanner: false,
+        // Restrict access to admins only
         home: AuthGuard(
           allowedRoles: [Role.admin],
           child: AddTeacherPage(),
@@ -28,6 +30,7 @@ void main() {
   );
 }
 
+// page for adding a new teacher or admin
 class AddTeacherPage extends StatefulWidget {
   const AddTeacherPage({super.key});
 
@@ -36,9 +39,11 @@ class AddTeacherPage extends StatefulWidget {
 }
 
 class _AddTeacherPageState extends State<AddTeacherPage> {
+  // defineD primary colors in UI
   static const primaryBlue = Color(0xFF1A2B8F);
   static const accentPurple = Color(0xFF6F73FF);
 
+  // Controllers for input fields
   final TextEditingController _firstNameCtrl = TextEditingController();
   final TextEditingController _middleNameCtrl = TextEditingController();
   final TextEditingController _lastNameCtrl = TextEditingController();
@@ -46,6 +51,7 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
   final TextEditingController _pwCtrl = TextEditingController();
   final TextEditingController _pwRepeatCtrl = TextEditingController();
 
+  // Submission state
   bool _submitting = false;
 
   // Default role is Teacher
@@ -53,6 +59,7 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
 
   @override
   void dispose() {
+    // Dispose controllers to prevent memory leaks
     _firstNameCtrl.dispose();
     _middleNameCtrl.dispose();
     _lastNameCtrl.dispose();
@@ -62,11 +69,13 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
     super.dispose();
   }
 
+  // Validates email format
   bool _isValidEmail(String value) {
     final regex = RegExp(r"^[\w\.\-]+@[a-zA-Z0-9]+\.[a-zA-Z]+$");
     return regex.hasMatch(value);
   }
 
+  // [success] determines background color
   void _toast(String msg, {bool success = true}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -77,9 +86,12 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
     );
   }
 
+  //---------  SAVE → API -------------
+  // Validates input and sends request to create a new student
   Future<void> _save() async {
     if (_submitting) return;
 
+    // Read and trim input values
     final firstName = _firstNameCtrl.text.trim();
     final middleName = _middleNameCtrl.text.trim();
     final lastName = _lastNameCtrl.text.trim();
@@ -87,6 +99,7 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
     final pw = _pwCtrl.text.trim();
     final repw = _pwRepeatCtrl.text.trim();
 
+    // Input validation
     if (firstName.isEmpty)
       return _toast('Vul een voornaam in.', success: false);
     if (lastName.isEmpty)
@@ -103,7 +116,7 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
     try {
       final api = ApiService();
 
-      // Get current admin's school ID
+      // Get the school ID of the current admin
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       if (userProvider.currentUser?.school == null) {
         _toast('Admin heeft geen school ingesteld.', success: false);
@@ -112,6 +125,7 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
       }
       final schoolId = userProvider.currentUser!.school!.id;
 
+      // Create student via API
       await api.createTeacherOrAdmin(
         firstname: firstName,
         middlename: middleName.isEmpty ? null : middleName,
@@ -122,6 +136,7 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
         schoolId: schoolId,
       );
 
+      // Build full name for success message
       String fullName = firstName;
       if (middleName.isNotEmpty) {
         fullName += ' $middleName';
@@ -130,6 +145,7 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
 
       _toast("Gebruiker $fullName succesvol aangemaakt!", success: true);
 
+      // Clear input fields after successful creation
       _firstNameCtrl.clear();
       _middleNameCtrl.clear();
       _lastNameCtrl.clear();
@@ -138,6 +154,7 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
       _pwRepeatCtrl.clear();
       setState(() => _selectedRole = 'teacher'); // reset role
     } catch (e) {
+      // Handle specific API error
       if (e.toString().contains('E-mail bestaat al')) {
         _toast('Er bestaat al een gebruiker met dit e-mailadres.',
             success: false);
@@ -150,8 +167,10 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
     }
   }
 
+  // --------------  UI  -----------------------
   @override
   Widget build(BuildContext context) {
+    // Access theme manager for background color
     final themeManager = Provider.of<ThemeManager>(context);
 
     return WaveBackgroundLayout(
@@ -161,6 +180,7 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Page title
             Text(
               'Teacher Management',
               style: TextStyle(
@@ -204,13 +224,14 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
 
             const SizedBox(height: 16),
 
-            // Row: Last name + Role
+            // row: Last name + Role
             Row(
               children: [
                 Expanded(
                   flex: 4,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    // Last name input
                     children: [
                       _label('Achternaam:'),
                       _inputField(
@@ -224,6 +245,7 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
                   flex: 3,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    // Role dropdown
                     children: [
                       _label('Rol:'),
                       Container(
@@ -263,7 +285,7 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
             ),
 
             const SizedBox(height: 16),
-
+            // Email field
             _label('Email:'),
             _inputField(
                 controller: _emailCtrl,
@@ -271,7 +293,7 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
                 keyboardType: TextInputType.emailAddress),
 
             const SizedBox(height: 16),
-
+            // Password field
             _label('Wachtwoord:'),
             _inputField(
                 controller: _pwCtrl,
@@ -279,7 +301,7 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
                 obscure: true),
 
             const SizedBox(height: 16),
-
+            // Repeat password field
             _label('Wachtwoord herhalen:'),
             _inputField(
                 controller: _pwRepeatCtrl,
@@ -287,7 +309,7 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
                 obscure: true),
 
             const SizedBox(height: 28),
-
+            // Create button
             Center(
               child: SizedBox(
                 width: 180,
@@ -336,12 +358,14 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
     );
   }
 
+  // Label widget for input fields
   Widget _label(String text, {Color color = const Color(0xFF100c08)}) {
     return Text(text,
         style:
             TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.w700));
   }
 
+  // Input field widget
   Widget _inputField({
     required TextEditingController controller,
     required String hint,
@@ -360,6 +384,7 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
               offset: const Offset(0, 4))
         ],
       ),
+      // Text field
       child: TextField(
         controller: controller,
         obscureText: obscure,
