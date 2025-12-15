@@ -10,6 +10,7 @@ import '/api/auth_guard.dart';
 
 void main() {
   runApp(
+    // Provide global state objects to the widget tree
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeManager()),
@@ -17,6 +18,7 @@ void main() {
       ],
       child: const MaterialApp(
         debugShowCheckedModeBanner: false,
+        // Only admins and teachers are allowed to access this page
         home: AuthGuard(
           allowedRoles: [Role.admin, Role.teacher],
           child: AddStudentPage(),
@@ -26,6 +28,7 @@ void main() {
   );
 }
 
+// page for adding a new student
 class AddStudentPage extends StatefulWidget {
   const AddStudentPage({super.key});
 
@@ -80,6 +83,7 @@ class _AddStudentPageState extends State<AddStudentPage> {
   Future<void> _save() async {
     if (_submitting) return;
 
+    // Trim inputs
     final firstName = _firstNameCtrl.text.trim();
     final middleName = _middleNameCtrl.text.trim();
     final lastName = _lastNameCtrl.text.trim();
@@ -87,6 +91,7 @@ class _AddStudentPageState extends State<AddStudentPage> {
     final pw = _pwCtrl.text.trim();
     final repw = _pwRepeatCtrl.text.trim();
 
+    // Validate inputs
     if (firstName.isEmpty)
       return _toast('Vul een voornaam in.', success: false);
     if (lastName.isEmpty)
@@ -172,7 +177,7 @@ class _AddStudentPageState extends State<AddStudentPage> {
             ),
             const SizedBox(height: 24),
 
-            // Row: first + middle
+            // Row containing first name and middle name fields
             Row(
               children: [
                 Expanded(
@@ -206,9 +211,9 @@ class _AddStudentPageState extends State<AddStudentPage> {
                 ),
               ],
             ),
-
             const SizedBox(height: 16),
 
+            // Last name field
             _label('Achternaam:'),
             _inputField(
               controller: _lastNameCtrl,
@@ -218,6 +223,7 @@ class _AddStudentPageState extends State<AddStudentPage> {
 
             const SizedBox(height: 16),
 
+            // Email field
             _label('Email:'),
             _inputField(
               controller: _emailCtrl,
@@ -227,6 +233,7 @@ class _AddStudentPageState extends State<AddStudentPage> {
 
             const SizedBox(height: 16),
 
+            // Password field
             _label('Wachtwoord:'),
             _inputField(
               controller: _pwCtrl,
@@ -236,6 +243,7 @@ class _AddStudentPageState extends State<AddStudentPage> {
 
             const SizedBox(height: 16),
 
+            // Repeat password field
             _label('Wachtwoord herhalen:'),
             _inputField(
               controller: _pwRepeatCtrl,
