@@ -118,6 +118,56 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
+  String _stripMarkdown(String text) {
+    // Remove code blocks first (```code```) to avoid processing their content
+    text = text.replaceAll(RegExp(r'```[\s\S]*?```'), '');
+
+    // Remove inline code (`code`)
+    text = text.replaceAllMapped(
+        RegExp(r'`([^`]+)`'), (match) => match.group(1) ?? '');
+
+    // Remove images ![alt](url)
+    text = text.replaceAllMapped(
+        RegExp(r'!\[([^\]]*)\]\([^\)]+\)'), (match) => match.group(1) ?? '');
+
+    // Remove links [text](url) - keep the text
+    text = text.replaceAllMapped(
+        RegExp(r'\[([^\]]+)\]\([^\)]+\)'), (match) => match.group(1) ?? '');
+
+    // Remove strikethrough (~~text~~)
+    text = text.replaceAllMapped(
+        RegExp(r'~~(.+?)~~'), (match) => match.group(1) ?? '');
+
+    // Remove bold (**text** or __text__) - must be before italic
+    text = text.replaceAllMapped(
+        RegExp(r'\*\*(.+?)\*\*'), (match) => match.group(1) ?? '');
+    text = text.replaceAllMapped(
+        RegExp(r'__(.+?)__'), (match) => match.group(1) ?? '');
+
+    // Remove italic (*text* or _text_)
+    text = text.replaceAllMapped(
+        RegExp(r'\*(.+?)\*'), (match) => match.group(1) ?? '');
+    text = text.replaceAllMapped(
+        RegExp(r'_(.+?)_'), (match) => match.group(1) ?? '');
+
+    // Remove headers (# ## ### etc)
+    text = text.replaceAll(RegExp(r'^#{1,6}\s+', multiLine: true), '');
+
+    // Remove blockquotes (> text)
+    text = text.replaceAll(RegExp(r'^>\s+', multiLine: true), '');
+
+    // Remove horizontal rules (---, ***, ___)
+    text = text.replaceAll(RegExp(r'^[\-\*_]{3,}$', multiLine: true), '');
+
+    // Remove bullet points (- or * at start of line)
+    text = text.replaceAll(RegExp(r'^[\*\-\+]\s+', multiLine: true), '');
+
+    // Remove numbered lists (1. 2. etc)
+    text = text.replaceAll(RegExp(r'^\d+\.\s+', multiLine: true), '');
+
+    return text.trim();
+  }
+
   Future<void> _toggleSpeak(String messageId, String text) async {
     if (_chatController.currentlySpeakingMessageId == messageId) {
       await _stopSpeaking();
@@ -133,7 +183,10 @@ class _ChatPageState extends State<ChatPage> {
     await flutterTts.setPitch(1.0);
     await flutterTts.setSpeechRate(0.8);
     await flutterTts.setVolume(1.0);
-    await flutterTts.speak(text);
+
+    // Strip markdown formatting before speaking
+    final cleanText = _stripMarkdown(text);
+    await flutterTts.speak(cleanText);
   }
 
   Future<void> _stopSpeaking() async {
