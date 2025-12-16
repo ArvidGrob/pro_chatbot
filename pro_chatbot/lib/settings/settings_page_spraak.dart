@@ -3,6 +3,7 @@ import 'settings_page.dart';
 import 'package:provider/provider.dart';
 import '/wave_background_layout.dart';
 import '/theme_manager.dart';
+import '../tts_setting.dart';
 
 void main() {
   runApp(
@@ -88,15 +89,13 @@ class _SettingsPageSpraakState extends State<SettingsPageSpraak> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(25.0),
                     decoration: BoxDecoration(
-                      color: _pressedButton == 'voice'
-                          ? const Color(0xFF4545BD)
-                          : const Color(0xFF2323AD),
+                      color: themeManager.getOptionSoftBlue(),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Vrouwelijke stem row
+                        // Female voice
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -108,24 +107,19 @@ class _SettingsPageSpraakState extends State<SettingsPageSpraak> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            SizedBox(
-                              width: 40,
-                              height: 40,
-                              child: _selectedVoice == 'vrouwelijk'
-                                  ? Image.asset(
-                                      'assets/images/check.png',
-                                      width: 40,
-                                      height: 40,
-                                      fit: BoxFit.contain,
-                                    )
-                                  : const SizedBox.shrink(),
-                            ),
+                            if (_selectedVoice ==
+                                'vrouwelijk') // Function still to be implemented
+                              Image.asset(
+                                'assets/images/check.png',
+                                width: 30,
+                                height: 30,
+                              ),
                           ],
                         ),
 
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 30),
 
-                        // Mannelijke stem row
+                        // Male voice
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -137,25 +131,69 @@ class _SettingsPageSpraakState extends State<SettingsPageSpraak> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            SizedBox(
-                              width: 40,
-                              height: 40,
-                              child: _selectedVoice == 'mannelijk'
-                                  ? Image.asset(
-                                      'assets/images/check.png',
-                                      width: 40,
-                                      height: 40,
-                                      fit: BoxFit.contain,
-                                    )
-                                  : const SizedBox.shrink(),
-                            ),
+                            if (_selectedVoice ==
+                                'mannelijk') // Function still to be implemented
+                              Image.asset(
+                                'assets/images/check.png',
+                                width: 30,
+                                height: 30,
+                              ),
                           ],
                         ),
                       ],
                     ),
                   ),
                 ),
-
+                const SizedBox(height: 30),
+                // Speech rate slider
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(25.0),
+                  decoration: BoxDecoration(
+                    color: themeManager.getOptionSoftBlue(),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Spreeksnelheid',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          activeTrackColor: Colors.white,
+                          inactiveTrackColor: Colors.white.withOpacity(0.3),
+                          thumbColor: Colors.white,
+                          overlayColor: Colors.white.withOpacity(0.2),
+                          valueIndicatorColor: Colors.white,
+                          valueIndicatorTextStyle: const TextStyle(
+                            color:
+                                Color(0xFF2A2AFF), // matches theme title color
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        child: Slider(
+                          value: TtsSettings.speechRate,
+                          min: 0.0,
+                          max: 2.0,
+                          divisions: 20,
+                          label: TtsSettings.speechRate.toStringAsFixed(1),
+                          onChanged: (value) {
+                            setState(() {
+                              TtsSettings.speechRate = value;
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 const Spacer(),
 
                 // Return button (to SettingsPage)
