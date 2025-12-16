@@ -15,6 +15,9 @@ class HelpRequest {
   final String? teacherResponse;
   final DateTime? respondedAt;
   final int? teacherId;
+  final int? schoolId; // NOUVEAU
+  final int? classId; // NOUVEAU
+  final String? className; // NOUVEAU
 
   HelpRequest({
     required this.id,
@@ -27,6 +30,9 @@ class HelpRequest {
     this.teacherResponse,
     this.respondedAt,
     this.teacherId,
+    this.schoolId, // NOUVEAU
+    this.classId, // NOUVEAU
+    this.className, // NOUVEAU
   });
 
   factory HelpRequest.fromJson(Map<String, dynamic> json) {
@@ -46,6 +52,9 @@ class HelpRequest {
           ? DateTime.parse(json['responded_at'])
           : null,
       teacherId: json['teacher_id'],
+      schoolId: json['school_id'], // NOUVEAU
+      classId: json['class_id'], // NOUVEAU
+      className: json['class_name'], // NOUVEAU
     );
   }
 
@@ -61,6 +70,9 @@ class HelpRequest {
       'teacher_response': teacherResponse,
       'responded_at': respondedAt?.toIso8601String(),
       'teacher_id': teacherId,
+      'school_id': schoolId, // NOUVEAU
+      'class_id': classId, // NOUVEAU
+      'class_name': className, // NOUVEAU
     };
   }
 
@@ -75,6 +87,9 @@ class HelpRequest {
     String? teacherResponse,
     DateTime? respondedAt,
     int? teacherId,
+    int? schoolId, // NOUVEAU
+    int? classId, // NOUVEAU
+    String? className, // NOUVEAU
   }) {
     return HelpRequest(
       id: id ?? this.id,
@@ -87,6 +102,9 @@ class HelpRequest {
       teacherResponse: teacherResponse ?? this.teacherResponse,
       respondedAt: respondedAt ?? this.respondedAt,
       teacherId: teacherId ?? this.teacherId,
+      schoolId: schoolId ?? this.schoolId, // NOUVEAU
+      classId: classId ?? this.classId, // NOUVEAU
+      className: className ?? this.className, // NOUVEAU
     );
   }
 }

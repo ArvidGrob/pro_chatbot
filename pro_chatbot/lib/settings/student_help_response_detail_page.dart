@@ -49,8 +49,32 @@ class _StudentHelpResponseDetailPageState
       final messages = await _helpRequestService
           .getConversationMessages(widget.helpRequest.id);
 
+      // AJOUT : Insérer le message initial s'il n'existe pas déjà
+      final List<HelpRequestMessage> allMessages = [];
+
+      // Vérifier si le message initial existe déjà dans la liste
+      final hasInitialMessage = messages.any((msg) =>
+          msg.message == widget.helpRequest.message &&
+          msg.sender == MessageSender.student);
+
+      if (!hasInitialMessage && widget.helpRequest.message.isNotEmpty) {
+        // Créer le message initial
+        final initialMessage = HelpRequestMessage(
+          id: 0, // ID fictif
+          helpRequestId: widget.helpRequest.id,
+          sender: MessageSender.student,
+          senderId: widget.helpRequest.studentId,
+          senderName: widget.helpRequest.studentName,
+          message: widget.helpRequest.message,
+          createdAt: widget.helpRequest.createdAt,
+        );
+        allMessages.add(initialMessage);
+      }
+
+      allMessages.addAll(messages);
+
       setState(() {
-        _messages = messages;
+        _messages = allMessages;
         _isLoading = false;
       });
 

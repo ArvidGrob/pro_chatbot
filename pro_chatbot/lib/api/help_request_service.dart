@@ -43,9 +43,11 @@ class HelpRequestService {
   }
 
   /// Get all help requests (for teachers/admin)
-  Future<List<HelpRequest>> getAllHelpRequests() async {
+  /// CORRECTED: Now requires teacherId to filter by school
+  Future<List<HelpRequest>> getAllHelpRequests({required int teacherId}) async {
     try {
-      final url = Uri.parse('$baseUrl/api/help-requests');
+      // Pass teacher_id as query parameter to filter by school
+      final url = Uri.parse('$baseUrl/api/help-requests?teacher_id=$teacherId');
 
       final response = await http.get(
         url,

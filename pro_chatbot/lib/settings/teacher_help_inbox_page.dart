@@ -4,6 +4,7 @@ import '/theme_manager.dart';
 import '/wave_background_layout.dart';
 import '/models/help_request.dart';
 import '/api/help_request_service.dart';
+import '/api/user_provider.dart'; // ADDED
 import 'teacher_help_detail_page.dart';
 import 'settings_page_hulp.dart';
 
@@ -31,7 +32,21 @@ class _TeacherHelpInboxPageState extends State<TeacherHelpInboxPage> {
     });
 
     try {
-      final requests = await _helpRequestService.getAllHelpRequests();
+      // CORRECTED: Pass teacher_id to filter by school
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final currentUser = userProvider.currentUser;
+
+      if (currentUser == null) {
+        setState(() {
+          _isLoading = false;
+          _helpRequests = [];
+        });
+        return;
+      }
+
+      final requests = await _helpRequestService.getAllHelpRequests(
+        teacherId: currentUser.id,
+      );
 
       setState(() {
         _helpRequests = requests;
