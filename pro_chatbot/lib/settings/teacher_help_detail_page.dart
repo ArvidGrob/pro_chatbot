@@ -359,9 +359,16 @@ class _TeacherHelpDetailPageState extends State<TeacherHelpDetailPage> {
                           ),
                           border: InputBorder.none,
                         ),
-                        maxLines: null,
+                        maxLines: 1, // ✅ BELANGRIJK
                         textCapitalization: TextCapitalization.sentences,
+                        textInputAction: TextInputAction.send, // ✅
+                        onSubmitted: (_) {
+                          if (!_isSending) {
+                            _sendMessage();
+                          }
+                        },
                       ),
+
                     ),
                   ),
                   const SizedBox(width: 12),
