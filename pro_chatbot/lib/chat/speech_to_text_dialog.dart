@@ -85,6 +85,18 @@ class _SpeechToTextDialogState extends State<_SpeechToTextDialog> {
   void initState() {
     super.initState();
     _startListening();
+    _startStatusChecker();
+  }
+
+  void _startStatusChecker() {
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        setState(() {
+          _isListening = widget.speech.isListening;
+        });
+        _startStatusChecker();
+      }
+    });
   }
 
   Future<void> _startListening() async {
@@ -104,8 +116,8 @@ class _SpeechToTextDialogState extends State<_SpeechToTextDialog> {
           });
         }
       },
-      listenFor: const Duration(seconds: 30),
-      pauseFor: const Duration(seconds: 5),
+      listenFor: const Duration(minutes: 10),
+      pauseFor: const Duration(seconds: 20),
       partialResults: true,
       cancelOnError: true,
       listenMode: stt.ListenMode.confirmation,
