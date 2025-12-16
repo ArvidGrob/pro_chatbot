@@ -997,10 +997,11 @@ class _ChatPageState extends State<ChatPage> {
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.symmetric(vertical: 12),
                       ),
-                      maxLines: null,
+                      maxLines: 1,
                       textInputAction: TextInputAction.send,
                       onSubmitted: (_) => _sendMessage(),
                     ),
+
                   ),
                   // Send button inside the text field
                   GestureDetector(
