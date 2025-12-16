@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pro_chatbot/tts_setting.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'chat_message_model.dart';
@@ -181,7 +182,7 @@ class _ChatPageState extends State<ChatPage> {
 
     await flutterTts.setLanguage("nl-NL");
     await flutterTts.setPitch(1.0);
-    await flutterTts.setSpeechRate(0.8);
+    await flutterTts.setSpeechRate(TtsSettings.speechRate);
     await flutterTts.setVolume(1.0);
 
     // Strip markdown formatting before speaking
