@@ -70,7 +70,10 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       // 1️⃣ Login user
-      User user = await api.login(_idCtrl.text.trim(), _pwCtrl.text.trim());
+      final email = _idCtrl.text.trim().toLowerCase();
+      final password = _pwCtrl.text;
+
+      User user = await api.login(email, password);
 
       // 2️⃣ Fetch school for the logged-in user
       School school = await api.fetchUserSchool(user.id);
@@ -153,19 +156,25 @@ class _LoginPageState extends State<LoginPage> {
                         controller: _idCtrl,
                         textInputAction: TextInputAction.next,
                         validator: (v) {
-                          if (v == null || v.isEmpty) {
+                          if (v == null) return 'Voer uw e-mail in';
+
+                          final value = v.trim(); // ✅ DAS ist der Fix
+
+                          if (value.isEmpty) {
                             return 'Voer uw e-mail in';
                           }
-                          if (!v.contains('@') || !v.contains('.')) {
+                          if (!value.contains('@') || !value.contains('.')) {
                             return 'Voer een geldig e-mailadres in';
                           }
+
                           final emailRegex =
-                              RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                          if (!emailRegex.hasMatch(v)) {
+                          RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                          if (!emailRegex.hasMatch(value)) {
                             return 'Voer een geldig e-mailadres in';
                           }
                           return null;
                         },
+
                       ),
                       const SizedBox(height: 16),
                       _RoundedField(
