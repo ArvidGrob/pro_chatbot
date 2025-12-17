@@ -175,6 +175,12 @@ class _LoginPageState extends State<LoginPage> {
                         validator: (v) => (v == null || v.isEmpty)
                             ? 'Voer uw wachtwoord in'
                             : null,
+                        textInputAction: TextInputAction.done, // ✅
+                        onSubmitted: (_) {
+                          if (!_isLoading) {
+                            _handleLogin(); // ✅ Enter = Login
+                          }
+                        },
                         suffix: IconButton(
                           onPressed: () => setState(() => _obscure = !_obscure),
                           icon: Icon(
@@ -260,6 +266,7 @@ class _RoundedField extends StatelessWidget {
   final String? Function(String?)? validator;
   final Widget? suffix;
   final TextInputAction? textInputAction;
+  final void Function(String)? onSubmitted;
 
   const _RoundedField({
     required this.label,
@@ -268,11 +275,13 @@ class _RoundedField extends StatelessWidget {
     this.validator,
     this.suffix,
     this.textInputAction,
+    this.onSubmitted,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      onFieldSubmitted: onSubmitted,
       controller: controller,
       obscureText: obscureText,
       obscuringCharacter: '*',
