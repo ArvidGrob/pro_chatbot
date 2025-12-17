@@ -128,6 +128,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                         tileId: 'school',
                         label: 'School',
                         icon: Icons.apartment_rounded,
+                        color: themeManager.getContainerColor(0),
                         onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
@@ -143,6 +144,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
                         tileId: 'add_teacher',
                         label: 'Toevoegen',
                         icon: Icons.person_add,
+                        color: themeManager.getContainerColor(1),
                         onTap: () {
                           Navigator.of(context)
                               .push(
@@ -509,13 +511,18 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
   Widget _pressableTile({
     required String tileId,
     required String label,
+    required Color color,
     required IconData icon,
     required VoidCallback onTap,
   }) {
     bool isPressed = _pressedTile == tileId;
-    final Color primaryColor = isPressed
-        ? const Color(0xFF4F54D9).withOpacity(0.85)
-        : const Color(0xFF6F73FF);
+
+    final Color tileColor = Theme.of(context).brightness == Brightness.dark
+        ? color
+        : color; // optional, here we just keep the base color
+
+    final Color buttonColor = Provider.of<ThemeManager>(context, listen: false)
+        .getButtonColor(tileColor, isPressed: isPressed);
 
     return GestureDetector(
       onTapDown: (_) => setState(() => _pressedTile = tileId),
@@ -527,7 +534,7 @@ class _TeacherOverviewPageState extends State<TeacherOverviewPage> {
       child: Container(
         height: 50,
         decoration: BoxDecoration(
-          color: primaryColor,
+          color: buttonColor, // <- use pressed-aware color
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(

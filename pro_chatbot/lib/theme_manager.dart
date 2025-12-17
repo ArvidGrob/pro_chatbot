@@ -7,77 +7,82 @@ class ThemeManager extends ChangeNotifier {
   bool get isColorBlindMode => _isColorBlindMode;
   bool get isWhiteSelected => _isWhiteSelected;
 
+  /// Default (non–colorblind) theme colors
   static const Color defaultPrimary = Color(0xFF6464FF);
   static const Color defaultBackgroundLight = Colors.white;
   static const Color defaultBackgroundDark = Colors.black87;
 
+  /// IBM Color Blind Safe Palette
   static const List<Color> ibmColorBlindPalette = [
-    Color(0xFF785ef0), // Soft Blue
-    Color(0xFFdc267f), // Bright Pink
-    Color(0xFFfe6100), // Blaze Orange
-    Color(0xFFffb000), // Yellow Sea
-    Color(0xFF648fff), // Light Blue
+    Color(0xFF785EF0), // Soft Blue
+    Color(0xFFDC267F), // Bright Pink
+    Color(0xFFFE6100), // Blaze Orange
+    Color(0xFFFFB000), // Yellow Sea
+    Color(0xFF648FFF), // Light Blue
   ];
+
+  /// Base colors
 
   Color get backgroundColor =>
       _isWhiteSelected ? defaultBackgroundLight : defaultBackgroundDark;
 
-  Color get primaryColor =>
-      _isColorBlindMode ? ibmColorBlindPalette[0] : defaultPrimary;
-
   Color get subtitleTextColor =>
-      _isWhiteSelected ? Color(0xFF252324) : Colors.white;
+      _isWhiteSelected ? const Color(0xFF252324) : Colors.white;
 
-  Color getOptionSoftBlue() {
-    return _isColorBlindMode ? ibmColorBlindPalette[0] : defaultPrimary;
+  /// Primary brand color
+  Color get primaryColor =>
+      _isColorBlindMode ? ibmColorBlindPalette.first : defaultPrimary;
+
+  /// Container / UI colors
+
+  /// Returns a stable container color based on index
+  /// index: 0 → first container, 1 → second, etc.
+  Color getContainerColor(int index) {
+    if (!_isColorBlindMode) {
+      return defaultPrimary;
+    }
+
+    return ibmColorBlindPalette[index % ibmColorBlindPalette.length];
   }
 
-  Color getOptionBrightPink() {
-    return _isColorBlindMode ? ibmColorBlindPalette[1] : defaultPrimary;
+  /// Returns a lighter secondary version of a container color
+  Color getSecondaryContainerColor(
+    int index, {
+    double lightenAmount = 0.15,
+  }) {
+    return lightenColor(getContainerColor(index), lightenAmount);
   }
 
-  Color getOptionBlazeOrange() {
-    return _isColorBlindMode ? ibmColorBlindPalette[2] : defaultPrimary;
-  }
-
-  Color getOptionYellowSea() {
-    return _isColorBlindMode ? ibmColorBlindPalette[3] : defaultPrimary;
-  }
-
-  Color getOptionLightBlue() {
-    return _isColorBlindMode ? ibmColorBlindPalette[4] : defaultPrimary;
-  }
+  /// Color utilities
 
   /// Lighten a color by a given [amount] (0.0 - 1.0)
   Color lightenColor(Color color, [double amount = 0.25]) {
-    assert(amount >= 0 && amount <= 1);
     final hsl = HSLColor.fromColor(color);
-    final lighterHsl =
-        hsl.withLightness((hsl.lightness + amount).clamp(0.0, 1.0));
-    return lighterHsl.toColor();
-  }
-
-  /// Secondary color is mostly primary but slightly lighter
-  Color getSecondaryColor(Color primaryColor, {double lightenAmount = 0.1}) {
-    return lightenColor(primaryColor, lightenAmount);
-  }
-
-  List<Color> getProgressiveColors(int boxIndex) {
-    if (!_isColorBlindMode) {
-      return [defaultPrimary];
-    }
-    int count = boxIndex.clamp(1, ibmColorBlindPalette.length);
-    return ibmColorBlindPalette.sublist(0, count);
+    return hsl
+        .withLightness((hsl.lightness + amount).clamp(0.0, 1.0))
+        .toColor();
   }
 
   /// Darken a color by a given [amount] (0.0 - 1.0)
   Color darkenColor(Color color, [double amount = 0.25]) {
-    assert(amount >= 0 && amount <= 1);
     final hsl = HSLColor.fromColor(color);
-    final darkerHsl =
-        hsl.withLightness((hsl.lightness - amount).clamp(0.0, 1.0));
-    return darkerHsl.toColor();
+    return hsl
+        .withLightness((hsl.lightness - amount).clamp(0.0, 1.0))
+        .toColor();
   }
+
+  /// Button press feedback
+  Color getButtonColor(
+    Color baseColor, {
+    bool isPressed = false,
+    double darkenAmount = 0.25,
+  }) {
+    return isPressed ? darkenColor(baseColor, darkenAmount) : baseColor;
+  }
+
+  /// ===============================
+  /// State toggles
+  /// ===============================
 
   void toggleColorBlindMode(bool value) {
     _isColorBlindMode = value;
@@ -87,11 +92,5 @@ class ThemeManager extends ChangeNotifier {
   void switchBackground(bool isWhite) {
     _isWhiteSelected = isWhite;
     notifyListeners();
-  }
-
-  /// Returns the active button color depending on pressed state
-  Color getButtonColor(Color baseColor,
-      {bool isPressed = false, double darkenAmount = 0.25}) {
-    return isPressed ? darkenColor(baseColor, darkenAmount) : baseColor;
   }
 }

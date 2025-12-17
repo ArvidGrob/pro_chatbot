@@ -1041,6 +1041,14 @@ class _ChatPageState extends State<ChatPage> {
                   Expanded(
                     child: TextField(
                       controller: _messageController,
+                      autocorrect: true,
+                      enableSuggestions: true,
+                      spellCheckConfiguration: const SpellCheckConfiguration(
+                        misspelledTextStyle: TextStyle(
+                          decoration: TextDecoration.underline,
+                          color: Colors.red,
+                        ),
+                      ),
                       decoration: const InputDecoration(
                         hintText: 'Vraag het aan Luminara',
                         hintStyle: TextStyle(

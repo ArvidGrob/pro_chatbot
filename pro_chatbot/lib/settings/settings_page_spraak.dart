@@ -89,7 +89,7 @@ class _SettingsPageSpraakState extends State<SettingsPageSpraak> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(25.0),
                     decoration: BoxDecoration(
-                      color: themeManager.getOptionSoftBlue(),
+                      color: themeManager.getContainerColor(0),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Column(
@@ -150,7 +150,7 @@ class _SettingsPageSpraakState extends State<SettingsPageSpraak> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(25.0),
                   decoration: BoxDecoration(
-                    color: themeManager.getOptionSoftBlue(),
+                    color: themeManager.getContainerColor(1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Column(

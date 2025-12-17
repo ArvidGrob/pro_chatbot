@@ -80,27 +80,30 @@ class _SettingsPageHulpState extends State<SettingsPageHulp> {
               ),
               const SizedBox(height: 40),
 
-              // Veelgestelde vragen -> Soft Blue
-              _buildButton(
-                themeManager,
-                buttonId: 'veelgestelde',
-                label: 'Veelgestelde vragen',
-                baseColor: themeManager.getOptionSoftBlue(),
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const SettingsPageHulp21(),
+              // Mijn berichten (students)
+              if (!isTeacherOrAdmin)
+                _buildButton(
+                  themeManager,
+                  buttonId: 'mijn_berichten',
+                  label: 'Mijn berichten',
+                  color: themeManager.getContainerColor(0),
+                  pressedColor: themeManager.getSecondaryContainerColor(0),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const StudentHelpResponsesPage(),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
+              if (!isTeacherOrAdmin) const SizedBox(height: 20),
 
               // Contact opnemen (students) of Berichten inbox (teachers/admin)
               _buildButton(
                 themeManager,
                 buttonId: 'contact',
                 label: isTeacherOrAdmin ? 'Berichten inbox' : 'Contact opnemen',
-                baseColor: themeManager.getOptionBrightPink(),
+                color: themeManager.getContainerColor(1),
+                pressedColor: themeManager.getSecondaryContainerColor(1),
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -112,28 +115,29 @@ class _SettingsPageHulpState extends State<SettingsPageHulp> {
               ),
               const SizedBox(height: 20),
 
-              // Mijn berichten (students) - option supplémentaire pour voir les réponses
-              if (!isTeacherOrAdmin)
-                _buildButton(
-                  themeManager,
-                  buttonId: 'mijn_berichten',
-                  label: 'Mijn berichten',
-                  baseColor: themeManager.getOptionYellowSea(),
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const StudentHelpResponsesPage(),
-                    ),
+              // Veelgestelde vragen
+              _buildButton(
+                themeManager,
+                buttonId: 'veelgestelde',
+                label: 'Veelgestelde vragen',
+                color: themeManager.getContainerColor(2),
+                pressedColor: themeManager.getSecondaryContainerColor(2),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SettingsPageHulp21(),
                   ),
                 ),
-              if (!isTeacherOrAdmin) const SizedBox(height: 20),
+              ),
+              const SizedBox(height: 20),
 
-              // Appversie -> Blaze Orange
+              // Appversie
               _buildButton(
                 themeManager,
                 buttonId: 'appversie',
                 label: 'Appversie',
-                baseColor: themeManager.getOptionBlazeOrange(),
+                color: themeManager.getContainerColor(3),
+                pressedColor: themeManager.getSecondaryContainerColor(3),
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -149,12 +153,13 @@ Alle rechten voorbehouden © 2025.
               ),
               const SizedBox(height: 20),
 
-              // Ontwikkelaar -> Yellow Sea
+              // Ontwikkelaar
               _buildButton(
                 themeManager,
                 buttonId: 'ontwikkelaar',
                 label: 'Ontwikkelaar',
-                baseColor: themeManager.getOptionYellowSea(),
+                color: themeManager.getContainerColor(4),
+                pressedColor: themeManager.getSecondaryContainerColor(4),
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -204,11 +209,11 @@ In samenwerking met het lectoraat van Hogeschool Windesheim.
     required String buttonId,
     required String label,
     required VoidCallback onTap,
-    required Color baseColor,
+    required Color color,
+    required Color pressedColor,
   }) {
     bool isPressed = _pressedButton == buttonId;
-    Color buttonColor =
-        themeManager.getButtonColor(baseColor, isPressed: isPressed);
+    Color buttonColor = isPressed ? pressedColor : color;
 
     return GestureDetector(
       onTapDown: (_) => setState(() => _pressedButton = buttonId),

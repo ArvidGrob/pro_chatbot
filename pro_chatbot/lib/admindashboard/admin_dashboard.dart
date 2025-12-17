@@ -107,10 +107,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     buttonId: 'docent',
                     label: 'Docent',
                     iconPath: 'assets/images/docent.png',
-                    primaryColor: themeManager.getOptionBrightPink(),
-                    secondaryColor: themeManager.getSecondaryColor(
-                        themeManager.getOptionBrightPink(),
-                        lightenAmount: 0.2),
+                    primaryColor: themeManager.getContainerColor(0),
+                    secondaryColor: themeManager.getSecondaryContainerColor(0),
                     onTap: () {
                       final userProvider =
                           Provider.of<UserProvider>(context, listen: false);
@@ -157,10 +155,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     buttonId: 'student',
                     label: 'Student',
                     iconPath: 'assets/images/student.png',
-                    primaryColor: themeManager.getOptionSoftBlue(),
-                    secondaryColor: themeManager.getSecondaryColor(
-                        themeManager.getOptionSoftBlue(),
-                        lightenAmount: 0.2),
+                    primaryColor: themeManager.getContainerColor(1),
+                    secondaryColor: themeManager.getSecondaryContainerColor(1),
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
@@ -176,10 +172,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     buttonId: 'klas',
                     label: 'Klas',
                     iconPath: 'assets/images/beheer.png',
-                    primaryColor: themeManager.getOptionBlazeOrange(),
-                    secondaryColor: themeManager.getSecondaryColor(
-                        themeManager.getOptionBlazeOrange(),
-                        lightenAmount: 0.2),
+                    primaryColor: themeManager.getContainerColor(2),
+                    secondaryColor: themeManager.getSecondaryContainerColor(2),
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(

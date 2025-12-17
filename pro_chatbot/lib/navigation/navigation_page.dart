@@ -60,9 +60,8 @@ class _NavigationPageState extends State<NavigationPage> {
                   id: 'chat',
                   title: 'Chat',
                   iconPath: 'assets/images/chat.png',
-                  primaryColor: themeManager.getOptionSoftBlue(),
-                  secondaryColor: themeManager
-                      .getSecondaryColor(themeManager.getOptionSoftBlue()),
+                  primaryColor: themeManager.getContainerColor(0),
+                  secondaryColor: themeManager.getSecondaryContainerColor(0),
                   onTap: () {
                     ApiService().resetConversation();
                     Navigator.push(
@@ -78,9 +77,8 @@ class _NavigationPageState extends State<NavigationPage> {
                   id: 'training',
                   title: 'Training',
                   iconPath: 'assets/images/training.png',
-                  primaryColor: themeManager.getOptionBrightPink(),
-                  secondaryColor: themeManager
-                      .getSecondaryColor(themeManager.getOptionBrightPink()),
+                  primaryColor: themeManager.getContainerColor(1),
+                  secondaryColor: themeManager.getSecondaryContainerColor(1),
                   onTap: () {
                     Navigator.push(
                       context,
@@ -104,9 +102,9 @@ class _NavigationPageState extends State<NavigationPage> {
                             id: 'instellingen',
                             title: 'Instellingen',
                             iconPath: 'assets/images/settings.png',
-                            primaryColor: themeManager.getOptionBlazeOrange(),
-                            secondaryColor: themeManager.getSecondaryColor(
-                                themeManager.getOptionBlazeOrange()),
+                            primaryColor: themeManager.getContainerColor(2),
+                            secondaryColor:
+                                themeManager.getSecondaryContainerColor(2),
                             maxSize: buttonSize,
                             onTap: () {
                               Navigator.push(
@@ -124,9 +122,9 @@ class _NavigationPageState extends State<NavigationPage> {
                             id: 'admin',
                             title: 'Admin',
                             iconPath: 'assets/images/admin.png',
-                            primaryColor: themeManager.getOptionYellowSea(),
-                            secondaryColor: themeManager.getSecondaryColor(
-                                themeManager.getOptionYellowSea()),
+                            primaryColor: themeManager.getContainerColor(3),
+                            secondaryColor:
+                                themeManager.getSecondaryContainerColor(3),
                             maxSize: buttonSize,
                             onTap: () {
                               final userProvider = Provider.of<UserProvider>(

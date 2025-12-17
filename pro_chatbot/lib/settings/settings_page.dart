@@ -61,7 +61,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     id: 'account',
                     title: 'Account',
                     iconPath: 'assets/images/account.png',
-                    color: themeManager.getOptionSoftBlue(),
+                    color: themeManager.getContainerColor(0),
                     themeManager: themeManager,
                     onTap: () =>
                         _navigateTo(context, const SettingsPageAccount()),
@@ -73,7 +73,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     id: 'spraak',
                     title: 'Spraak',
                     iconPath: 'assets/images/spraak.png',
-                    color: themeManager.getOptionBrightPink(),
+                    color: themeManager.getContainerColor(1),
                     themeManager: themeManager,
                     onTap: () =>
                         _navigateTo(context, const SettingsPageSpraak()),
@@ -85,7 +85,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     id: 'thema',
                     title: 'Thema',
                     iconPath: 'assets/images/thema.png',
-                    color: themeManager.getOptionBlazeOrange(),
+                    color: themeManager.getContainerColor(2),
                     themeManager: themeManager,
                     onTap: () =>
                         _navigateTo(context, const SettingsPageThema()),
@@ -97,7 +97,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     id: 'hulp',
                     title: 'Hulp',
                     iconPath: 'assets/images/hulp.png',
-                    color: themeManager.getOptionYellowSea(),
+                    color: themeManager.getContainerColor(3),
                     themeManager: themeManager,
                     onTap: () => _navigateTo(context, const SettingsPageHulp()),
                   ),
