@@ -62,6 +62,8 @@ class _TrainingPageState extends State<TrainingPage> {
                   _buildButton(
                     buttonId: 'getting_started',
                     label: 'Getting Started',
+                    color: themeManager.getContainerColor(0),
+                    pressedColor: themeManager.getSecondaryContainerColor(0),
                     onTap: () {
                       Navigator.push(
                         context,
@@ -76,6 +78,8 @@ class _TrainingPageState extends State<TrainingPage> {
                   _buildButton(
                     buttonId: 'how_it_works',
                     label: 'How it Works',
+                    color: themeManager.getContainerColor(1),
+                    pressedColor: themeManager.getSecondaryContainerColor(1),
                     onTap: () {
                       Navigator.push(
                         context,
@@ -90,6 +94,8 @@ class _TrainingPageState extends State<TrainingPage> {
                   _buildButton(
                     buttonId: 'prompt_examples',
                     label: 'Prompt Examples',
+                    color: themeManager.getContainerColor(2),
+                    pressedColor: themeManager.getSecondaryContainerColor(2),
                     onTap: () {
                       Navigator.push(
                         context,
@@ -104,6 +110,8 @@ class _TrainingPageState extends State<TrainingPage> {
                   _buildButton(
                     buttonId: 'best_practices',
                     label: 'Best Practices',
+                    color: themeManager.getContainerColor(3),
+                    pressedColor: themeManager.getSecondaryContainerColor(3),
                     onTap: () {
                       Navigator.push(
                         context,
@@ -118,6 +126,8 @@ class _TrainingPageState extends State<TrainingPage> {
                   _buildButton(
                     buttonId: 'limitations',
                     label: 'Limitations',
+                    color: themeManager.getContainerColor(4),
+                    pressedColor: themeManager.getSecondaryContainerColor(4),
                     onTap: () {
                       Navigator.push(
                         context,
@@ -132,6 +142,8 @@ class _TrainingPageState extends State<TrainingPage> {
                   _buildButton(
                     buttonId: 'accuracy_of_ai',
                     label: 'Accuracy of Ai',
+                    color: themeManager.getContainerColor(5),
+                    pressedColor: themeManager.getSecondaryContainerColor(5),
                     onTap: () {
                       Navigator.push(
                         context,
@@ -172,10 +184,11 @@ class _TrainingPageState extends State<TrainingPage> {
     required String buttonId,
     required String label,
     required VoidCallback onTap,
+    required Color color,
+    required Color pressedColor,
   }) {
     bool isPressed = _pressedButton == buttonId;
-    Color buttonColor =
-        isPressed ? const Color(0xFF4545BD) : const Color(0xFF6464FF);
+    Color buttonColor = isPressed ? pressedColor : color;
 
     return GestureDetector(
       onTapDown: (_) {

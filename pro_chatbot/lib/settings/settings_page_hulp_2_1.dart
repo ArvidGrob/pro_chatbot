@@ -107,7 +107,7 @@ class _SettingsPageHulp21State extends State<SettingsPageHulp21> {
                             themeManager,
                             questionId: 'question1',
                             text: 'Hoe gebruik je de app?',
-                            baseColor: themeManager.getOptionSoftBlue(),
+                            baseColor: themeManager.getContainerColor(0),
                             onTap: () {
                               Navigator.push(
                                 context,
@@ -122,7 +122,7 @@ class _SettingsPageHulp21State extends State<SettingsPageHulp21> {
                             themeManager,
                             questionId: 'question2',
                             text: 'Hoe verander je je stem?',
-                            baseColor: themeManager.getOptionBrightPink(),
+                            baseColor: themeManager.getContainerColor(1),
                             onTap: () {
                               Navigator.push(
                                 context,
@@ -137,7 +137,7 @@ class _SettingsPageHulp21State extends State<SettingsPageHulp21> {
                             themeManager,
                             questionId: 'question3',
                             text: 'Hoe importeer ik een bestand in de chat?',
-                            baseColor: themeManager.getOptionBlazeOrange(),
+                            baseColor: themeManager.getContainerColor(2),
                             onTap: () {
                               Navigator.push(
                                 context,
@@ -152,7 +152,7 @@ class _SettingsPageHulp21State extends State<SettingsPageHulp21> {
                             themeManager,
                             questionId: 'question4',
                             text: 'Hoe wijzig ik mijn wachtwoord?',
-                            baseColor: themeManager.getOptionYellowSea(),
+                            baseColor: themeManager.getContainerColor(3),
                             onTap: () {
                               Navigator.push(
                                 context,
@@ -168,7 +168,7 @@ class _SettingsPageHulp21State extends State<SettingsPageHulp21> {
                             questionId: 'question5',
                             text:
                                 'Hoe verwijder ik een\ngesprek uit de geschiedenis?',
-                            baseColor: themeManager.getOptionYellowSea(),
+                            baseColor: themeManager.getContainerColor(4),
                             onTap: () {
                               Navigator.push(
                                 context,
@@ -183,7 +183,7 @@ class _SettingsPageHulp21State extends State<SettingsPageHulp21> {
                             themeManager,
                             questionId: 'question6',
                             text: 'Hoe neem ik contact op\nmet ondersteuning?',
-                            baseColor: themeManager.getOptionYellowSea(),
+                            baseColor: themeManager.getContainerColor(5),
                             onTap: () {
                               Navigator.push(
                                 context,
@@ -199,7 +199,7 @@ class _SettingsPageHulp21State extends State<SettingsPageHulp21> {
                             questionId: 'question7',
                             text:
                                 'Hoe werk ik met de\nspraak-naar-tekst functie?',
-                            baseColor: themeManager.getOptionYellowSea(),
+                            baseColor: themeManager.getContainerColor(0),
                             onTap: () {
                               Navigator.push(
                                 context,
@@ -215,7 +215,7 @@ class _SettingsPageHulp21State extends State<SettingsPageHulp21> {
                             questionId: 'question8',
                             text:
                                 'Wat is de Training-sectie en\nhoe gebruik ik deze?',
-                            baseColor: themeManager.getOptionYellowSea(),
+                            baseColor: themeManager.getContainerColor(1),
                             onTap: () {
                               Navigator.push(
                                 context,
@@ -230,7 +230,7 @@ class _SettingsPageHulp21State extends State<SettingsPageHulp21> {
                             themeManager,
                             questionId: 'question9',
                             text: 'Hoe wijzig ik mijn naam\nin mijn profiel?',
-                            baseColor: themeManager.getOptionYellowSea(),
+                            baseColor: themeManager.getContainerColor(2),
                             onTap: () {
                               Navigator.push(
                                 context,
@@ -245,7 +245,7 @@ class _SettingsPageHulp21State extends State<SettingsPageHulp21> {
                             themeManager,
                             questionId: 'question10',
                             text: 'Welke bestandsformaten\nkan ik uploaden?',
-                            baseColor: themeManager.getOptionYellowSea(),
+                            baseColor: themeManager.getContainerColor(3),
                             onTap: () {
                               Navigator.push(
                                 context,

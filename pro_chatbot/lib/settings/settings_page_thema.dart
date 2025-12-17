@@ -63,7 +63,7 @@ class SettingsPageThema extends StatelessWidget {
                 color: Colors.white,
                 selected: themeManager.isWhiteSelected,
                 onTap: () => themeManager.switchBackground(true),
-                containerColor: themeManager.getOptionSoftBlue(),
+                containerColor: themeManager.getContainerColor(0),
               ),
               const SizedBox(width: 20),
               // 'Black' color option box
@@ -72,7 +72,7 @@ class SettingsPageThema extends StatelessWidget {
                 color: Colors.black87,
                 selected: !themeManager.isWhiteSelected,
                 onTap: () => themeManager.switchBackground(false),
-                containerColor: themeManager.getOptionBrightPink(),
+                containerColor: themeManager.getContainerColor(1),
               ),
             ],
           ),
@@ -84,7 +84,7 @@ class SettingsPageThema extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 20),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: themeManager.getOptionBlazeOrange(),
+              color: themeManager.getContainerColor(2),
               borderRadius: BorderRadius.circular(20),
               boxShadow: const [
                 BoxShadow(
