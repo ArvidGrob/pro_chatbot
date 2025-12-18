@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '/api/user_provider.dart';
 import '/models/user.dart';
-import '/login/login_page.dart';
+import '/login/main.dart';
 import '../access_denied_page.dart';
 
 /// A reusable widget that guards pages based on user authentication and roles.

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pro_chatbot/login/login_page.dart';
+import 'package:pro_chatbot/login/main.dart';
 import 'package:provider/provider.dart';
 import '/theme_manager.dart';
 import '/wave_background_layout.dart';
