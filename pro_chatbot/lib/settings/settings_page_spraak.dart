@@ -180,7 +180,7 @@ class _SettingsPageSpraakState extends State<SettingsPageSpraak> {
                         ),
                         child: Slider(
                           value: TtsSettings.speechRate,
-                          min: 0.0,
+                          min: 0.5,
                           max: 2.0,
                           divisions: 20,
                           label: TtsSettings.speechRate.toStringAsFixed(1),

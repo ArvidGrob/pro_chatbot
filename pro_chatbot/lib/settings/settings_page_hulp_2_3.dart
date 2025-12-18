@@ -90,36 +90,17 @@ class _SettingsPageHulp23State extends State<SettingsPageHulp23> {
                     color: const Color(0xFFD9D9D9),
                     borderRadius: BorderRadius.circular(20),
                   ),
+                  // Content text title
                   child: Column(
                     children: [
-                      if (widget.content.isNotEmpty) ...[
-                        const Text(
-                          'Ontwikkelaar:',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      Text(
+                        widget.content,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 18,
                         ),
-                        const SizedBox(height: 10),
-                        Text(
-                          widget.content,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ] else ...[
-                        const Text(
-                          'Appversie:',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                      ),
                     ],
                   ),
                 ),
