@@ -465,7 +465,8 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                       if (Navigator.canPop(context)) {
                         print('Navigating back...');
                         // Return a special value to indicate starting fresh
-                        Navigator.pop(context, 'start_new_chat');
+                        Navigator.pop(
+                            context, ApiService().getConversationId());
                       } else {
                         print('Cannot pop - no previous route');
                       }

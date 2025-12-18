@@ -30,6 +30,10 @@ class ApiService {
     _conversationId = conversationId;
   }
 
+  String? getConversationId() {
+    return _conversationId;
+  }
+
   Future<String> sendChatMessage(String message) async {
     final url = Uri.parse('$baseUrl/api/chat');
 
