@@ -72,13 +72,23 @@ class _LoginPageState extends State<LoginPage> {
       // 1️⃣ Login user
       final email = _idCtrl.text.trim().toLowerCase();
       final password = _pwCtrl.text;
-
       User user = await api.login(email, password);
 
       // 2️⃣ Fetch school for the logged-in user
       School school = await api.fetchUserSchool(user.id);
 
-      // 3️⃣ Attach school to user
+      // 2.5️⃣ Fetch the class if the user has a class
+      SchoolClass? schoolClass;
+      if (user.classId != null) {
+        try {
+          schoolClass =
+              await api.getClassById(user.classId!); // fetch single class
+        } catch (_) {
+          schoolClass = SchoolClass(id: user.classId!, name: "Onbekend");
+        }
+      }
+
+      // 3️⃣ Attach school and class to user
       user = User(
         id: user.id,
         email: user.email,
@@ -87,6 +97,8 @@ class _LoginPageState extends State<LoginPage> {
         middlename: user.middlename,
         role: user.role,
         school: school,
+        schoolClass: schoolClass,
+        classId: user.classId,
       );
 
       // 4️⃣ Save updated user in provider
@@ -168,13 +180,12 @@ class _LoginPageState extends State<LoginPage> {
                           }
 
                           final emailRegex =
-                          RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                              RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
                           if (!emailRegex.hasMatch(value)) {
                             return 'Voer een geldig e-mailadres in';
                           }
                           return null;
                         },
-
                       ),
                       const SizedBox(height: 16),
                       _RoundedField(

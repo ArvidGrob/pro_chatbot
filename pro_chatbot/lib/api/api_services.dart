@@ -532,4 +532,23 @@ class ApiService {
           'Failed to load statistics: ${response.statusCode} - ${response.body}');
     }
   }
+
+  // GetClass
+  // ---------- Get single class by ID ----------
+  Future<SchoolClass> getClassById(int classId) async {
+    final url = Uri.parse('$baseUrl/api/classes/$classId');
+    final response = await _client.get(url);
+
+    print('GET $url -> ${response.statusCode}');
+    print('BODY: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return SchoolClass.fromJson(data);
+    } else if (response.statusCode == 404) {
+      throw Exception('Class not found');
+    } else {
+      throw Exception('Server error: ${response.statusCode}');
+    }
+  }
 }
